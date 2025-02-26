@@ -12,44 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 0}
   m_Name: SoundDatabase
   m_EditorClassIdentifier: Assembly-CSharp::SoundDatabase
-  soundList:
-  - soundID: 
-    category: 0
-    clip: {fileID: 0}
-    volume: 0
-    loop: 0
-  - soundID: 
-    category: 0
-    clip: {fileID: 0}
-    volume: 0
-    loop: 0
-  - soundID: 
-    category: 0
-    clip: {fileID: 0}
-    volume: 0
-    loop: 0
-  - soundID: 
-    category: 0
-    clip: {fileID: 0}
-    volume: 0
-    loop: 0
-  - soundID: 
-    category: 0
-    clip: {fileID: 0}
-    volume: 0
-    loop: 0
-  - soundID: 
-    category: 0
-    clip: {fileID: 0}
-    volume: 0
-    loop: 0
-  - soundID: 
-    category: 0
-    clip: {fileID: 0}
-    volume: 0
-    loop: 0
-  - soundID: 
-    category: 0
-    clip: {fileID: 0}
-    volume: 0
-    loop: 0
+  soundList: []
