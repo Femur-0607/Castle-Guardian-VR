@@ -6,10 +6,10 @@ public class PlayerLookController : MonoBehaviour
 {
     [Header("입력 관련")]
     private Vector2 _lookDelta;             // 인풋 시스템으로 받는 인풋값
-    private float _lookSensitivity = 20f;   // 민감도 조절 변수
+    private float _lookSensitivity = 1f;   // 민감도 조절 변수
     
     [Header("회전 관련")]
-    public float pitchRange  = 10f;         // 회전제한 상,하 기준 ±70도
+    public float pitchRange  = 20f;         // 회전제한 상,하 기준 ±20도
     public float yawRange  = 70f;           // 회전제한 좌,우 기준 ±70도
     
     // 현재 회전 값
@@ -23,11 +23,27 @@ public class PlayerLookController : MonoBehaviour
     [Header("참조")]
     private Transform _lookTransform;
     
-    private void OnLook(InputValue value)
+    // Look 업데이트 실행 여부 (조준 중이면 false)
+    private bool isLookEnabled = true;
+    
+    private void OnEnable()
     {
-        _lookDelta = value.Get<Vector2>();
+        EventManager.Instance.OnLookChanged += OnLookChanged;
+        EventManager.Instance.OnFireStart += DisableLook;
+        EventManager.Instance.OnFireRelease += EnableLook;
     }
 
+    private void OnDisable()
+    {
+        EventManager.Instance.OnLookChanged -= OnLookChanged;
+        EventManager.Instance.OnFireStart -= DisableLook;
+        EventManager.Instance.OnFireRelease -= EnableLook;
+    }
+    
+    private void OnLookChanged(Vector2 lookDelta) =>  _lookDelta = lookDelta;
+    private void DisableLook() => isLookEnabled = false;
+    private void EnableLook() => isLookEnabled = true;
+    
     private void Start()
     {
         _lookTransform = GetComponent<Transform>();
@@ -47,6 +63,7 @@ public class PlayerLookController : MonoBehaviour
     {
         UpdateLook();
 
+        // 유니티 에디터상에서 '[',']' 키 입력으로 민감도 조절
 #if UNITY_EDITOR
         if (Input.GetKeyDown(KeyCode.RightBracket))
         {
@@ -62,6 +79,10 @@ public class PlayerLookController : MonoBehaviour
     // 입력값에 따라 회전을 계산하고, 초기값 기준으로 제한하여 적용하는 메서드
     private void UpdateLook()
     {
+        // 조준 상태(화살 충전 중)라면 회전 로직 실행하지 않음
+        if (!isLookEnabled)
+            return;
+        
         float deltaYaw = _lookDelta.x * _lookSensitivity * Time.deltaTime;
         float deltaPitch = _lookDelta.y * _lookSensitivity * Time.deltaTime;
         

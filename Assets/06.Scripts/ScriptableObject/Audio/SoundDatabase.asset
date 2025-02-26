@@ -18,3 +18,38 @@ MonoBehaviour:
     clip: {fileID: 0}
     volume: 0
     loop: 0
+  - soundID: 
+    category: 0
+    clip: {fileID: 0}
+    volume: 0
+    loop: 0
+  - soundID: 
+    category: 0
+    clip: {fileID: 0}
+    volume: 0
+    loop: 0
+  - soundID: 
+    category: 0
+    clip: {fileID: 0}
+    volume: 0
+    loop: 0
+  - soundID: 
+    category: 0
+    clip: {fileID: 0}
+    volume: 0
+    loop: 0
+  - soundID: 
+    category: 0
+    clip: {fileID: 0}
+    volume: 0
+    loop: 0
+  - soundID: 
+    category: 0
+    clip: {fileID: 0}
+    volume: 0
+    loop: 0
+  - soundID: 
+    category: 0
+    clip: {fileID: 0}
+    volume: 0
+    loop: 0
