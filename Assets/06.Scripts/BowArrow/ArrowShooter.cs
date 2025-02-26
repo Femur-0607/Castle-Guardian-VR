@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using ProjectileCurveVisualizerSystem;
 
-// 실제 화살을 쏘는 스크립트
+// 화살 오브젝트가 인풋을 받았을때 어떻게 처리해야하는지에 대한 스크립트
 public class ArrowShooter : MonoBehaviour
 {
     [Header("참조")]

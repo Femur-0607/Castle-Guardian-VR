@@ -2,6 +2,7 @@ using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
+// 시야 관련 인풋을 받았을때 시야가 어떻게 처리하는지에 대한 스크립트
 public class PlayerLookController : MonoBehaviour
 {
     [Header("입력 관련")]

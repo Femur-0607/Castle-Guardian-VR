@@ -3,6 +3,7 @@ using UnityEngine;
 
 namespace ProjectileCurveVisualizerSystem
 {
+    // 투사체의 궤적을 계산하고 시각화 하는 스크립트
     public class ProjectileCurveVisualizer : MonoBehaviour
     {
         // 라인렌더러 컴포넌트를 통해 궤적을 시각화합니다.
