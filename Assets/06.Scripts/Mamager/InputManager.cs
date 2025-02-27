@@ -27,12 +27,4 @@ public class InputManager : MonoBehaviour
         lookAction.performed += ctx => EventManager.Instance.LookChangedEvent(ctx.ReadValue<Vector2>());
         lookAction.canceled += ctx => EventManager.Instance.LookChangedEvent(Vector2.zero);
     }
-
-    private void OnDisable()
-    {
-        fireAction.performed -= ctx => EventManager.Instance.FireStartEvent();
-        fireAction.canceled -= ctx => EventManager.Instance.FireReleaseEvent();
-        chargingAction.performed -= ctx => EventManager.Instance.FireChargingEvent(ctx.ReadValue<Vector2>());
-        lookAction.performed -= ctx => EventManager.Instance.LookChangedEvent(ctx.ReadValue<Vector2>());
-    }
 }

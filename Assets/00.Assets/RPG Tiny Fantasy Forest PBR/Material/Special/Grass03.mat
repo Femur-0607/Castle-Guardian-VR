@@ -58,7 +58,7 @@ Material:
     - _QueueControl: 0
     - _QueueOffset: 0
     - _Speed: 4.81
-    - _Strength: 48
+    - _Strength: 0
     - _WindDensity: 0.1
     - _WindStrength: 2
     m_Colors:
