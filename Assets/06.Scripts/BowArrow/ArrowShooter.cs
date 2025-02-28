@@ -5,10 +5,12 @@ using ProjectileCurveVisualizerSystem;
 // 화살 오브젝트가 인풋을 받았을때 어떻게 처리해야하는지에 대한 스크립트
 public class ArrowShooter : MonoBehaviour
 {
+    #region 필드 변수
+
     [Header("참조")]
-    public Transform arrowSpawnPoint;  // 화살이 생성될 위치
-    public GameObject arrowPrefab;     // 화살 프리팹
-    public ProjectileCurveVisualizer curveVisualizer;
+    public Transform arrowSpawnPoint;       // 화살이 생성될 트랜스폼
+    public ProjectilePool projectilePool;   // 화살 오브젝트 풀 참조
+    public ProjectileCurveVisualizer curveVisualizer;   // 라인레더러 경로 생성 스크립트
     
     [Header("화살 설정")]
     public float minSpeed = 1f;    // 활을 가장 조금 당겼을 때의 속도(곡률 최소)
@@ -22,7 +24,11 @@ public class ArrowShooter : MonoBehaviour
     // 마우스 드래그 계산용
     private float initialMouseY;
     private float currentMouseY;
-
+    
+    #endregion
+    
+    #region 유니티 이벤트 함수
+    
     private void OnEnable()
     {
         EventManager.Instance.OnFireStart += OnFireStart;
@@ -36,16 +42,26 @@ public class ArrowShooter : MonoBehaviour
         EventManager.Instance.OnFireRelease -= OnFireRelease;
         EventManager.Instance.OnFireCharging -= OnFireCharging;
     }
+    
+    #endregion
 
+    #region 인풋에 따른 화살 로직
+
+    /// <summary>
+    /// 마우스 클릭시 발동하는 메서드 ( 화살 준비 ) 
+    /// </summary>
     private void OnFireStart()
     {
         isAiming = true;
-        
         initialMouseY = currentMouseY;  // 조준 시작 시의 마우스 Y값을 초기값으로 저장
         currentArrowSpeed = minSpeed;   // 초기값은 최소 속도
     }
     
-    // 마우스 위치 변경 이벤트 처리 (주로 Y 좌표를 이용하여 드래그 거리를 계산)
+    /// <summary>
+    /// 마우스 위치 변경 이벤트 처리
+    /// <para>주로 Y 좌표를 이용하여 드래그 거리를 계산한다.<br/>마우스를 아래로 드래그 ( 시위 당김 )</para>
+    /// </summary>
+    /// <param name="pos">현재 마우스 위치 (예: Vector3 타입의 좌표)로, 주로 Y값을 사용하여 드래그 거리를 계산함</param>
     private void OnFireCharging(Vector2 pos)
     {
         currentMouseY = pos.y;
@@ -75,20 +91,22 @@ public class ArrowShooter : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 마우스 땔때 작동되는 메서드
+    /// </summary> 화살 쏘기
     private void OnFireRelease()
     {
         if (!isAiming) return;
 
         isAiming = false;
-        curveVisualizer.HideProjectileCurve(); // 가이드라인 숨김
+        curveVisualizer.HideProjectileCurve(); // 화살 궤적 숨김
 
-        // 화살 생성 및 발사
-        GameObject arrowInstance = Instantiate(arrowPrefab, arrowSpawnPoint.position, Quaternion.identity);
-        Projectile arrow = arrowInstance.GetComponent<Projectile>();
-
-        if (arrow != null)
-        {
-            arrow.Throw(arrowSpawnPoint.forward * currentArrowSpeed); // Throw() 호출 저장된 화살의 힘으로 발사
-        }
+        // 오브젝트 풀에서 화살 가져와서 발사
+        projectilePool.GetProjectile(
+            arrowSpawnPoint.position, // 화살 스폰 위치
+            Quaternion.identity, // 회전(필요하다면 arrowSpawnPoint.rotation)
+            arrowSpawnPoint.forward * currentArrowSpeed); // 발사 속도
     }
+    
+    #endregion
 }

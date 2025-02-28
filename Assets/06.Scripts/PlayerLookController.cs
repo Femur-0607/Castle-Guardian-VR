@@ -5,6 +5,8 @@ using UnityEngine.InputSystem;
 // 시야 관련 인풋을 받았을때 시야가 어떻게 처리하는지에 대한 스크립트
 public class PlayerLookController : MonoBehaviour
 {
+    #region 필드 변수
+
     [Header("입력 관련")]
     private Vector2 _lookDelta;             // 인풋 시스템으로 받는 인풋값
     private float _lookSensitivity = 1f;   // 민감도 조절 변수
@@ -12,11 +14,9 @@ public class PlayerLookController : MonoBehaviour
     [Header("회전 관련")]
     public float pitchRange  = 20f;         // 회전제한 상,하 기준 ±20도
     public float yawRange  = 70f;           // 회전제한 좌,우 기준 ±70도
-    
     // 현재 회전 값
     private float _currentPitch;
     private float _currentYaw;
-    
     // 초기 회전 값을 저장
     private float _initialPitch;
     private float _initialYaw;
@@ -26,6 +26,10 @@ public class PlayerLookController : MonoBehaviour
     
     // Look 업데이트 실행 여부 (조준 중이면 false)
     private bool isLookEnabled = true;
+
+    #endregion
+
+    #region 유니티 이벤트 함수
     
     private void OnEnable()
     {
@@ -76,7 +80,9 @@ public class PlayerLookController : MonoBehaviour
         }
 #endif
     }
-
+    
+    #endregion
+    
     // 입력값에 따라 회전을 계산하고, 초기값 기준으로 제한하여 적용하는 메서드
     private void UpdateLook()
     {

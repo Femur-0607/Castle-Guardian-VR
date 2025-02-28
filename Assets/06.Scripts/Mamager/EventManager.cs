@@ -12,7 +12,9 @@ public class EventManager : MonoBehaviour
     public event Action OnFireRelease;  // 조준 해제 시 발동할 이벤트
     public event Action<Vector2> OnFireCharging;    // 조준 중 발동할 이벤트
     public event Action<Vector2> OnLookChanged;     // 시야 회전 시 발동할 이벤트
-    public event Action OnDeath; // 사망 시 발동할 이벤트
+    
+    public event Action<int> OnWaveStart;       // 웨이브 시작 시 발동할 이벤트
+    public event Action<int> OnWaveEnd;         // 웨이브 종료 시 발동할 이벤트
     
     // 싱글톤 패턴 사용
     private void Awake()
@@ -31,5 +33,6 @@ public class EventManager : MonoBehaviour
     public void FireReleaseEvent() => OnFireRelease?.Invoke();
     public void FireChargingEvent(Vector2 pos) => OnFireCharging?.Invoke(pos);
     public void LookChangedEvent(Vector2 lookDelta) => OnLookChanged?.Invoke(lookDelta);
-    public void DeathEvent() => OnDeath?.Invoke();
+    public void WaveStartEvent(int wave) => OnWaveStart?.Invoke(wave);
+    public void WaveEndEvent(int wave) => OnWaveEnd?.Invoke(wave);
 }

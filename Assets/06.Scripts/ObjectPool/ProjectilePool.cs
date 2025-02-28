@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.Pool;
+using ProjectileCurveVisualizerSystem;
 
 /// <summary>
 /// 투사체(화살) 전용 풀 매니저
@@ -19,13 +20,13 @@ public class ProjectilePool : MonoBehaviour
     {
         // 풀 생성
         projectilePool = new ObjectPool<Projectile>(
-            createFunc: CreatePooledItem,
-            actionOnGet: OnTakeFromPool,
-            actionOnRelease: OnReturnedToPool,
-            actionOnDestroy: OnDestroyPoolObject,
+            createFunc: CreatePooledItem,           //  풀에서 객체가 필요할 때 새 객체를 생성하는 함수
+            actionOnGet: OnTakeFromPool,            //  풀에서 객체를 가져올 때 호출되는 함수
+            actionOnRelease: OnReturnedToPool,      //  객체가 풀에 바환될 때 호출되는 함수
+            actionOnDestroy: OnDestroyPoolObject,   //  객체가 풀에서 완전히 제거될 때 호출되는 함수
             collectionCheck: false,
-            defaultCapacity: defaultCapacity,
-            maxSize: maxSize
+            defaultCapacity: defaultCapacity,       //  풀의 초기 생성 개수
+            maxSize: maxSize                        //  풀의 최대 허용 개수
         );
     }
 
@@ -67,17 +68,8 @@ public class ProjectilePool : MonoBehaviour
 
         // 위치/회전/속도 설정
         proj.transform.SetPositionAndRotation(spawnPosition, rotation);
-        proj.Launch(launchVelocity);
+        proj.Throw(launchVelocity);;
 
         return proj;
-    }
-
-    /// <summary>
-    /// 외부 스크립트에서 수동으로 반환하고 싶을 때 호출
-    /// (일반적으로 Projectile 내부에서 충돌 후 풀로 반환하므로 잘 안 쓸 수도 있음)
-    /// </summary>
-    public void ReleaseProjectile(Projectile proj)
-    {
-        projectilePool.Release(proj);
     }
 }

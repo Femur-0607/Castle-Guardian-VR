@@ -38,7 +38,5 @@ public class LivingEntity : MonoBehaviour, IDamageable
     public virtual void Die()
     {
         isAlive = false;
-        // 사망 시 이벤트 매니저에 송신
-        EventManager.Instance.DeathEvent();
     }
 }

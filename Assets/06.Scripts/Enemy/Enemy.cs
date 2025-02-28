@@ -1,23 +1,36 @@
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.Pool;
 
-// Enemy의 상태 표시 enum
+  #region Enemy의 상태 표시 enum
+
 public enum EnemyState
 {
     Chasing, // 추적
     Attacking, // 공격
     Dead // 사망
 }
+
+#endregion
+
 // Enemy에 상속할 베이스
 public class Enemy : LivingEntity
 {
+    #region 필드 변수
+    
+    [Header("참조")]
+    private IObjectPool<Enemy> pool;
     private NavMeshAgent agent;
     public Transform target;        // 성문
     public EnemyData enemyData;     // 'Enemy'의 스테이터스를 담당
     
     private float lastAttackTime;
     private EnemyState currentState;
+    
+    #endregion
 
+    #region 유니티 이벤트 함수
+    
     protected override void Start()
     {
         agent = GetComponent<NavMeshAgent>();
@@ -36,7 +49,7 @@ public class Enemy : LivingEntity
         
         currentState = EnemyState.Chasing; // 생성 즉시 추적 상태
     }
-
+    
     void Update()
     {
         if (!isAlive) return;
@@ -55,7 +68,42 @@ public class Enemy : LivingEntity
                 break;
         }
     }
-    // 추적 중
+    
+    #endregion
+
+    #region 오브젝트 풀 관련
+
+    public void SetPoolReference(IObjectPool<Enemy> poolRef)
+    {
+        pool = poolRef;
+    }
+    
+    /// <summary>
+    /// Pool에서 Get될 때마다 호출될 초기화 로직
+    /// </summary>
+    public void ResetState()
+    {
+        // LivingEntity에 체력 초기값이 있다면 여기서 재설정
+        currentHealth = startingHealth;
+        isAlive = true;
+
+        if (agent != null)
+        {
+            agent.isStopped = false;
+            // agent.enabled = true; // 필요시
+        }
+
+        // FSM, Animator 등을 초기 상태로 돌리는 로직
+        // ...
+    }
+
+    #endregion
+
+    #region FSM (Finite State Machine) 유한상태기계
+    
+    /// <summary>
+    /// 추적 상태
+    /// </summary>
     void Chase()
     {
         if (target != null)
@@ -72,6 +120,9 @@ public class Enemy : LivingEntity
         }
     }
     
+    /// <summary>
+    /// 공격 상태
+    /// </summary>
     void Attack()
     {
         if (target != null)
@@ -103,6 +154,9 @@ public class Enemy : LivingEntity
         }
     }
 
+    /// <summary>
+    /// 사망 상태
+    /// </summary>
     public override void Die()
     {
         base.Die();
@@ -112,4 +166,6 @@ public class Enemy : LivingEntity
         agent.isStopped = true;
         // 추가 사망 애니메이션이나 이펙트 구현 가능
     }
+    
+    #endregion
 }
