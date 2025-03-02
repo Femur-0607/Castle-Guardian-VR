@@ -42,13 +42,14 @@ public class ProjectilePool : MonoBehaviour
 
     private void OnTakeFromPool(Projectile projectile)
     {
-        projectile.gameObject.SetActive(true);
         projectile.ResetState();  // 물리값, TrailRenderer 등 초기화
+        projectile.gameObject.SetActive(true);
     }
 
     private void OnReturnedToPool(Projectile projectile)
     {
         projectile.gameObject.SetActive(false);
+        projectile.ResetState();  // 물리값, TrailRenderer 등 초기화
     }
 
     private void OnDestroyPoolObject(Projectile projectile)

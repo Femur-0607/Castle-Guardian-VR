@@ -4,10 +4,14 @@ using UnityEngine;
 public class WaveManager : MonoBehaviour
 {
     #region 필드 변수
+    
+    // 활성 SpawnManager들의 리스트 (인스펙터나 초기화 시 등록)
+    [SerializeField] private SpawnManager[] spawnManagers;
 
     public int currentWave { get; private set; } = 1;   // 현재 웨이브
     public int enemyCountInWave { get; private set; } = 5;  // 웨이브 마다 스폰할 적 수
     private bool isWaveActive;  // 웨이브 진행 여부
+    private float waveEndTime;
 
     #endregion
 
@@ -15,11 +19,17 @@ public class WaveManager : MonoBehaviour
 
     void Update()
     {
-        // Test용: 10초 후에 웨이브 시작 (웨이브 진행 중이 아닐 때)
-        if (!isWaveActive && Time.time >= 10f)
+        // Test용: 웨이브 종료 1초 후에 웨이브 시작 (웨이브 진행 중이 아닐 때)
+        if (!isWaveActive && Time.time - waveEndTime >= 1f)
         {
             isWaveActive = true;
             WaveStartEvent();
+        }
+        
+        // 전체 SpawnManager의 LiveEnemyCount 합이 0이면 웨이브 종료
+        if (isWaveActive && GetTotalLiveEnemyCount() <= 0)
+        {
+            WaveEndEvent();
         }
     }
 
@@ -30,7 +40,17 @@ public class WaveManager : MonoBehaviour
     /// <summary>
     /// 웨이브 시작 시 이벤트 매니저에 송신
     /// </summary>
-    private void WaveStartEvent() => EventManager.Instance.WaveStartEvent(currentWave);
+    private void WaveStartEvent() => EventManager.Instance.WaveStartEvent(currentWave, enemyCountInWave);
+    
+    private int GetTotalLiveEnemyCount()
+    {
+        int total = 0;
+        foreach(var sm in spawnManagers)
+        {
+            total += sm.LiveEnemyCount;
+        }
+        return total;
+    }
 
     /// <summary>
     /// 웨이브 종료 시 발동하는 메서드
@@ -41,6 +61,7 @@ public class WaveManager : MonoBehaviour
         isWaveActive = false;
         EventManager.Instance.WaveEndEvent(currentWave); // 이벤트 매니저에 웨이브 종료 송신
         currentWave++; // 웨이브 수 증가 
+        waveEndTime = Time.time;
     }
 
     #endregion

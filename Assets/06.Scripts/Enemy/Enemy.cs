@@ -1,17 +1,16 @@
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.Pool;
 
-  #region Enemy의 상태 표시 enum
-
 public enum EnemyState
 {
+    Idle,      // 초기 상태. NavMeshAgent가 활성화되기 전에는 아무 행동도 하지 않음.
     Chasing, // 추적
     Attacking, // 공격
     Dead // 사망
 }
-
-#endregion
 
 // Enemy에 상속할 베이스
 public class Enemy : LivingEntity
@@ -20,21 +19,24 @@ public class Enemy : LivingEntity
     
     [Header("참조")]
     private IObjectPool<Enemy> pool;
-    private NavMeshAgent agent;
+    [SerializeField] private NavMeshAgent agent;
     public Transform target;        // 성문
     public EnemyData enemyData;     // 'Enemy'의 스테이터스를 담당
+    public SpawnManager spawnManager;
     
     private float lastAttackTime;
-    private EnemyState currentState;
+    private EnemyState currentState;    // 현재 상태 알려주는 이넘 변수
     
     #endregion
 
     #region 유니티 이벤트 함수
-    
-    protected override void Start()
+
+    private void Awake()
     {
         agent = GetComponent<NavMeshAgent>();
-        
+    }
+    protected override void Start()
+    {
         // 먼저 스크립터블 오브젝트 불러오기
         if (enemyData != null)
         {
@@ -43,11 +45,9 @@ public class Enemy : LivingEntity
             agent.stoppingDistance = enemyData.attackRange;
         }
         
-        // 초기화 진행
-        base.Start();
+        base.Start();   // 초기화 진행
         
-        
-        currentState = EnemyState.Chasing; // 생성 즉시 추적 상태
+        currentState = EnemyState.Idle;
     }
     
     void Update()
@@ -57,6 +57,8 @@ public class Enemy : LivingEntity
         // FSM 구현
         switch (currentState)
         {
+            case EnemyState.Idle:
+                break;
             case EnemyState.Chasing:
                 Chase();
                 break;
@@ -86,20 +88,44 @@ public class Enemy : LivingEntity
         // LivingEntity에 체력 초기값이 있다면 여기서 재설정
         currentHealth = startingHealth;
         isAlive = true;
-
-        if (agent != null)
-        {
-            agent.isStopped = false;
-            // agent.enabled = true; // 필요시
-        }
-
-        // FSM, Animator 등을 초기 상태로 돌리는 로직
-        // ...
+        
+        currentState = EnemyState.Idle;
+        
+        // NavMeshAgent를 딜레이 후 활성화하여 추적 시작
+        StartCoroutine(DelayedAgentActivation(1f));
+    }
+    
+    private IEnumerator DelayedAgentActivation(float delay)
+    {
+        agent.enabled = false;
+        
+        yield return new WaitForSeconds(delay);
+        
+        agent.enabled = true;
+        
+        BeginChase();
     }
 
     #endregion
 
     #region FSM (Finite State Machine) 유한상태기계
+    
+    /// <summary>
+    /// 적의 추적을 시작하는 메서드
+    /// NavMeshAgent가 활성화되고 유효한 NavMesh 위에 배치되었음을 전제로 함.
+    /// </summary>
+    public void BeginChase()
+    {
+        if (target != null && agent.isOnNavMesh)
+        {
+            currentState = EnemyState.Chasing;
+            agent.isStopped = false;
+        }
+        else
+        {
+            Debug.LogWarning("[Enemy] BeginChase() 호출 시, agent가 NavMesh 위에 없거나 target이 null입니다.");
+        }
+    }
     
     /// <summary>
     /// 추적 상태
@@ -109,8 +135,6 @@ public class Enemy : LivingEntity
         if (target != null)
         {
             agent.SetDestination(target.position); // 성문으로 이동
-            
-            float distance = Vector3.Distance(transform.position, target.position);
             
             if (!agent.pathPending && agent.remainingDistance <= agent.stoppingDistance) // 공격범위안에 성문이 들어오면
             {
@@ -163,7 +187,11 @@ public class Enemy : LivingEntity
         
         currentState = EnemyState.Dead;
         
-        agent.isStopped = true;
+        // agent.isStopped = true;
+        
+        spawnManager.EnemyDied(this);
+
+        pool?.Release(this);
         // 추가 사망 애니메이션이나 이펙트 구현 가능
     }
     
