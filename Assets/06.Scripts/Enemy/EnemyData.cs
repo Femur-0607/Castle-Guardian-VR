@@ -9,4 +9,5 @@ public class EnemyData : ScriptableObject
     public float attackRange = 2f;
     public float attackDamage = 10f;
     public float attackCooldown = 1f;
+    public float goldDropAmount = 50f;
 }

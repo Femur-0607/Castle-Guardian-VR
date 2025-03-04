@@ -187,11 +187,13 @@ public class Enemy : LivingEntity
         
         currentState = EnemyState.Dead;
         
-        // agent.isStopped = true;
-        
         spawnManager.EnemyDied(this);
 
         pool?.Release(this);
+        
+        // 사망 시 게임매니저에게 골드 전달
+        GameManager.Instance.gameMoney += (int)enemyData.goldDropAmount;
+        
         // 추가 사망 애니메이션이나 이펙트 구현 가능
     }
     
