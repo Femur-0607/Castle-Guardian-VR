@@ -8,13 +8,13 @@ public class EventManager : MonoBehaviour
 {
     public static EventManager Instance { get; private set; }
     
-    public event Action OnFireStart;    // 조준 시작 시 발동할 이벤트
-    public event Action OnFireRelease;  // 조준 해제 시 발동할 이벤트
-    public event Action<Vector2> OnFireCharging;    // 조준 중 발동할 이벤트
-    public event Action<Vector2> OnLookChanged;     // 시야 회전 시 발동할 이벤트
+    public event Action OnFireStart;                    // 조준 시작 시 발동할 이벤트
+    public event Action OnFireRelease;                  // 조준 해제 시 발동할 이벤트
+    public event Action<Vector2> OnFireCharging;        // 조준 중 발동할 이벤트
+    public event Action<Vector2> OnLookChanged;         // 시야 회전 시 발동할 이벤트
     
-    public event Action<int, int> OnWaveStart;       // 웨이브 시작 시 발동할 이벤트
-    public event Action<int> OnWaveEnd;         // 웨이브 종료 시 발동할 이벤트
+    public event Action<int, int> OnWaveStart;     // 웨이브 시작 시 발동할 이벤트
+    public event Action<int> OnWaveEnd;       // 웨이브 종료 시 발동할 이벤 트
     
     // 싱글톤 패턴 사용
     private void Awake()

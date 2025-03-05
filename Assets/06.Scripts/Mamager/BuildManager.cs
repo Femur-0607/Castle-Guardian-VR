@@ -1,16 +1,17 @@
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
 public class BuildManager : MonoBehaviour
 {
     public static BuildManager Instance;
 
-    [Header("Build Mode Settings")]
+    [Header("빌드 모드 셋팅")]
     public bool isBuildMode = false;
-    public GameObject towerPrefab;  // 상점에서 선택된 타워 프리팹
+    public GameObject towerPrefab;  // 건설할 타워 프리팹
 
-    [Header("Camera References")]
-    public Camera normalCamera;  // 평소 플레이 시 사용하는 카메라
-    public Camera buildCamera;   // 빌드 모드에서 사용하는 전체 맵 시야 카메라
+    [Header("카메라 관련")]
+    public Camera normalCamera;     // 평소 플레이 시 사용하는 카메라
+    public Camera buildCamera;      // 빌드 모드에서 사용하는 전체 맵 시야 카메라
 
     private void Awake()
     {
@@ -62,17 +63,19 @@ public class BuildManager : MonoBehaviour
 
         Debug.Log("Exited Build Mode.");
     }
+    
+    public bool CanBuildOnNode(BuildableNode node)
+    {
+        return node.CanPlaceTower();
+    }
 
     // Node 스크립트에서 호출: 선택한 노드 위치에 타워 생성
-    public GameObject BuildTowerAt(Vector3 position)
+    public GameObject BuildTowerAt(BuildableNode node)
     {
-        if (towerPrefab == null)
-        {
-            Debug.LogError("No tower prefab set for build mode.");
-            return null;
-        }
-        GameObject newTower = Instantiate(towerPrefab, position, Quaternion.identity);
-        Debug.Log("Tower built at: " + position);
-        return newTower;
+        if (!node.CanPlaceTower()) return null;
+
+        BuildableNode.BuildTower();
+        ExitBuildMode();
+        return node.gameObject;
     }
 }

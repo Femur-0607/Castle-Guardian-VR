@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 114c8057569f09740a18b73f29fef18c
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 268545
+  packageName: Object Placement VFX
+  packageVersion: 1.0
+  assetPath: Assets/ObjectPlacement_VFX/Scripts/Placement.cs
+  uploadId: 621804

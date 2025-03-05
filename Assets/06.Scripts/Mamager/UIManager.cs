@@ -1,4 +1,5 @@
 using System;
+using TMPro;
 using UnityEngine;
 
 public class UIManager : MonoBehaviour
@@ -6,11 +7,10 @@ public class UIManager : MonoBehaviour
     #region 필드 변수
     
     public static UIManager Instance;
-    public string currentWave;
+    public TextMeshProUGUI currentWaveTMP;
     
     [Header("Shop UI Panel")]
     public GameObject shopUIPanel;  // 인스펙터에서 상점 UI 패널 연결
-
     
     #endregion
 
@@ -31,37 +31,42 @@ public class UIManager : MonoBehaviour
     // 웨이브 이벤트 구독
     private void OnEnable()
     {
-        EventManager.Instance.OnWaveStart += HandleWaveEndUI;
+        EventManager.Instance.OnWaveStart +=  HandleWaveStartUI;
+        EventManager.Instance.OnWaveEnd +=  HandleWaveEndUI;
     }
 
     private void OnDisable()
     {
-        EventManager.Instance.OnWaveStart -= HandleWaveEndUI;
+        EventManager.Instance.OnWaveStart -= HandleWaveStartUI;
+        EventManager.Instance.OnWaveEnd -= HandleWaveEndUI;
     }
 
     #endregion
 
     #region UI 업데이트 함수
-
-    private void HandleWaveEndUI(int wave, int _unusedSomething)
+    
+    // 현재 웨이브 시작 시 작동되는 메서드
+    private void HandleWaveStartUI(int _, int __)
     {
-        currentWave = $"Wave : {wave}";
+        HideShopUI();
+    }
+ 
+    // 현재 웨이브 종료 시 작동되는 메서드
+    private void HandleWaveEndUI(int wave)
+    {
+        currentWaveTMP.text = $"Wave : {wave}"; // UI 텍스트 갱신
         ShowShopUI();
     }
     
-    // 상점 UI 표시
-    public void ShowShopUI()
-    {
-        if (shopUIPanel != null)
-            shopUIPanel.SetActive(true);
-    }
-
-    // 상점 UI 숨김
-    public void HideShopUI()
-    {
-        if (shopUIPanel != null)
-            shopUIPanel.SetActive(false);
-    }
+    /// <summary>
+    /// 상점 UI 표시 
+    /// </summary>
+    public void ShowShopUI() => shopUIPanel.SetActive(true);
+    
+    /// <summary>
+    /// 상점 UI 숨김
+    /// </summary>
+    public void HideShopUI() => shopUIPanel.SetActive(false);
 
     #endregion
 }

@@ -26,7 +26,7 @@ public class SpawnManager : MonoBehaviour
     
     #endregion
 
-    #region 유니티 이벤트 변수
+    #region 유니티 이벤트 함수
 
     private void OnEnable()
     {
@@ -91,11 +91,6 @@ public class SpawnManager : MonoBehaviour
             Vector3 adjustedPos = position;
             adjustedPos.y = hit.position.y;
             position = adjustedPos;
-        }
-        else
-        {
-            // 근처에 NavMesh가 없으면, 일단 그대로 스폰하거나 에러 처리
-            Debug.LogWarning($"No valid NavMesh position near {position} within radius {radius}.");
         }
 
         // 이제 spawnPos는 NavMesh 위의 좌표이므로 안전하게 에이전트를 사용할 수 있음

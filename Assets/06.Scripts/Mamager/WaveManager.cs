@@ -20,7 +20,7 @@ public class WaveManager : MonoBehaviour
     void Update()
     {
         // Test용: 웨이브 종료 1초 후에 웨이브 시작 (웨이브 진행 중이 아닐 때)
-        if (!isWaveActive && Time.time - waveEndTime >= 1f)
+        if (!isWaveActive && Time.time - waveEndTime >= 100f)
         {
             isWaveActive = true;
             WaveStartEvent();
@@ -59,8 +59,9 @@ public class WaveManager : MonoBehaviour
     public void WaveEndEvent()
     {
         isWaveActive = false;
+        currentWave++; // 웨이브 수 증가
         EventManager.Instance.WaveEndEvent(currentWave); // 이벤트 매니저에 웨이브 종료 송신
-        currentWave++; // 웨이브 수 증가 
+         
         waveEndTime = Time.time;
     }
 

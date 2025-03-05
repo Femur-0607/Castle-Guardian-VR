@@ -32,12 +32,63 @@ MonoBehaviour:
       isFolder: 1
       isAsset: 0
       _id: 1057740425
-    name: Page 1
+    name: Models
     _id: 1058287977
-  - items: []
-    name: Page 2
+  - items:
+    - globalId:
+        globalObjectIdString: GlobalObjectId_V1-3-a3242dcf98c62a842b56d966c6c8d3bf-2100000-0
+      _typeString: UnityEngine.Material, UnityEngine.CoreModule, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
+      _obj: {fileID: 2100000, guid: a3242dcf98c62a842b56d966c6c8d3bf, type: 2}
+      isSceneGameObject: 0
+      isFolder: 0
+      isAsset: 1
+      _id: 1055871022
+    - globalId:
+        globalObjectIdString: GlobalObjectId_V1-3-ee90f878377271b4fbbf915249f24476-2100000-0
+      _typeString: UnityEngine.Material, UnityEngine.CoreModule, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
+      _obj: {fileID: 2100000, guid: ee90f878377271b4fbbf915249f24476, type: 2}
+      isSceneGameObject: 0
+      isFolder: 0
+      isAsset: 1
+      _id: 1041152393
+    - globalId:
+        globalObjectIdString: GlobalObjectId_V1-1-ce8b6056e281f7c40b4f6f25ef610477-100000-0
+      _typeString: UnityEngine.GameObject, UnityEngine.CoreModule, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
+      _obj: {fileID: 100000, guid: ce8b6056e281f7c40b4f6f25ef610477, type: 3}
+      isSceneGameObject: 0
+      isFolder: 0
+      isAsset: 1
+      _id: 1058321579
+    - globalId:
+        globalObjectIdString: GlobalObjectId_V1-1-240875b6dee8d804883a4a485f4ed145-100000-0
+      _typeString: UnityEngine.GameObject, UnityEngine.CoreModule, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
+      _obj: {fileID: 100000, guid: 240875b6dee8d804883a4a485f4ed145, type: 3}
+      isSceneGameObject: 0
+      isFolder: 0
+      isAsset: 1
+      _id: 1060562395
+    - globalId:
+        globalObjectIdString: GlobalObjectId_V1-1-5921e45280d702e44ad0fb582ac16d26-100000-0
+      _typeString: UnityEngine.GameObject, UnityEngine.CoreModule, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
+      _obj: {fileID: 100000, guid: 5921e45280d702e44ad0fb582ac16d26, type: 3}
+      isSceneGameObject: 0
+      isFolder: 0
+      isAsset: 1
+      _id: 1063702280
+    name: Tower
     _id: 1055673866
   - items: []
     name: Page 3
+    _id: 1063872270
+  - items: []
+    name: Page 4
+    _id: 1063793382
+  - items: []
+    name: Page 5
     _id: 0
   rowScale: 1

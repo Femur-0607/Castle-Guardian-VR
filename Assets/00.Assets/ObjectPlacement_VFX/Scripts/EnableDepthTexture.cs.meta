@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 2c147986d13cdae4aa193f3f706868f5
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 268545
+  packageName: Object Placement VFX
+  packageVersion: 1.0
+  assetPath: Assets/ObjectPlacement_VFX/Scripts/EnableDepthTexture.cs
+  uploadId: 621804

@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: d2fb5aeec6e866b42be3087a0222103c
+ShaderImporter:
+  externalObjects: {}
+  defaultTextures: []
+  nonModifiableTextures: []
+  preprocessorOverride: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 268545
+  packageName: Object Placement VFX
+  packageVersion: 1.0
+  assetPath: Assets/ObjectPlacement_VFX/Shaders/BlueprintEffectV3.shader
+  uploadId: 621804

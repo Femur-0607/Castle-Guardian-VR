@@ -43,8 +43,7 @@ GameObject:
   - component: {fileID: 1659618666753151275}
   - component: {fileID: 7099203158615754388}
   - component: {fileID: 1149140230551301295}
-  - component: {fileID: 5633769811547893692}
-  - component: {fileID: 8128961262576221713}
+  - component: {fileID: 2244857529086102267}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -171,7 +170,7 @@ MonoBehaviour:
     m_MipBias: 0
     m_VarianceClampScale: 0.9
     m_ContrastAdaptiveSharpening: 0
---- !u!114 &5633769811547893692
+--- !u!114 &2244857529086102267
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -180,26 +179,6 @@ MonoBehaviour:
   m_GameObject: {fileID: 5748960491244267849}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 671ab1500b76ecd4bbae9cef5f783096, type: 3}
+  m_Script: {fileID: 11500000, guid: 2c147986d13cdae4aa193f3f706868f5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  pitchRange: 10
-  yawRange: 70
---- !u!114 &8128961262576221713
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5748960491244267849}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a0ffcee2456e76643960760f302ae34e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  arrowSpawnPoint: {fileID: 6845703299527957414}
-  projectilePool: {fileID: 0}
-  curveVisualizer: {fileID: 0}
-  minSpeed: 10
-  maxSpeed: 40
-  dragToFullPower: 200
