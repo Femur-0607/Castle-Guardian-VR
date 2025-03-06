@@ -11,12 +11,12 @@ public class BuildableNode : MonoBehaviour
 {
     #region 필드 변수
 
-    private bool towerConstructionPossible;  // 타워 건설 여부 확인 불타입 변수
+    [SerializeField] private BuildManager buildManager;
 
     [Header("노드 시각 셋팅")]
-    private Color baseColor = Color.gray;   // 기본 색상 (건설 전)
-    private Color hoverColor = Color.green;   // 마우스 올렸을 때 건설 가능한 색상
-    private Color occupiedColor = Color.red;      // 이미 타워가 건설되어 있으면 빨간색
+    private Color baseColor = Color.red;       // 기본 색상 (건설 전)
+    private Color towerColor = Color.white;     // 기본 색상 (건설 후)
+    private Color hoverColor = Color.green;     // 마우스 올렸을 때 건설 가능한 색상
     
     [Header("머터리얼 설정")]
     [Tooltip("건설 미리보기(고스트) 머터리얼 (예: BlueprintEffectV3)")]
@@ -24,8 +24,8 @@ public class BuildableNode : MonoBehaviour
     [Tooltip("타워 건설 완료 후 적용할 실제 타워 머터리얼")]
     [SerializeField] private Material towerMaterial;
 
-    // Renderer 컴포넌트 (Node의 시각적 표현)
-    private Renderer rend;
+    private Renderer renderer;
+    private BoxCollider boxCollider;
     // 타워 건설 여부를 판단하는 변수
     private bool isOccupied = false;
 
@@ -35,16 +35,12 @@ public class BuildableNode : MonoBehaviour
     
     private void Awake()
     {
-        rend = GetComponent<Renderer>();
+        renderer = GetComponent<Renderer>();
+        boxCollider = GetComponent<BoxCollider>();
         
-        rend.material = ghostMaterial;  // 초기 상태: 고스트 머터리얼로 설정
+        renderer.material = ghostMaterial;  // 초기 상태: 고스트 머터리얼로 설정
         SetColor(baseColor);
-        rend.material.color = baseColor;
-
-        if (isOccupied)
-        {
-            SetColor(occupiedColor);    // 건설이 되어있는곳은 impossibleColor로 초기화
-        }
+        renderer.material.color = baseColor;
     }
 
     private void OnMouseEnter()
@@ -52,25 +48,23 @@ public class BuildableNode : MonoBehaviour
         // UI 위에 있을 경우엔 클릭/오버 효과를 무시
         if (EventSystem.current.IsPointerOverGameObject()) return;
         // 빌드모드가 아닐 경우엔 효과 적용하지 않음
-        if (!BuildManager.Instance.isBuildMode) return;
+        if (!buildManager.isBuildMode) return;
 
         if (!isOccupied) SetColor(hoverColor);  //  건설 가능하면 hoverColor색으로 머터리얼 변환
     }
 
     private void OnMouseExit()
     {
+        if (isOccupied) return;
         SetColor(baseColor);
     }
 
     private void OnMouseDown()
     {
-        // UI 위에서 발생한 클릭은 무시
-        if (EventSystem.current.IsPointerOverGameObject()) return;
         // 빌드모드가 아닐 경우 처리하지 않음
-        if (!BuildManager.Instance.isBuildMode) return;
+        if (!buildManager.isBuildMode) return;
 
-        // BuildManager에 건설 요청 (Node의 위치와 상태를 넘김)
-        BuildManager.Instance.BuildTowerAt(this);
+        BuildTower();
     }
     
     #endregion
@@ -84,6 +78,24 @@ public class BuildableNode : MonoBehaviour
     {
         return !isOccupied;
     }
+    
+    /// <summary>
+    /// 노드의 가시성을 설정합니다. (콜라이더와 렌더러 활성화/비활성화)
+    /// </summary>
+    public void SetNodeVisibility(bool visible)
+    {
+        // 이미 건설된 노드는 렌더러는 항상 활성화 상태 유지
+        if (isOccupied)
+        {
+            renderer.enabled = true;
+            boxCollider.enabled = false; // 건설된 노드는 콜라이더 비활성화
+        }
+        else
+        {
+            renderer.enabled = visible;
+            boxCollider.enabled = visible;
+        }
+    }
 
     /// <summary>
     /// BuildManager가 호출하여 이 Node에 타워를 건설합니다.
@@ -91,26 +103,24 @@ public class BuildableNode : MonoBehaviour
     /// </summary>
     public void BuildTower()
     {
-        if (!CanPlaceTower())
-        {
-            Debug.Log("BuildableNode: Tower already built on " + gameObject.name);
-            return;
-        }
+        if (!CanPlaceTower()) return;
 
         isOccupied = true;
 
         // 실제 타워 머터리얼로 교체하여 건설 완료 상태를 표시
-        if (towerMaterial != null)
-        {
-            rend.material = towerMaterial;
-        }
-        else
-        {
-            Debug.LogWarning("BuildableNode: Tower material is not assigned on " + gameObject.name);
-        }
+        renderer.material = towerMaterial;
 
-        Debug.Log("BuildableNode: Tower built on " + gameObject.name);
+        // 하얀색으로 색상 초기화
+        renderer.material.color = towerColor;
 
+        // 건설된 노드로 등록
+        buildManager.RegisterConstructedNode(this);
+        
+        // 콜라이더 비활성화 (더 이상 클릭할 필요 없음)
+        boxCollider.enabled = false;
+        
+        // 빌드 모드 종료
+        buildManager.ExitBuildMode();
         // 추가: 타워 동작 스크립트 활성화 등 추가 로직을 넣을 수 있음
     }
 
@@ -124,9 +134,9 @@ public class BuildableNode : MonoBehaviour
     /// <param name="color">적용할 색상</param>
     private void SetColor(Color color)
     {
-        if (rend != null && rend.material != null)
+        if (renderer != null && renderer.material != null)
         {
-            rend.material.color = color;
+            renderer.material.color = color;
         }
     }
 

@@ -58,12 +58,10 @@ namespace ProjectileCurveVisualizerSystem
         
         private void OnCollisionEnter(Collision collision)
         {
-            Debug.Log(collision.gameObject.name);
             // 충돌한 오브젝트에 IDamageable가 있을경우 가져오기
             if(collision.gameObject.TryGetComponent<IDamageable>(out var damageable))
             {
                 damageable.TakeDamage(projectileDamage);
-                Debug.Log(projectileDamage);
             }
             
             // 충돌 후 1초 뒤 풀로 반환

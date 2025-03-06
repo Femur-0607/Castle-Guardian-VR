@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: EnemyData
   m_EditorClassIdentifier: 
   startingHealth: 100
-  moveSpeed: 10
+  moveSpeed: 5
   attackRange: 10
   attackDamage: 10
   attackCooldown: 1
+  goldDropAmount: 50

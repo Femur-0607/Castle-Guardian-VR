@@ -16,7 +16,6 @@ public class SpawnManager : MonoBehaviour
     [Header("Spawn Settings")]
     [SerializeField] private Transform spawnCenter;   // 적 스폰 기준 위치
     [SerializeField] private Transform[] targets;    // 스폰 시 타겟 할당
-    // [SerializeField] private float spawnRadius = 2f; // 적 스폰 반경
     
     // 현재 웨이브에서 활성화된 적 수를 관리하는 변수
     public int LiveEnemyCount { get; private set; }

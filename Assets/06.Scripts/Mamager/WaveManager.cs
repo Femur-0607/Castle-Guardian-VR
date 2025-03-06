@@ -8,24 +8,26 @@ public class WaveManager : MonoBehaviour
     // 활성 SpawnManager들의 리스트 (인스펙터나 초기화 시 등록)
     [SerializeField] private SpawnManager[] spawnManagers;
 
-    public int currentWave { get; private set; } = 1;   // 현재 웨이브
-    public int enemyCountInWave { get; private set; } = 5;  // 웨이브 마다 스폰할 적 수
+    public int currentWave { get; private set; }   // 현재 웨이브
+    public int enemyCountInWave { get; private set; } // 웨이브 마다 스폰할 적 수
     private bool isWaveActive;  // 웨이브 진행 여부
-    private float waveEndTime;
 
     #endregion
 
     #region 유니티 이벤트 함수
+    
+    private void OnEnable()
+    {
+        EventManager.Instance.OnGameStart += OnWaveStart;
+    }
+
+    private void OnDisable()
+    {
+        EventManager.Instance.OnGameStart -= OnWaveStart;
+    }
 
     void Update()
     {
-        // Test용: 웨이브 종료 1초 후에 웨이브 시작 (웨이브 진행 중이 아닐 때)
-        if (!isWaveActive && Time.time - waveEndTime >= 100f)
-        {
-            isWaveActive = true;
-            WaveStartEvent();
-        }
-        
         // 전체 SpawnManager의 LiveEnemyCount 합이 0이면 웨이브 종료
         if (isWaveActive && GetTotalLiveEnemyCount() <= 0)
         {
@@ -37,19 +39,28 @@ public class WaveManager : MonoBehaviour
 
     #region 웨이브 관리
 
-    /// <summary>
-    /// 웨이브 시작 시 이벤트 매니저에 송신
-    /// </summary>
-    private void WaveStartEvent() => EventManager.Instance.WaveStartEvent(currentWave, enemyCountInWave);
-    
-    private int GetTotalLiveEnemyCount()
+    // 게임 시작 시 호출되는 메서드
+    public void OnWaveStart()
     {
-        int total = 0;
-        foreach(var sm in spawnManagers)
-        {
-            total += sm.LiveEnemyCount;
-        }
-        return total;
+        currentWave = 1;
+        enemyCountInWave = 5;
+        isWaveActive = true;
+        EventManager.Instance.WaveStartEvent(currentWave, enemyCountInWave);
+    }
+    
+    /// <summary>
+    /// 웨이브 시작 시 발동하는 메서드
+    /// </summary>
+    public void StartNextWaveEvent()
+    {
+        currentWave++;
+        // 웨이브가 높아질수록 적 수 증가 (예시: 매 웨이브마다 2씩 증가)
+        enemyCountInWave = 5 + (currentWave - 1) * 2;
+        
+        isWaveActive = true;
+        
+        // 이벤트 매니저에게 웨이브 시작 송신(웨이브 번호, 적의 수)
+        EventManager.Instance.WaveStartEvent(currentWave, enemyCountInWave);
     }
 
     /// <summary>
@@ -59,12 +70,28 @@ public class WaveManager : MonoBehaviour
     public void WaveEndEvent()
     {
         isWaveActive = false;
-        currentWave++; // 웨이브 수 증가
+        
         EventManager.Instance.WaveEndEvent(currentWave); // 이벤트 매니저에 웨이브 종료 송신
-         
-        waveEndTime = Time.time;
+        
+        if (currentWave >= 10) // 예시: 10웨이브가 최종 웨이브라면
+        {
+            GameManager.Instance.EndGame(true); // 승리로 게임 종료
+        }
     }
 
+    /// <summary>
+    /// 스폰매니저 전체의 에너미 카운트를 계속 체크하고있는 메서드
+    /// </summary>
+    /// <returns></returns>
+    private int GetTotalLiveEnemyCount()
+    {
+        int total = 0;
+        foreach(var sm in spawnManagers)
+        {
+            total += sm.LiveEnemyCount;
+        }
+        return total;
+    }
+    
     #endregion
-
 }
