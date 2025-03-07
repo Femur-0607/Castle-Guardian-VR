@@ -60,6 +60,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d1efccc2e657a449908030fd57d861b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  projectilePrefab: {fileID: 4372118671643852597, guid: 401198e8bd3dcae46a08cc437b840b32, type: 3}
+  projectilePrefab: {fileID: 4372118671643852597, guid: aa419c62197ca2e4e91b5f4552d2a7d3, type: 3}
   defaultCapacity: 10
   maxSize: 50

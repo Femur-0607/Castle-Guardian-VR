@@ -198,4 +198,40 @@ public class Enemy : LivingEntity
     }
     
     #endregion
+
+    #region 상태이상
+
+    // Enemy.cs에 추가될 메서드
+    public void ApplySlowEffect(float duration, float slowAmount)
+    {
+        // 이미 실행 중인 슬로우 코루틴 중지
+        if (slowCoroutine != null)
+        {
+            StopCoroutine(slowCoroutine);
+        }
+    
+        // 새 슬로우 코루틴 시작
+        slowCoroutine = StartCoroutine(SlowEffectRoutine(duration, slowAmount));
+    }
+
+    private Coroutine slowCoroutine;
+
+    private IEnumerator SlowEffectRoutine(float duration, float slowAmount)
+    {
+        // 원래 속도 저장
+        float originalSpeed = agent.speed;
+    
+        // 속도 감소
+        agent.speed = originalSpeed * (1f - slowAmount);
+    
+        // 지속 시간 대기
+        yield return new WaitForSeconds(duration);
+    
+        // 속도 복원
+        agent.speed = originalSpeed;
+    
+        slowCoroutine = null;
+    }
+
+    #endregion
 }

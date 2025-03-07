@@ -69,7 +69,7 @@ public class ProjectilePool : MonoBehaviour
 
         // 위치/회전/속도 설정
         proj.transform.SetPositionAndRotation(spawnPosition, rotation);
-        proj.Throw(launchVelocity);;
+        proj.Launch(launchVelocity);;
 
         return proj;
     }

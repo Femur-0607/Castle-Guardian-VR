@@ -19,15 +19,22 @@ public class BuildableNode : MonoBehaviour
     private Color hoverColor = Color.green;     // 마우스 올렸을 때 건설 가능한 색상
     
     [Header("머터리얼 설정")]
-    [Tooltip("건설 미리보기(고스트) 머터리얼 (예: BlueprintEffectV3)")]
-    [SerializeField] private Material ghostMaterial;
     [Tooltip("타워 건설 완료 후 적용할 실제 타워 머터리얼")]
     [SerializeField] private Material towerMaterial;
 
-    private Renderer renderer;
-    private BoxCollider boxCollider;
+    private Renderer nodeRenderer;
+    private BoxCollider nodeCollider;
+    
     // 타워 건설 여부를 판단하는 변수
-    private bool isOccupied = false;
+    private bool _isOccupied = false;
+    public bool IsOccupied => _isOccupied;
+
+    [Header("타워 컴포넌트")]
+    [SerializeField] private ArcherTower archerTower;
+    [SerializeField] private ExplosiveTower explosiveTower;
+    [SerializeField] private SlowTower slowTower;
+
+    private Tower activeTower;
 
     #endregion
 
@@ -35,12 +42,19 @@ public class BuildableNode : MonoBehaviour
     
     private void Awake()
     {
-        renderer = GetComponent<Renderer>();
-        boxCollider = GetComponent<BoxCollider>();
+        nodeRenderer = GetComponent<Renderer>();
+        nodeCollider = GetComponent<BoxCollider>();
+        archerTower = GetComponent<ArcherTower>();
+        explosiveTower = GetComponent<ExplosiveTower>();
+        slowTower = GetComponent<SlowTower>();
         
-        renderer.material = ghostMaterial;  // 초기 상태: 고스트 머터리얼로 설정
         SetColor(baseColor);
-        renderer.material.color = baseColor;
+        nodeRenderer.material.color = baseColor;
+
+        // 시작 시 모든 타워 비활성화
+        archerTower.enabled = false;
+        explosiveTower.enabled = false;
+        slowTower.enabled = false;
     }
 
     private void OnMouseEnter()
@@ -50,12 +64,12 @@ public class BuildableNode : MonoBehaviour
         // 빌드모드가 아닐 경우엔 효과 적용하지 않음
         if (!buildManager.isBuildMode) return;
 
-        if (!isOccupied) SetColor(hoverColor);  //  건설 가능하면 hoverColor색으로 머터리얼 변환
+        if (!_isOccupied) SetColor(hoverColor);  //  건설 가능하면 hoverColor색으로 머터리얼 변환
     }
 
     private void OnMouseExit()
     {
-        if (isOccupied) return;
+        if (_isOccupied) return;
         SetColor(baseColor);
     }
 
@@ -66,17 +80,29 @@ public class BuildableNode : MonoBehaviour
 
         BuildTower();
     }
-    
+
     #endregion
 
-    #region Public 메서드
+    #region 기초 타워 건설
+    
+    /// <summary>
+    /// Renderer의 머터리얼 색상을 지정된 색상으로 변경합니다.
+    /// </summary>
+    /// <param name="color">적용할 색상</param>
+    private void SetColor(Color color)
+    {
+        if (nodeRenderer != null && nodeRenderer.material != null)
+        {
+            nodeRenderer.material.color = color;
+        }
+    }
 
     /// <summary>
     /// 이 Node에 타워를 건설할 수 있으면 true를 반환합니다.
     /// </summary>
     public bool CanPlaceTower()
     {
-        return !isOccupied;
+        return !_isOccupied;
     }
     
     /// <summary>
@@ -85,15 +111,15 @@ public class BuildableNode : MonoBehaviour
     public void SetNodeVisibility(bool visible)
     {
         // 이미 건설된 노드는 렌더러는 항상 활성화 상태 유지
-        if (isOccupied)
+        if (_isOccupied)
         {
-            renderer.enabled = true;
-            boxCollider.enabled = false; // 건설된 노드는 콜라이더 비활성화
+            nodeRenderer.enabled = true;
+            nodeCollider.enabled = false; // 건설된 노드는 콜라이더 비활성화
         }
         else
         {
-            renderer.enabled = visible;
-            boxCollider.enabled = visible;
+            nodeRenderer.enabled = visible;
+            nodeCollider.enabled = visible;
         }
     }
 
@@ -105,39 +131,79 @@ public class BuildableNode : MonoBehaviour
     {
         if (!CanPlaceTower()) return;
 
-        isOccupied = true;
+        _isOccupied = true;
 
-        // 실제 타워 머터리얼로 교체하여 건설 완료 상태를 표시
-        renderer.material = towerMaterial;
+        nodeRenderer.material = towerMaterial; // 실제 타워 머터리얼로 교체하여 건설 완료 상태를 표시
 
-        // 하얀색으로 색상 초기화
-        renderer.material.color = towerColor;
+        nodeRenderer.material.color = towerColor; // 하얀색으로 색상 초기화
 
-        // 건설된 노드로 등록
-        buildManager.RegisterConstructedNode(this);
+        buildManager.RegisterConstructedNode(this); // 건설된 노드로 등록
+
+        buildManager.ExitBuildMode(); // 빌드 모드 종료
         
-        // 콜라이더 비활성화 (더 이상 클릭할 필요 없음)
-        boxCollider.enabled = false;
+        ActivateArcherTower(); // 기본 타워 활성화
+    }
+
+    public void ActivateArcherTower()
+    {
+        // 이전 타워 비활성화
+        DeactivateAllTowers();
         
-        // 빌드 모드 종료
-        buildManager.ExitBuildMode();
-        // 추가: 타워 동작 스크립트 활성화 등 추가 로직을 넣을 수 있음
+        // 아처 타워 활성화
+        archerTower.enabled = true;
+        if (archerTower.gameObject != gameObject) archerTower.gameObject.SetActive(true);
+        
+        // 현재 활성 타워 참조 업데이트
+        activeTower = archerTower;
+        
+        // 노드 상태 업데이트
+        _isOccupied = true;
     }
 
     #endregion
+        
+    #region 타워 업그레이드
 
-    #region Helper 메서드
+    public void UpgradeToExplosiveTower()
+    {
+        // 이전 타워 비활성화
+        DeactivateAllTowers();
+
+        // 폭발 타워 활성화
+        explosiveTower.enabled = true;
+        if (explosiveTower.gameObject != gameObject) explosiveTower.gameObject.SetActive(true);
+
+        // 현재 활성 타워 참조 업데이트
+        activeTower = explosiveTower;
+    }
+
+    public void UpgradeToSlowTower()
+    {
+        // 이전 타워 비활성화
+        DeactivateAllTowers();
+        
+        // 둔화 타워 활성화
+        slowTower.enabled = true;
+        if (slowTower.gameObject != gameObject) slowTower.gameObject.SetActive(true);
+        
+        // 현재 활성 타워 참조 업데이트
+        activeTower = slowTower;
+    }
 
     /// <summary>
-    /// Renderer의 머터리얼 색상을 지정된 색상으로 변경합니다.
+    /// 타워 업그레이드 시 초기화
     /// </summary>
-    /// <param name="color">적용할 색상</param>
-    private void SetColor(Color color)
+    private void DeactivateAllTowers()
     {
-        if (renderer != null && renderer.material != null)
-        {
-            renderer.material.color = color;
-        }
+        // 모든 타워 컴포넌트 비활성화
+        archerTower.enabled = false;
+        explosiveTower.enabled = false;
+        slowTower.enabled = false;
+
+        // 타워의 게임오브젝트도 비활성화 (시각적 요소)
+        if (archerTower.gameObject != gameObject) archerTower.gameObject.SetActive(false);
+        if (explosiveTower.gameObject != gameObject) explosiveTower.gameObject.SetActive(false);
+        if (slowTower.gameObject != gameObject) slowTower.gameObject.SetActive(false);
     }
 
     #endregion
