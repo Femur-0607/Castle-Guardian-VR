@@ -8,7 +8,6 @@ public abstract class Tower : MonoBehaviour, IUpgradeable
     [Header("기본 참조")]
     [SerializeField] protected TowerData towerData;
     [SerializeField] protected Transform firePoint;
-    [SerializeField] protected ProjectilePool projectilePool;
     
     // 공격 관련 변수
     protected float lastAttackTime;
@@ -17,8 +16,6 @@ public abstract class Tower : MonoBehaviour, IUpgradeable
     
     // 타겟 감지 최적화 변수
     protected float detectionInterval = 1f;
-    protected float nextDetectionTime = 0f;
-    
     
     protected virtual void Start()
     {

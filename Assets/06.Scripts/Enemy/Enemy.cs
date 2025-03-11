@@ -20,20 +20,22 @@ public class Enemy : LivingEntity
     [Header("참조")]
     private IObjectPool<Enemy> pool;
     [SerializeField] private NavMeshAgent agent;
+    [SerializeField] private Animator animator;
     public Transform target;        // 성문
     public EnemyData enemyData;     // 'Enemy'의 스테이터스를 담당
     public SpawnManager spawnManager;
     
     private float lastAttackTime;
     private EnemyState currentState;    // 현재 상태 알려주는 이넘 변수
-    
+
     #endregion
 
-    #region 유니티 이벤트 함수
+    #region 유니티 이벤트 함수 및 상속 관련
 
     private void Awake()
     {
         agent = GetComponent<NavMeshAgent>();
+        animator = GetComponent<Animator>();
     }
     protected override void Start()
     {
@@ -69,6 +71,16 @@ public class Enemy : LivingEntity
                 // 사망 상태에서는 행동 안함.
                 break;
         }
+    }
+
+    public override void TakeDamage(float damage)
+    {
+        base.TakeDamage(damage);
+        
+        if (!isAlive) return;
+        
+        // 50% 확률로 히트 모션 재생 (과도한 히트 모션 방지)
+        if (Random.value > 0.5f) animator.SetTrigger("hit");
     }
     
     #endregion
@@ -121,38 +133,36 @@ public class Enemy : LivingEntity
             currentState = EnemyState.Chasing;
             agent.isStopped = false;
         }
-        else
-        {
-            Debug.LogWarning("[Enemy] BeginChase() 호출 시, agent가 NavMesh 위에 없거나 target이 null입니다.");
-        }
     }
-    
+
     /// <summary>
     /// 추적 상태
     /// </summary>
     void Chase()
     {
-        if (target != null)
+        if (target != null && animator != null)
         {
             agent.SetDestination(target.position); // 성문으로 이동
-            
+
             if (!agent.pathPending && agent.remainingDistance <= agent.stoppingDistance) // 공격범위안에 성문이 들어오면
             {
                 currentState = EnemyState.Attacking; // 공격상태로 전환
                 agent.isStopped = true; // 공격 시에는 이동을 멈춤
             }
+
+            animator.SetBool("isChasing", true);
         }
     }
-    
+
     /// <summary>
     /// 공격 상태
     /// </summary>
     void Attack()
     {
-        if (target != null)
+        if (target != null && animator != null)
         {
             float distance = Vector3.Distance(transform.position, target.position);
-            
+
             if (distance > agent.stoppingDistance)
             {
                 // 목표가 범위를 벗어나면 다시 추격 상태로 전환
@@ -166,15 +176,22 @@ public class Enemy : LivingEntity
             {
                 // 리빙 엔티티 스크립트가 있어야지 공격 가능
                 LivingEntity castle = target.GetComponent<LivingEntity>();
-                
+
                 if (castle != null)
                 {
                     castle.TakeDamage(enemyData.attackDamage);
                 }
-                
+
                 // 현재 시간을 할당
                 lastAttackTime = Time.time;
             }
+
+            animator.SetBool("isChasing", false);
+
+            // 공격 애니메이션 랜덤 재생
+            int attackPattern = Random.Range(0, 1);
+            animator.SetInteger("attackPattern", attackPattern);
+            animator.SetTrigger("attack");
         }
     }
 
@@ -194,14 +211,13 @@ public class Enemy : LivingEntity
         // 사망 시 게임매니저에게 골드 전달
         GameManager.Instance.gameMoney += (int)enemyData.goldDropAmount;
         
-        // 추가 사망 애니메이션이나 이펙트 구현 가능
+        animator.SetBool("isDead", true);
     }
     
     #endregion
 
     #region 상태이상
 
-    // Enemy.cs에 추가될 메서드
     public void ApplySlowEffect(float duration, float slowAmount)
     {
         // 이미 실행 중인 슬로우 코루틴 중지

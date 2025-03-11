@@ -45,6 +45,9 @@ public class WaveManager : MonoBehaviour
         currentWave = 1;
         enemyCountInWave = 5;
         isWaveActive = true;
+
+        SoundManager.Instance.PlaySound("BattleBGM");
+
         EventManager.Instance.WaveStartEvent(currentWave, enemyCountInWave);
     }
     
@@ -58,6 +61,8 @@ public class WaveManager : MonoBehaviour
         enemyCountInWave = 5 + (currentWave - 1) * 2;
         
         isWaveActive = true;
+
+        SoundManager.Instance.PlaySound("BattleBGM");
         
         // 이벤트 매니저에게 웨이브 시작 송신(웨이브 번호, 적의 수)
         EventManager.Instance.WaveStartEvent(currentWave, enemyCountInWave);
@@ -70,6 +75,8 @@ public class WaveManager : MonoBehaviour
     public void WaveEndEvent()
     {
         isWaveActive = false;
+
+        SoundManager.Instance.PlaySound("MainBGM");
         
         EventManager.Instance.WaveEndEvent(currentWave); // 이벤트 매니저에 웨이브 종료 송신
         

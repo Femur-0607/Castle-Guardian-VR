@@ -4,7 +4,7 @@ using System.Collections.Generic;
 public enum SoundCategory
 {
     BGM,
-    SFX,
+    SFX ,
     UI
 }
 

@@ -4,23 +4,13 @@ using System.Collections;
 public class ArcherTower : Tower
 {
     [Header("타워 고유 설정")]
-    [SerializeField] private Animator towerAnimator;
     [SerializeField] private AudioClip shootSound;
     [SerializeField] private GameObject hitEffectPrefab;
 
     protected override void Attack(Enemy target)
     {
-        // 애니메이션 재생
-        if (towerAnimator != null)
-        {
-            towerAnimator.SetTrigger("Attack");
-        }
-        
-        // 사운드 효과
-        if (shootSound != null)
-        {
-            AudioSource.PlayClipAtPoint(shootSound, transform.position);
-        }
+        // 화살 발사 사운드를 3D로 재생 (타워의 위치에서)
+        SoundManager.Instance.PlaySound3D("ArrowTowerShoot", firePoint.position);
         
         // 화살이 적에게 도달하는 시간 계산
         float distance = Vector3.Distance(firePoint.position, target.transform.position);

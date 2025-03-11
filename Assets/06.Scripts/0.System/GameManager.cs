@@ -31,6 +31,8 @@ public class GameManager : MonoBehaviour
 
         // 시작 시 컴포넌트 비활성화
         DisablePlayerControls();
+
+        SoundManager.Instance.PlaySound("MainBGM");
     }
 
     private void OnEnable()
@@ -57,6 +59,7 @@ public class GameManager : MonoBehaviour
         if (!gameStarted)
         {
             gameStarted = true;
+
             EventManager.Instance.GameStartEvent();
         }
     }

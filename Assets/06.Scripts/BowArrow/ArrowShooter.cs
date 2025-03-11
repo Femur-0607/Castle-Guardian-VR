@@ -98,6 +98,8 @@ public class ArrowShooter : MonoBehaviour
     {
         if (!isAiming) return;
 
+        SoundManager.Instance.PlaySound("ArrowShoot");
+        
         isAiming = false;
         curveVisualizer.HideProjectileCurve(); // 화살 궤적 숨김
 
