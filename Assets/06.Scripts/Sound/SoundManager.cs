@@ -125,8 +125,6 @@ public class SoundManager : MonoBehaviour
     /// </summary>
     public void PlaySound(string soundID)
     {
-        Debug.Log($"PlaySound 호출됨: {soundID}");
-        
         if (soundDict == null)
         {
             Debug.LogWarning("SoundDictionary가 생성되지 않았습니다.");

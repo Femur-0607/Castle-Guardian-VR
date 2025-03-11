@@ -4,7 +4,6 @@ using System.Collections;
 public class ArcherTower : Tower
 {
     [Header("타워 고유 설정")]
-    [SerializeField] private AudioClip shootSound;
     [SerializeField] private GameObject hitEffectPrefab;
 
     protected override void Attack(Enemy target)

@@ -9,7 +9,7 @@ public class PlayerLookController : MonoBehaviour
 
     [Header("입력 관련")]
     private Vector2 _lookDelta;             // 인풋 시스템으로 받는 인풋값
-    private float _lookSensitivity = 1f;   // 민감도 조절 변수
+    private float _lookSensitivity = 20f;   // 민감도 조절 변수
     
     [Header("회전 관련")]
     public float pitchRange  = 20f;         // 회전제한 상,하 기준 ±20도

@@ -17,17 +17,23 @@ public class BuildableNode : MonoBehaviour
     private Color baseColor = Color.red;       // 기본 색상 (건설 전)
     private Color towerColor = Color.white;     // 기본 색상 (건설 후)
     private Color hoverColor = Color.green;     // 마우스 올렸을 때 건설 가능한 색상
+    private Color buildModeNodeColor = Color.cyan; // 빌드 모드에서 1단계 타워 표시용 색상
     
     [Header("머터리얼 설정")]
-    [Tooltip("타워 건설 완료 후 적용할 실제 타워 머터리얼")]
+    [SerializeField] private Material initialMaterial;
     [SerializeField] private Material towerMaterial;
 
     private Renderer nodeRenderer;
     private BoxCollider nodeCollider;
+
+    // 대신 towerLevel 사용
+    private int towerLevel = 0; // 0: 건설 전, 1: 1단계, 2: 2단계
+    // 호환성을 위한 프로퍼티
+    public bool IsOccupied => towerLevel > 0;
+
+    // 타워 레벨과 타입 관리용 변수 추가
+    private TowerType currentTowerType = TowerType.Normal;
     
-    // 타워 건설 여부를 판단하는 변수
-    private bool _isOccupied = false;
-    public bool IsOccupied => _isOccupied;
 
     [Header("타워 컴포넌트")]
     [SerializeField] private ArcherTower archerTower;
@@ -49,6 +55,7 @@ public class BuildableNode : MonoBehaviour
         slowTower = GetComponent<SlowTower>();
         
         SetColor(baseColor);
+        nodeRenderer.material = initialMaterial;
         nodeRenderer.material.color = baseColor;
 
         // 시작 시 모든 타워 비활성화
@@ -64,21 +71,49 @@ public class BuildableNode : MonoBehaviour
         // 빌드모드가 아닐 경우엔 효과 적용하지 않음
         if (!buildManager.isBuildMode) return;
 
-        if (!_isOccupied) SetColor(hoverColor);  //  건설 가능하면 hoverColor색으로 머터리얼 변환
+        if (towerLevel == 0) SetColor(hoverColor);  //  건설 가능하면 hoverColor색으로 머터리얼 변환
     }
 
     private void OnMouseExit()
     {
-        if (_isOccupied) return;
+        if (towerLevel > 0) return;
         SetColor(baseColor);
     }
 
     private void OnMouseDown()
     {
-        // 빌드모드가 아닐 경우 처리하지 않음
+        // 빌드 모드가 아니면 아무것도 하지 않음
         if (!buildManager.isBuildMode) return;
-
-        BuildTower();
+        
+        // 새 타워 건설 모드
+        if (buildManager.currentBuildMode == BuildManager.BuildModeType.NewTower)
+        {
+            // 건설 가능한 노드일 경우에만 건설
+            if (towerLevel == 0)
+            {
+                BuildTower();
+            }
+        }
+        // 업그레이드 모드
+        else if (buildManager.currentBuildMode == BuildManager.BuildModeType.UpgradeTower)
+        {
+            // 1단계 타워만 업그레이드 가능
+            if (towerLevel == 1)
+            {
+                // 업그레이드 타입에 따라 처리
+                if (buildManager.GetUpgradeTargetType() == TowerType.Explosive)
+                {
+                    UpgradeToExplosiveTower();
+                }
+                else if (buildManager.GetUpgradeTargetType() == TowerType.Slow)
+                {
+                    UpgradeToSlowTower();
+                }
+                
+                // 업그레이드 후 빌드 모드 종료
+                buildManager.ExitBuildMode();
+            }
+        }
     }
 
     #endregion
@@ -102,7 +137,7 @@ public class BuildableNode : MonoBehaviour
     /// </summary>
     public bool CanPlaceTower()
     {
-        return !_isOccupied;
+        return towerLevel == 0;
     }
     
     /// <summary>
@@ -111,7 +146,7 @@ public class BuildableNode : MonoBehaviour
     public void SetNodeVisibility(bool visible)
     {
         // 이미 건설된 노드는 렌더러는 항상 활성화 상태 유지
-        if (_isOccupied)
+        if (towerLevel > 0)
         {
             nodeRenderer.enabled = true;
             nodeCollider.enabled = false; // 건설된 노드는 콜라이더 비활성화
@@ -131,17 +166,18 @@ public class BuildableNode : MonoBehaviour
     {
         if (!CanPlaceTower()) return;
 
-        _isOccupied = true;
+        towerLevel = 1; // 1단계 타워로 설정
+        currentTowerType = TowerType.Normal;
 
-        nodeRenderer.material = towerMaterial; // 실제 타워 머터리얼로 교체하여 건설 완료 상태를 표시
+        nodeRenderer.material = towerMaterial;
+        nodeRenderer.material.color = towerColor;
 
-        nodeRenderer.material.color = towerColor; // 하얀색으로 색상 초기화
-
-        buildManager.RegisterConstructedNode(this); // 건설된 노드로 등록
-
-        buildManager.ExitBuildMode(); // 빌드 모드 종료
+        // 1단계 타워 노드로 등록
+        buildManager.RegisterTier1Node(this);
         
-        ActivateArcherTower(); // 기본 타워 활성화
+        buildManager.ExitBuildMode();
+        
+        ActivateArcherTower();
     }
 
     public void ActivateArcherTower()
@@ -157,7 +193,8 @@ public class BuildableNode : MonoBehaviour
         activeTower = archerTower;
         
         // 노드 상태 업데이트
-        _isOccupied = true;
+        towerLevel = 1;
+        currentTowerType = TowerType.Normal;
     }
 
     #endregion
@@ -175,6 +212,10 @@ public class BuildableNode : MonoBehaviour
 
         // 현재 활성 타워 참조 업데이트
         activeTower = explosiveTower;
+        
+        // 타워 레벨과 타입 업데이트
+        towerLevel = 2;
+        currentTowerType = TowerType.Explosive;
     }
 
     public void UpgradeToSlowTower()
@@ -188,6 +229,10 @@ public class BuildableNode : MonoBehaviour
         
         // 현재 활성 타워 참조 업데이트
         activeTower = slowTower;
+        
+        // 타워 레벨과 타입 업데이트
+        towerLevel = 2;
+        currentTowerType = TowerType.Slow;
     }
 
     /// <summary>
@@ -206,5 +251,47 @@ public class BuildableNode : MonoBehaviour
         if (slowTower.gameObject != gameObject) slowTower.gameObject.SetActive(false);
     }
 
+    #endregion
+    
+    #region 빌드 모드 관련 메서드
+    
+    /// <summary>
+    /// 빌드 모드 진입 시 호출되는 메서드
+    /// </summary>
+    public void OnBuildModeEnter()
+    {
+        // 타워가 설치되지 않은 노드는 처리하지 않음
+        if (towerLevel == 0) return;
+        
+        // 1단계 타워인 경우에만 머티리얼 변경
+        if (towerLevel == 1)
+        {
+            // 원래 초기 머티리얼로 변경
+            nodeRenderer.material = initialMaterial;
+            
+            // 1단계 타워는 buildModeNodeColor 색상 적용
+            nodeRenderer.material.color = buildModeNodeColor;
+        }
+        // 2단계 타워는 머티리얼 변경 없음 (현재 상태 유지)
+    }
+    
+    /// <summary>
+    /// 빌드 모드 종료 시 호출되는 메서드
+    /// </summary>
+    public void OnBuildModeExit()
+    {
+        // 타워가 설치되지 않은 노드는 처리하지 않음
+        if (towerLevel == 0) return;
+        
+        // 1단계 타워인 경우에만 머티리얼 변경
+        if (towerLevel == 1)
+        {
+            // 다시 타워 머티리얼로 변경
+            nodeRenderer.material = towerMaterial;
+            nodeRenderer.material.color = towerColor;
+        }
+        // 2단계 타워는 머티리얼 변경 없음 (현재 상태 유지)
+    }
+    
     #endregion
 }

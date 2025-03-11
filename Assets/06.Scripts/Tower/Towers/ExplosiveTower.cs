@@ -65,14 +65,4 @@ public class ExplosiveTower : Tower
             }
         }
     }
-    
-    // 디버깅용 폭발 범위 시각화
-    protected override void OnDrawGizmosSelected()
-    {
-        base.OnDrawGizmosSelected();
-        
-        // 폭발 범위 표시
-        Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(transform.position, explosionRadius);
-    }
 }

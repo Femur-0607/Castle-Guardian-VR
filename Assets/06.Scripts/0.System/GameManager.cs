@@ -1,4 +1,5 @@
 using UnityEngine;
+using System;
 
 public class GameManager : MonoBehaviour
 {
@@ -13,7 +14,22 @@ public class GameManager : MonoBehaviour
     [SerializeField] private ArrowShooter arrowShooter;
     [SerializeField] private PlayerLookController playerLookController;
 
-    public int gameMoney = 200;
+    // 게임 머니(골드) 프로퍼티로 변경
+    private int _gameMoney = 200;
+    public int gameMoney 
+    { 
+        get => _gameMoney; 
+        private set 
+        { 
+            if (_gameMoney != value) 
+            { 
+                _gameMoney = value; 
+                // EventManager를 통해 이벤트 발생
+                EventManager.Instance.MoneyChangedEvent(_gameMoney); 
+            } 
+        } 
+    }
+    
     public bool gameStarted { get; private set; } = false;
 
     #endregion
@@ -32,7 +48,7 @@ public class GameManager : MonoBehaviour
         // 시작 시 컴포넌트 비활성화
         DisablePlayerControls();
 
-        SoundManager.Instance.PlaySound("MainBGM");
+        SoundManager.Instance.PlaySound("TitleBGM");
     }
 
     private void OnEnable()
@@ -60,6 +76,8 @@ public class GameManager : MonoBehaviour
         {
             gameStarted = true;
 
+            SoundManager.Instance.PlaySound("MainBGM");
+
             EventManager.Instance.GameStartEvent();
         }
     }
@@ -81,8 +99,18 @@ public class GameManager : MonoBehaviour
     
     // 돈이 충분한지 여부 확인
     public bool HasEnoughMoney(int cost) => gameMoney >= cost;
+    
     // 돈 차감
-    public void DeductMoney(int cost) => gameMoney -= cost;
+    public void DeductMoney(int cost)
+    {
+        gameMoney -= cost;
+    }
+    
+    // 돈 추가 메서드 (웨이브 클리어 보상 등에 사용)
+    public void AddMoney(int amount)
+    {
+        gameMoney += amount;
+    }
 
     #endregion
     

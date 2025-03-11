@@ -21,6 +21,7 @@ public class EventManager : MonoBehaviour
     public event Action<int> OnWaveEnd;                 // 웨이브 종료 시 발동할 이벤트
     public event Action OnGameStart;                    // 게임 시작 시 발동할 이벤트
     public event Action<bool> OnGameEnd;                // 게임 종료 시 발동할 이벤트 (승리 여부 포함)
+    public event Action<int> OnMoneyChanged;            // 골드 변경 시 발동할 이벤트
     
     #endregion
 
@@ -44,6 +45,7 @@ public class EventManager : MonoBehaviour
     public void WaveEndEvent(int wave) => OnWaveEnd?.Invoke(wave);
     public void GameStartEvent() => OnGameStart?.Invoke();
     public void GameEndEvent(bool isGameOver) => OnGameEnd?.Invoke(isGameOver);
+    public void MoneyChangedEvent(int amount) => OnMoneyChanged?.Invoke(amount);
     
     
 }

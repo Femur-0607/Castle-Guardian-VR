@@ -14,16 +14,23 @@ public abstract class Tower : MonoBehaviour, IUpgradeable
     protected List<Enemy> enemiesInRange = new List<Enemy>();
     protected Enemy currentTarget;
     
-    // 타겟 감지 최적화 변수
-    protected float detectionInterval = 1f;
-    
+    // 감지용 SphereCollider
+    protected SphereCollider detectionCollider;
+
+    protected virtual void Awake()
+    {
+        // 감지용 SphereCollider 추가
+        detectionCollider = GetComponent<SphereCollider>();
+        detectionCollider.isTrigger = true; // 트리거로 설정
+    }
+
     protected virtual void Start()
     {
         // 초기 스탯 설정
         lastAttackTime = -towerData.attackCooldown; // 바로 공격 가능하도록 설정
-
-        // 주기적으로 적 감지 수행
-        StartCoroutine(DetectEnemiesRoutine());
+        
+        // SphereCollider 범위 설정
+        UpdateDetectionRange();
     }
     
     protected virtual void Update()
@@ -45,29 +52,45 @@ public abstract class Tower : MonoBehaviour, IUpgradeable
         }
     }
     
-    // 주기적으로 적 감지
-    protected IEnumerator DetectEnemiesRoutine()
+    // 범위 업데이트 (업그레이드 시에도 호출)
+    protected void UpdateDetectionRange()
     {
-        while (true)
+        if (detectionCollider != null && towerData != null)
         {
-            DetectEnemies();
-            yield return new WaitForSeconds(detectionInterval);
+            detectionCollider.radius = towerData.attackRange;
         }
     }
     
-    // 범위 내 모든 적 감지
-    protected virtual void DetectEnemies()
+    // OnTriggerEnter: 적이 범위에 들어올 때 호출
+    protected virtual void OnTriggerEnter(Collider other)
     {
-        enemiesInRange.Clear();
-    
-        // Physics.OverlapSphere로 범위 내 콜라이더 감지
-        Collider[] colliders = Physics.OverlapSphere(transform.position, towerData.attackRange, LayerMask.GetMask("Enemy"));
-        
-        foreach (Collider col in colliders)
+        if (other.TryGetComponent<Enemy>(out var enemy) && enemy.IsAlive())
         {
-            if (col.TryGetComponent<Enemy>(out var enemy) && enemy.IsAlive())
+            if (!enemiesInRange.Contains(enemy))
             {
                 enemiesInRange.Add(enemy);
+                
+                // 현재 타겟이 없으면 이 적을 타겟으로 설정
+                if (currentTarget == null)
+                {
+                    currentTarget = enemy;
+                }
+            }
+        }
+    }
+    
+    // OnTriggerExit: 적이 범위를 벗어날 때 호출
+    protected virtual void OnTriggerExit(Collider other)
+    {
+        if (other.TryGetComponent<Enemy>(out var enemy))
+        {
+            enemiesInRange.Remove(enemy);
+            
+            // 현재 타겟이 범위를 벗어났다면 새 타겟 찾기
+            if (currentTarget == enemy)
+            {
+                currentTarget = null;
+                FindNewTarget();
             }
         }
     }
@@ -77,14 +100,17 @@ public abstract class Tower : MonoBehaviour, IUpgradeable
     {
         if (enemiesInRange.Count == 0) return;
         
+        // 리스트를 순회하며 유효한 적 찾기
+        enemiesInRange.RemoveAll(e => e == null || !e.gameObject.activeSelf || !e.IsAlive());
+        
+        if (enemiesInRange.Count == 0) return;
+        
         // 가장 가까운 적 찾기
         float closestDistance = float.MaxValue;
         Enemy closestEnemy = null;
         
         foreach (Enemy enemy in enemiesInRange)
         {
-            if (enemy == null || !enemy.gameObject.activeSelf || !enemy.IsAlive()) continue;
-            
             float distance = Vector3.Distance(transform.position, enemy.transform.position);
             if (distance < closestDistance)
             {
@@ -104,30 +130,24 @@ public abstract class Tower : MonoBehaviour, IUpgradeable
         return Vector3.Distance(transform.position, enemy.transform.position) <= towerData.attackRange;
     }
     
-    // 공격 구현 (추상 메서드)
-    protected abstract void Attack(Enemy target);
-    
-    // IUpgradeable 인터페이스 구현
+    // 업그레이드 시 범위 업데이트
     public virtual void UpgradeLevel()
     {
         towerData.upgradeLevel++;
         towerData.attackDamage += towerData.damageIncreasePerLevel;
         towerData.attackRange += towerData.rangeIncreasePerLevel;
         towerData.attackCooldown = Mathf.Max(0.1f, towerData.attackCooldown - towerData.cooldownDecreasePerLevel);
+        
+        // 범위 업데이트
+        UpdateDetectionRange();
     }
     
+    // 공격 구현 (추상 메서드)
+    protected abstract void Attack(Enemy target);
+    
+    // IUpgradeable 인터페이스 구현
     public virtual int GetUpgradeCost()
     {
         return towerData.upgradeCost;
-    }
-    
-    // 디버깅용 공격 범위 시각화
-    protected virtual void OnDrawGizmosSelected()
-    {
-        if (towerData != null)
-        {
-            Gizmos.color = Color.red;
-            Gizmos.DrawWireSphere(transform.position, towerData.attackRange);
-        }
     }
 }

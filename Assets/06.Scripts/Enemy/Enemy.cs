@@ -208,8 +208,8 @@ public class Enemy : LivingEntity
 
         pool?.Release(this);
         
-        // 사망 시 게임매니저에게 골드 전달
-        GameManager.Instance.gameMoney += (int)enemyData.goldDropAmount;
+        // 사망 시 게임매니저에게 골드 전달 (프로퍼티 사용을 위해 AddMoney 메서드 호출)
+        GameManager.Instance.AddMoney((int)enemyData.goldDropAmount);
         
         animator.SetBool("isDead", true);
     }
