@@ -14,8 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   projectileType: 0
   projectileName: "\uAE30\uBCF8 \uD654\uC0B4"
-  damage: 50
-  speed: 20
+  damage: 9999
   lifeTime: 5
   impactRadius: 0
   effectDuration: 0

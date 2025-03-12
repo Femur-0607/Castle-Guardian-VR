@@ -39,7 +39,6 @@ public class BuildManager : MonoBehaviour
 
     #region 빌드 모드 관련 로직
 
-    // BuildModeType 열거형 추가
     public enum BuildModeType
     {
         None,           // 빌드 모드 아님
@@ -47,7 +46,6 @@ public class BuildManager : MonoBehaviour
         UpgradeTower    // 타워 업그레이드 모드
     }
 
-    // isBuildMode 프로퍼티로 변경
     public bool isBuildMode => currentBuildMode != BuildModeType.None;
 
     // 빌드 모드 진입 메서드 수정
@@ -75,10 +73,11 @@ public class BuildManager : MonoBehaviour
         }
         else
         {
-            // 새 타워 모드에서는 건설 가능한 노드만 표시
+            // 새 타워 모드에서는 건설 가능한 노드(0단계)만 표시
             foreach (BuildableNode node in buildableNodes)
             {
                 node.SetNodeVisibility(true);
+                node.OnBuildModeEnter();
             }
         }
         
@@ -89,26 +88,31 @@ public class BuildManager : MonoBehaviour
     // 타워 건설 완료 후 호출하여 빌드 모드 종료
     public void ExitBuildMode()
     {
-        currentBuildMode = BuildModeType.None;
-
-        // 카메라 전환: 일반 카메라 활성화, 빌드 모드 카메라 비활성화
+        // 카메라 전환
         if (buildCamera != null && normalCamera != null)
         {
             buildCamera.gameObject.SetActive(false);
             normalCamera.gameObject.SetActive(true);
         }
 
-        // 모든 노드 비활성화
+        // 모든 노드에 빌드 모드 종료 알림
         foreach (BuildableNode node in buildableNodes)
         {
-            node.SetNodeVisibility(false);
+            node.OnBuildModeExit();
         }
         
-        // 건설된 모든 노드에 빌드 모드 종료 알림
         foreach (BuildableNode node in tier1Nodes)
         {
             node.OnBuildModeExit();
         }
+        
+        foreach (BuildableNode node in tier2Nodes)
+        {
+            // 2단계 타워는 변경 없음
+        }
+        
+        // 빌드 모드 상태 초기화
+        currentBuildMode = BuildModeType.None;
 
         // 상점 UI 다시 표시
         uiManager.ShowShopUI();

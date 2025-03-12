@@ -236,6 +236,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   buildManager: {fileID: 0}
+  initialMaterial: {fileID: 2100000, guid: a3242dcf98c62a842b56d966c6c8d3bf, type: 2}
   towerMaterial: {fileID: 2100000, guid: ee90f878377271b4fbbf915249f24476, type: 2}
   archerTower: {fileID: 4814830753184301173}
   explosiveTower: {fileID: 7582988939937536669}

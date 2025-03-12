@@ -62,15 +62,16 @@ public class ProjectilePool : MonoBehaviour
     /// <summary>
     /// 화살을 풀에서 꺼내와서 원하는 위치/회전, 발사 속도를 적용
     /// </summary>
-    public Projectile GetProjectile(Vector3 spawnPosition, Quaternion rotation, Vector3 launchVelocity)
+    public Projectile GetProjectile()
     {
-        // 풀에서 객체 하나를 Get
+        return projectilePool.Get();
+    }
+    
+    // 위치 정보만 받는 편의 메서드
+    public Projectile GetProjectileAt(Vector3 position)
+    {
         Projectile proj = projectilePool.Get();
-
-        // 위치/회전/속도 설정
-        proj.transform.SetPositionAndRotation(spawnPosition, rotation);
-        proj.Launch(launchVelocity);
-
+        proj.transform.position = position;
         return proj;
     }
 }

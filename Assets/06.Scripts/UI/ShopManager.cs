@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+
 public class ShopManager : MonoBehaviour
 {
     [Header("참조")]
@@ -19,9 +20,10 @@ public class ShopManager : MonoBehaviour
 
     private void Start() 
     {
-            nomalTowerButton.onClick.AddListener(OnTowerSelected);
-            explosiveUpgradeButton.onClick.AddListener(() => UpgradeTower(TowerType.Explosive));
-            slowUpgradeButton.onClick.AddListener(() => UpgradeTower(TowerType.Slow));
+        // 타워 버튼 리스너
+        nomalTowerButton.onClick.AddListener(OnTowerSelected);
+        explosiveUpgradeButton.onClick.AddListener(() => UpgradeTower(TowerType.Explosive));
+        slowUpgradeButton.onClick.AddListener(() => UpgradeTower(TowerType.Slow));
     }
 
     public void OnTowerSelected()
@@ -34,6 +36,7 @@ public class ShopManager : MonoBehaviour
             buildManager.EnterBuildMode();
         }
     }
+    
     public void UpgradeTower(TowerType upgradeType)
     {
         int cost = upgradeType == TowerType.Explosive ? explosiveUpgradeCost : slowUpgradeCost;

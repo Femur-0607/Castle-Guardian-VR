@@ -15,7 +15,6 @@ public class ProjectileData : ScriptableObject
     public ProjectileType projectileType = ProjectileType.Normal;
     public string projectileName = "기본 화살";
     public float damage = 50f;
-    public float speed = 20f;
     public float lifeTime = 5f;
     
     [Header("특수 효과")]
