@@ -23,6 +23,48 @@ public class SpawnManager : MonoBehaviour
     // ★ 활성화된 적을 추적하기 위한 리스트
     private List<Enemy> activeEnemies = new List<Enemy>();
     
+    [Header("적 타입 설정")]
+    [SerializeField] private EnemyData normalEnemyData;
+    [SerializeField] private EnemyData archerEnemyData;
+    [SerializeField] private EnemyData scoutEnemyData;
+    [SerializeField] private EnemyData tankerEnemyData;
+    [SerializeField] private EnemyData ghostEnemyData;
+    
+    // 웨이브별 적 타입 분포
+    [Serializable]
+    public class WaveDistribution
+    {
+        public int waveNumber;
+        [Range(0,1)] public float normalRatio = 1f;
+        [Range(0,1)] public float archerRatio = 0f;
+        [Range(0,1)] public float scoutRatio = 0f;
+        [Range(0,1)] public float tankerRatio = 0f;
+        [Range(0,1)] public float ghostRatio = 0f;
+    }
+    
+    [SerializeField] private WaveDistribution[] waveDistributions;
+    
+    // WaveManager 직접 참조 추가
+    [SerializeField] private WaveManager waveManager;
+    
+    // SpawnManager에 새로운 클래스 추가
+    [Serializable]
+    public class EnemySpawnData
+    {
+        public EnemyType enemyType;
+        public int count;
+    }
+
+    [Serializable]
+    public class WaveEnemyComposition
+    {
+        public int waveNumber;
+        public List<EnemySpawnData> enemies = new List<EnemySpawnData>();
+    }
+
+    // SpawnManager 클래스 내부
+    [SerializeField] private List<WaveEnemyComposition> waveCompositions = new List<WaveEnemyComposition>();
+    
     #endregion
 
     #region 유니티 이벤트 함수
@@ -69,37 +111,69 @@ public class SpawnManager : MonoBehaviour
         StartCoroutine(SpawnWaveCoroutine(enemyCount, center));
     }
     
-    private IEnumerator SpawnWaveCoroutine(int enemyCount, Vector3 center)
+    private IEnumerator SpawnWaveCoroutine(int totalEnemyCount, Vector3 center)
     {
-        for (int i = 0; i < enemyCount; i++)
+        // 현재 웨이브에 맞는 구성 찾기
+        WaveEnemyComposition currentWaveComp = waveCompositions.Find(w => w.waveNumber == waveManager.currentWave);
+        
+        if (currentWaveComp == null)
         {
-            SpawnEnemy(center);
-            
-            yield return new WaitForSeconds(1f); // 1초 간격으로 스폰, 필요에 따라 조정
+            // 기본 구성: 모두 일반 적
+            for (int i = 0; i < totalEnemyCount; i++)
+            {
+                SpawnEnemyOfType(EnemyType.Normal, center);
+                yield return new WaitForSeconds(1f);
+            }
+        }
+        else
+        {
+            // 지정된 구성에 따라 스폰
+            foreach (var enemyData in currentWaveComp.enemies)
+            {
+                for (int i = 0; i < enemyData.count; i++)
+                {
+                    SpawnEnemyOfType(enemyData.enemyType, center);
+                    yield return new WaitForSeconds(1f);
+                }
+            }
         }
     }
     
-    public void SpawnEnemy(Vector3 position)
+    private void SpawnEnemyOfType(EnemyType type, Vector3 position)
     {
-        NavMeshHit hit;
-        float radius = 2f;
-        // spawnPos 근처에서 NavMesh 위의 점 찾기
-        if (NavMesh.SamplePosition(position, out hit, radius, NavMesh.AllAreas))
-        {
-            // 찾은 NavMesh 지점의 y값으로 원래 위치의 y값을 보정합니다.
-            Vector3 adjustedPos = position;
-            adjustedPos.y = hit.position.y;
-            position = adjustedPos;
-        }
-
-        // 이제 spawnPos는 NavMesh 위의 좌표이므로 안전하게 에이전트를 사용할 수 있음
+        // type에 따라 적절한 EnemyData 가져오기
+        EnemyData data = GetEnemyDataByType(type);
         
-        Enemy e = enemyPool.GetEnemy(position, Quaternion.identity);    // enemyPool에서 적 하나를 꺼내 스폰
-        e.target = targets[Random.Range(0, targets.Length)];    // 랜덤한 타겟 할당
-        e.spawnManager = this;  // Enemy의 변수 spawnManager에 생성한 스폰매니저를 할당 (다이 메서드 실행시 보고용)
+        // 적 스폰
+        Enemy e = enemyPool.GetEnemy(position, Quaternion.identity);
+        e.target = targets[Random.Range(0, targets.Length)];
+        e.spawnManager = this;
+        e.enemyData = data; // 적 데이터 설정
+        
+        // 모델 교체 (적 타입에 따라)
+        SwitchEnemyModel(e, data.enemyType);
+        
         activeEnemies.Add(e);
-
         LiveEnemyCount++;
+    }
+    
+    // 적 모델 교체
+    private void SwitchEnemyModel(Enemy enemy, EnemyType type)
+    {
+        // 기존 모델 비활성화
+        Transform currentModel = enemy.transform.Find("Model");
+        if (currentModel != null)
+            currentModel.gameObject.SetActive(false);
+            
+        // 모델 프리팹 로드 (Resources 폴더에서)
+        string modelPath = "Models/Enemy_" + type.ToString();
+        GameObject modelPrefab = Resources.Load<GameObject>(modelPath);
+        
+        if (modelPrefab != null)
+        {
+            GameObject model = Instantiate(modelPrefab, enemy.transform);
+            model.name = "Model";
+        }
     }
     
     /// <summary>
@@ -122,5 +196,53 @@ public class SpawnManager : MonoBehaviour
         {
             enemy.TakeDamage(999999f);
         }
-    } 
+    }
+    
+    // 현재 웨이브를 기준으로 적 타입 선택
+    private EnemyData GetEnemyDataForCurrentWave(int wave)
+    {
+        // 현재 웨이브에 맞는 분포 찾기
+        WaveDistribution dist = null;
+        foreach (var d in waveDistributions)
+        {
+            if (d.waveNumber <= wave)
+                dist = d;
+            else
+                break;
+        }
+        
+        if (dist == null) return normalEnemyData;
+        
+        // 가중치 기반 랜덤 선택
+        float total = dist.normalRatio + dist.archerRatio + dist.scoutRatio + 
+                      dist.tankerRatio + dist.ghostRatio;
+        float rand = Random.Range(0, total);
+        
+        float acc = 0;
+        acc += dist.normalRatio;
+        if (rand <= acc) return normalEnemyData;
+        
+        acc += dist.archerRatio;
+        if (rand <= acc) return archerEnemyData;
+        
+        acc += dist.scoutRatio;
+        if (rand <= acc) return scoutEnemyData;
+        
+        acc += dist.tankerRatio;
+        if (rand <= acc) return tankerEnemyData;
+        
+        return ghostEnemyData;
+    }
+
+    private EnemyData GetEnemyDataByType(EnemyType type)
+    {
+        switch (type)
+        {
+            case EnemyType.Archer: return archerEnemyData;
+            case EnemyType.Scout: return scoutEnemyData;
+            case EnemyType.Tanker: return tankerEnemyData;
+            case EnemyType.Ghost: return ghostEnemyData;
+            default: return normalEnemyData;
+        }
+    }
 }
