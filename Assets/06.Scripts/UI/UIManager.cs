@@ -10,21 +10,21 @@ public class UIManager : MonoBehaviour
     [Header("참조")]
     [SerializeField] private WaveManager waveManager;
 
-    [Header("UI 참조")]
+    [Header("웨이브 UI")]
     public GameObject waveUIPanel;
-    public GameObject shopUIPanel;
+    public TextMeshProUGUI currentWaveTMP;
+
+    [Header("타이틀 및 게임 관련 UI")]
     public GameObject startUIPanel;
     public GameObject gameOverUIPanel;
     public Button startGameButton;
-    public TextMeshProUGUI currentWaveTMP;
     public TextMeshProUGUI goldAmountTMP;
 
-    [Header("탭 참조")]
-    [Tooltip("Arrow, Tower, Soldier 탭 버튼들")]
+    [Header("상점 UI")]
+    public GameObject shopUIPanel;
     public Button[] tabButtons;
-    [Tooltip("각 탭 버튼에 해당하는 LineFocus 이미지들")]
-    public GameObject[] allLineFocus;
-    [Tooltip("각 탭에 해당하는 상점 아이템 패널들")]
+    private Image[] lineFocusImages;
+    private TextMeshProUGUI[] tabTexts;
     public GameObject[] shopPanels;
 
     #endregion
@@ -44,7 +44,15 @@ public class UIManager : MonoBehaviour
         {
             UpdateGoldUI(GameManager.Instance.gameMoney);
         }
-        
+
+        lineFocusImages = new Image[tabButtons.Length];
+        tabTexts = new TextMeshProUGUI[tabButtons.Length];
+
+        for (int i = 0; i < tabButtons.Length; i++)
+        {
+            lineFocusImages[i] = tabButtons[i].transform.GetChild(0).GetComponent<Image>();
+            tabTexts[i] = tabButtons[i].GetComponent<TextMeshProUGUI>();
+        }
         // 탭 버튼 이벤트 설정
         for (int i = 0; i < tabButtons.Length; i++)
         {
@@ -138,15 +146,19 @@ public class UIManager : MonoBehaviour
     /// <param name="tabIndex">선택한 탭 인덱스 (0: Arrow, 1: Tower, 2: Soldier)</param>
     public void SwitchTab(int tabIndex)
     {
-        // 모든 LineFocus 비활성화
-        foreach (var focus in allLineFocus)
+        // 색상 정의
+        Color selectedColor;
+        Color unselectedColor;
+        ColorUtility.TryParseHtmlString("#F6E19C", out selectedColor);
+        ColorUtility.TryParseHtmlString("#BEB5B6", out unselectedColor);
+
+        // 모든 탭 버튼 순회
+        for (int i = 0; i < tabButtons.Length; i++)
         {
-            focus.gameObject.SetActive(false);
+            lineFocusImages[i].gameObject.SetActive(i == tabIndex);
+            tabTexts[i].color = (i == tabIndex) ? selectedColor : unselectedColor;
         }
-        
-        // 선택한 탭의 LineFocus만 활성화
-        allLineFocus[tabIndex].gameObject.SetActive(true);
-        
+
         // 모든 상점 패널 비활성화
         foreach (var panel in shopPanels)
         {

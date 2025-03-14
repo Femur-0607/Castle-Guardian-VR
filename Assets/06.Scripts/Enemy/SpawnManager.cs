@@ -12,8 +12,7 @@ public class SpawnManager : MonoBehaviour
     [Header("참조")]
     [SerializeField] private EnemyPool enemyPool;
     
-    // 웨이브 매니저로부터 전달받을 웨이브 관련 정보로 스폰할 때 사용할 변수들
-    [Header("Spawn Settings")]
+    [Header("스폰 셋팅")]
     [SerializeField] private Transform spawnCenter;   // 적 스폰 기준 위치
     [SerializeField] private Transform[] targets;    // 스폰 시 타겟 할당
     
@@ -28,42 +27,8 @@ public class SpawnManager : MonoBehaviour
     [SerializeField] private EnemyData archerEnemyData;
     [SerializeField] private EnemyData scoutEnemyData;
     [SerializeField] private EnemyData tankerEnemyData;
-    [SerializeField] private EnemyData ghostEnemyData;
-    
-    // 웨이브별 적 타입 분포
-    [Serializable]
-    public class WaveDistribution
-    {
-        public int waveNumber;
-        [Range(0,1)] public float normalRatio = 1f;
-        [Range(0,1)] public float archerRatio = 0f;
-        [Range(0,1)] public float scoutRatio = 0f;
-        [Range(0,1)] public float tankerRatio = 0f;
-        [Range(0,1)] public float ghostRatio = 0f;
-    }
-    
-    [SerializeField] private WaveDistribution[] waveDistributions;
-    
-    // WaveManager 직접 참조 추가
+
     [SerializeField] private WaveManager waveManager;
-    
-    // SpawnManager에 새로운 클래스 추가
-    [Serializable]
-    public class EnemySpawnData
-    {
-        public EnemyType enemyType;
-        public int count;
-    }
-
-    [Serializable]
-    public class WaveEnemyComposition
-    {
-        public int waveNumber;
-        public List<EnemySpawnData> enemies = new List<EnemySpawnData>();
-    }
-
-    // SpawnManager 클래스 내부
-    [SerializeField] private List<WaveEnemyComposition> waveCompositions = new List<WaveEnemyComposition>();
     
     #endregion
 
@@ -82,11 +47,13 @@ public class SpawnManager : MonoBehaviour
 
     private void Update()
     {
-        // 테스트용: F1 키 입력 시 모든 적 강제 Kill
-        if (Input.GetKeyDown(KeyCode.F1))
-        {
-            ForceKillAllEnemies();
-        }
+#if UNITY_EDITOR
+            // 테스트용: F1 키 입력 시 모든 적 강제 Kill
+            if (Input.GetKeyDown(KeyCode.F1))
+            {
+                ForceKillAllEnemies();
+            }
+#endif
     }
 
     #endregion
@@ -98,10 +65,10 @@ public class SpawnManager : MonoBehaviour
     /// </summary>
     /// <param name="wave">웨이브 번호</param>
     /// <param name="enemyCount">이번 웨이브에 생성할 적 수</param>
-    private void HandleWaveStart(int wave, int enemyCount) => SpawnWave(enemyCount, spawnCenter.position); // SpawnWave 호출: spawnCenter와 spawnRadius를 사용해 랜덤 위치에서 스폰
+    private void HandleWaveStart(int wave, int enemyCount) => SpawnWave(enemyCount, spawnCenter.position);
     
     /// <summary>
-    /// 지정된 적 수만큼 랜덤한 위치에서 적을 스폰하는 메서드.
+    /// 지정된 적 수만큼 적을 스폰하는 메서드.
     /// </summary>
     public void SpawnWave(int enemyCount, Vector3 center)
     {
@@ -113,8 +80,8 @@ public class SpawnManager : MonoBehaviour
     
     private IEnumerator SpawnWaveCoroutine(int totalEnemyCount, Vector3 center)
     {
-        // 현재 웨이브에 맞는 구성 찾기
-        WaveEnemyComposition currentWaveComp = waveCompositions.Find(w => w.waveNumber == waveManager.currentWave);
+        // 현재 웨이브에 맞는 구성을 WaveManager에서 가져오기
+        WaveManager.WaveEnemyComposition currentWaveComp = waveManager.GetWaveComposition(waveManager.currentWave);
         
         if (currentWaveComp == null)
         {
@@ -156,24 +123,22 @@ public class SpawnManager : MonoBehaviour
         activeEnemies.Add(e);
         LiveEnemyCount++;
     }
+
+    private EnemyData GetEnemyDataByType(EnemyType type)
+    {
+        switch (type)
+        {
+            case EnemyType.Archer: return archerEnemyData;
+            case EnemyType.Scout: return scoutEnemyData;
+            case EnemyType.Tanker: return tankerEnemyData;
+            default: return normalEnemyData;
+        }
+    }
     
     // 적 모델 교체
     private void SwitchEnemyModel(Enemy enemy, EnemyType type)
     {
-        // 기존 모델 비활성화
-        Transform currentModel = enemy.transform.Find("Model");
-        if (currentModel != null)
-            currentModel.gameObject.SetActive(false);
-            
-        // 모델 프리팹 로드 (Resources 폴더에서)
-        string modelPath = "Models/Enemy_" + type.ToString();
-        GameObject modelPrefab = Resources.Load<GameObject>(modelPath);
-        
-        if (modelPrefab != null)
-        {
-            GameObject model = Instantiate(modelPrefab, enemy.transform);
-            model.name = "Model";
-        }
+        enemy.ActivateModelByType(type);
     }
     
     /// <summary>
@@ -195,54 +160,6 @@ public class SpawnManager : MonoBehaviour
         foreach (Enemy enemy in activeEnemies.ToArray())
         {
             enemy.TakeDamage(999999f);
-        }
-    }
-    
-    // 현재 웨이브를 기준으로 적 타입 선택
-    private EnemyData GetEnemyDataForCurrentWave(int wave)
-    {
-        // 현재 웨이브에 맞는 분포 찾기
-        WaveDistribution dist = null;
-        foreach (var d in waveDistributions)
-        {
-            if (d.waveNumber <= wave)
-                dist = d;
-            else
-                break;
-        }
-        
-        if (dist == null) return normalEnemyData;
-        
-        // 가중치 기반 랜덤 선택
-        float total = dist.normalRatio + dist.archerRatio + dist.scoutRatio + 
-                      dist.tankerRatio + dist.ghostRatio;
-        float rand = Random.Range(0, total);
-        
-        float acc = 0;
-        acc += dist.normalRatio;
-        if (rand <= acc) return normalEnemyData;
-        
-        acc += dist.archerRatio;
-        if (rand <= acc) return archerEnemyData;
-        
-        acc += dist.scoutRatio;
-        if (rand <= acc) return scoutEnemyData;
-        
-        acc += dist.tankerRatio;
-        if (rand <= acc) return tankerEnemyData;
-        
-        return ghostEnemyData;
-    }
-
-    private EnemyData GetEnemyDataByType(EnemyType type)
-    {
-        switch (type)
-        {
-            case EnemyType.Archer: return archerEnemyData;
-            case EnemyType.Scout: return scoutEnemyData;
-            case EnemyType.Tanker: return tankerEnemyData;
-            case EnemyType.Ghost: return ghostEnemyData;
-            default: return normalEnemyData;
         }
     }
 }

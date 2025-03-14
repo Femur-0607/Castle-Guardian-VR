@@ -26,6 +26,9 @@ public class ArrowShooter : MonoBehaviour
     private float initialMouseY;
     private float currentMouseY;
 
+    [Header("화살 효과 프리팹")]
+    [SerializeField] private GameObject muzzleEffectPrefab; // 발사 전 효과 프리팹
+
     #endregion
 
     #region 유니티 이벤트 함수
@@ -99,6 +102,9 @@ public class ArrowShooter : MonoBehaviour
     {
         if (!isAiming) return;
 
+        GameObject muzzleEffect = Instantiate(muzzleEffectPrefab, arrowSpawnPoint.position, arrowSpawnPoint.rotation);
+        Destroy(muzzleEffect, 2f); // 2초 후 자동 제거
+
         SoundManager.Instance.PlaySound("ArrowShoot");
 
         isAiming = false;
@@ -109,11 +115,6 @@ public class ArrowShooter : MonoBehaviour
 
         // 발사 방향에 속도 적용
         Vector3 launchDirection = arrowSpawnPoint.forward * currentArrowSpeed;
-
-        // 발사 방향 디버그 로그
-        Debug.Log($"<color=orange>[발사 정보]</color> " +
-                 $"방향: {arrowSpawnPoint.forward}, " +
-                 $"속도: {currentArrowSpeed:F1}m/s");
 
         // 화살 발사
         arrow.Launch(launchDirection);

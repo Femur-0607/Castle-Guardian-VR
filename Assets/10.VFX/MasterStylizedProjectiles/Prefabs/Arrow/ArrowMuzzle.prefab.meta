@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: b0a86e1b4f65af34bb310842206580d8
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 255608
+  packageName: Master Stylized Projectile
+  packageVersion: 1.0
+  assetPath: Assets/MasterStylizedProjectiles/Prefabs/Arrow/ArrowMuzzle.prefab
+  uploadId: 648918

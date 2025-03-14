@@ -1,5 +1,13 @@
 using UnityEngine;
 
+public enum EnemyType
+{
+    Normal,     // 일반
+    Archer,     // 원거리
+    Scout,      // 속도빠름
+    Tanker,     // 탱커
+}
+
 [CreateAssetMenu(fileName = "EnemyData", menuName = "Enemy/EnemyData")]
 public class EnemyData : ScriptableObject
 {
@@ -33,14 +41,4 @@ public class EnemyData : ScriptableObject
     // 유령형 적 속성
     public float phaseInDuration = 1.5f;
     public float playerStunDuration = 3f;
-}
-
-// EnemyType.cs 새로 추가
-public enum EnemyType
-{
-    Normal,     // 일반 병사
-    Archer,     // 궁수
-    Scout,      // 정찰병
-    Tanker,     // 탱커
-    Ghost       // 유령
 }

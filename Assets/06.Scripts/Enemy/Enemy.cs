@@ -1,22 +1,22 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.Pool;
 
-public enum EnemyState
-{
-    Idle,      // 초기 상태. NavMeshAgent가 활성화되기 전에는 아무 행동도 하지 않음.
-    Chasing, // 추적
-    Attacking, // 공격
-    Dead // 사망
-}
 
-// Enemy에 상속할 베이스
+
 public class Enemy : LivingEntity
 {
+    public enum EnemyState
+    {
+        Idle,      // 초기 상태. NavMeshAgent가 활성화되기 전에는 아무 행동도 하지 않음.
+        Chasing, // 추적
+        Attacking, // 공격
+        Dead // 사망
+    }
+
     #region 필드 변수
-    
+
     [Header("참조")]
     private IObjectPool<Enemy> pool;
     [SerializeField] private NavMeshAgent agent;
@@ -24,7 +24,13 @@ public class Enemy : LivingEntity
     public Transform target;        // 성문
     public EnemyData enemyData;     // 'Enemy'의 스테이터스를 담당
     public SpawnManager spawnManager;
-    
+
+    [Header("모델 프리팹")]
+    [SerializeField] private GameObject normalModel;
+    [SerializeField] private GameObject archerModel;
+    [SerializeField] private GameObject scoutModel;
+    [SerializeField] private GameObject tankerModel;
+
     private float lastAttackTime;
     private EnemyState currentState;    // 현재 상태 알려주는 이넘 변수
 
@@ -35,7 +41,7 @@ public class Enemy : LivingEntity
     private void Awake()
     {
         agent = GetComponent<NavMeshAgent>();
-        animator = GetComponent<Animator>();
+        animator = GetComponentsInChildren<Animator>()[0];
     }
     protected override void Start()
     {
@@ -46,16 +52,16 @@ public class Enemy : LivingEntity
             agent.speed = enemyData.moveSpeed;
             agent.stoppingDistance = enemyData.attackRange;
         }
-        
+
         base.Start();   // 초기화 진행
-        
+
         currentState = EnemyState.Idle;
     }
-    
+
     void Update()
     {
         if (!isAlive) return;
-        
+
         // FSM 구현
         switch (currentState)
         {
@@ -76,13 +82,13 @@ public class Enemy : LivingEntity
     public override void TakeDamage(float damage)
     {
         base.TakeDamage(damage);
-        
+
         if (!isAlive) return;
-        
+
         // 50% 확률로 히트 모션 재생 (과도한 히트 모션 방지)
         if (Random.value > 0.5f) animator.SetTrigger("hit");
     }
-    
+
     #endregion
 
     #region 오브젝트 풀 관련
@@ -91,7 +97,7 @@ public class Enemy : LivingEntity
     {
         pool = poolRef;
     }
-    
+
     /// <summary>
     /// Pool에서 Get될 때마다 호출될 초기화 로직
     /// </summary>
@@ -100,28 +106,30 @@ public class Enemy : LivingEntity
         // LivingEntity에 체력 초기값이 있다면 여기서 재설정
         currentHealth = startingHealth;
         isAlive = true;
-        
+
         currentState = EnemyState.Idle;
-        
+
+        ActivateModelByType(enemyData.enemyType);
+
         // NavMeshAgent를 딜레이 후 활성화하여 추적 시작
         StartCoroutine(DelayedAgentActivation(1f));
     }
-    
+
     private IEnumerator DelayedAgentActivation(float delay)
     {
         agent.enabled = false;
-        
+
         yield return new WaitForSeconds(delay);
-        
+
         agent.enabled = true;
-        
+
         BeginChase();
     }
 
     #endregion
 
     #region FSM (Finite State Machine) 유한상태기계
-    
+
     /// <summary>
     /// 적의 추적을 시작하는 메서드
     /// NavMeshAgent가 활성화되고 유효한 NavMesh 위에 배치되었음을 전제로 함.
@@ -201,19 +209,19 @@ public class Enemy : LivingEntity
     public override void Die()
     {
         base.Die();
-        
+
         currentState = EnemyState.Dead;
-        
+
         spawnManager.EnemyDied(this);
 
         pool?.Release(this);
-        
+
         // 사망 시 게임매니저에게 골드 전달 (프로퍼티 사용을 위해 AddMoney 메서드 호출)
         GameManager.Instance.AddMoney((int)enemyData.goldDropAmount);
-        
+
         animator.SetBool("isDead", true);
     }
-    
+
     #endregion
 
     #region 상태이상
@@ -225,7 +233,7 @@ public class Enemy : LivingEntity
         {
             StopCoroutine(slowCoroutine);
         }
-    
+
         // 새 슬로우 코루틴 시작
         slowCoroutine = StartCoroutine(SlowEffectRoutine(duration, slowAmount));
     }
@@ -236,17 +244,56 @@ public class Enemy : LivingEntity
     {
         // 원래 속도 저장
         float originalSpeed = agent.speed;
-    
+
         // 속도 감소
         agent.speed = originalSpeed * (1f - slowAmount);
-    
+
         // 지속 시간 대기
         yield return new WaitForSeconds(duration);
-    
+
         // 속도 복원
         agent.speed = originalSpeed;
-    
+
         slowCoroutine = null;
+    }
+
+    #endregion
+
+    #region 모델링 관련
+
+    public void ActivateModelByType(EnemyType type)
+    {
+        // 모든 모델 비활성화
+        normalModel.SetActive(false);
+        archerModel.SetActive(false);
+        scoutModel.SetActive(false);
+        tankerModel.SetActive(false);
+        
+        // 지정된 타입의 모델만 활성화
+        switch(type)
+        {
+            case EnemyType.Normal:
+                normalModel.SetActive(true);
+                break;
+            case EnemyType.Archer:
+                archerModel.SetActive(true);
+                break;
+            case EnemyType.Scout:
+                scoutModel.SetActive(true);
+                break;
+            case EnemyType.Tanker:
+                tankerModel.SetActive(true);
+                break;
+        }
+        
+        // 애니메이터 재설정 (모델 변경 후 애니메이터 참조 필요)
+        UpdateAnimatorReference();
+    }
+    
+    private void UpdateAnimatorReference()
+    {
+        // 활성화된 모델의 애니메이터 컴포넌트 찾기
+        animator = GetComponentInChildren<Animator>();
     }
 
     #endregion

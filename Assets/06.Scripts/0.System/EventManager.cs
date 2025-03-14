@@ -12,7 +12,7 @@ public class EventManager : MonoBehaviour
     // - Instance가 먼저 설정되지 않으면 다른 스크립트에서 접근할 때 NullReferenceException 발생 가능
     // - 하지만 필요할 경우 다른 인스턴스로 교체할 수도 있음
     public static EventManager Instance { get; private set; }
-    
+
     public event Action OnFireStart;                    // 조준 시작 시 발동할 이벤트
     public event Action OnFireRelease;                  // 조준 해제 시 발동할 이벤트
     public event Action<Vector2> OnFireCharging;        // 조준 중 발동할 이벤트
@@ -22,10 +22,9 @@ public class EventManager : MonoBehaviour
     public event Action OnGameStart;                    // 게임 시작 시 발동할 이벤트
     public event Action<bool> OnGameEnd;                // 게임 종료 시 발동할 이벤트 (승리 여부 포함)
     public event Action<int> OnMoneyChanged;            // 골드 변경 시 발동할 이벤트
-    
+
     #endregion
 
-    
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -35,7 +34,9 @@ public class EventManager : MonoBehaviour
         }
         Instance = this;
     }
-    
+
+    #region 이벤트 발송 메서드
+
     // 람다식을 사용해서 이벤트 송신 간소화
     public void FireStartEvent() => OnFireStart?.Invoke();
     public void FireReleaseEvent() => OnFireRelease?.Invoke();
@@ -47,5 +48,5 @@ public class EventManager : MonoBehaviour
     public void GameEndEvent(bool isGameOver) => OnGameEnd?.Invoke(isGameOver);
     public void MoneyChangedEvent(int amount) => OnMoneyChanged?.Invoke(amount);
     
-    
+    #endregion
 }

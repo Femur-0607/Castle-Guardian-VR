@@ -23,6 +23,16 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: d9419ba0bfac1e84a95418ac5851caf6, type: 3}
     volume: 1
     loop: 0
+  - soundID: ExplosiveTowerShoot
+    category: 1
+    clip: {fileID: 8300000, guid: af66162561d2eed40ad49268cab318bb, type: 3}
+    volume: 1
+    loop: 1
+  - soundID: SlowTowerShoot
+    category: 1
+    clip: {fileID: 8300000, guid: a245ee5d75348c84a89ffb7992f1dc82, type: 3}
+    volume: 1
+    loop: 1
   - soundID: TitleBGM
     category: 0
     clip: {fileID: 8300000, guid: cc477da07a0e95340a4e0638d3853865, type: 3}

@@ -12,7 +12,6 @@ public class TowerData : ScriptableObject
 {
     [Header("기본 속성")]
     public TowerType towerType = TowerType.Normal;
-    public string towerName = "기본 타워";
     public float attackDamage = 50f;
     public float attackRange = 10f;
     public float attackCooldown = 2f;

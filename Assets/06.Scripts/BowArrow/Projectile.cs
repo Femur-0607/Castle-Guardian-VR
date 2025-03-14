@@ -9,25 +9,21 @@ using System.Collections;
 public abstract class Projectile : MonoBehaviour, IProjectile
 {
     #region 필드 변수
+    
     [Header("참조")]
     [SerializeField] protected ProjectileData projectileData;
-    [SerializeField] protected Transform projectileChildPoint;
+    [SerializeField] protected Transform projectileChildPoint;  // 렌더링은 자식한테 있어서 자식 위치도 초기화
     [SerializeField] protected Rigidbody projectileRigidbody;
     [SerializeField] protected MeshCollider projectileMeshCollider;
-    [SerializeField] protected TrailRenderer projectileTrail;
     
     [Header("화살 구조")]
     [SerializeField] protected Transform arrowTip;     // 화살촉 위치
     [SerializeField] protected Transform arrowTail;    // 화살깃 위치
     
-    [Header("디버그")]
-    [SerializeField] protected bool debugRotation = false; // 회전 디버그 활성화 여부
-
     protected IObjectPool<Projectile> pool;      // 자신을 관리하는 풀
     protected float spawnTime;                   // 생성 시간
     protected float currentDamage;               // 현재 데미지
     protected float projectileSpeed;            // 투사체 속도
-
 
     #endregion
 
@@ -42,6 +38,12 @@ public abstract class Projectile : MonoBehaviour, IProjectile
         {
             ReturnToPool();
         }
+    }
+
+    // 충돌 이벤트 처리
+    protected virtual void OnCollisionEnter(Collision collision)
+    {
+        OnImpact(collision);
     }
 
     #endregion
@@ -85,9 +87,6 @@ public abstract class Projectile : MonoBehaviour, IProjectile
 
         // 기본 데미지 설정
         currentDamage = projectileData.damage;
-
-        // 트레일 초기화
-        projectileTrail.Clear();
     }
 
     // 풀로 반환
@@ -109,12 +108,6 @@ public abstract class Projectile : MonoBehaviour, IProjectile
 
     // 충돌 시 처리 (추상 메서드)
     public abstract void OnImpact(Collision collision);
-
-    // 충돌 이벤트 처리
-    protected virtual void OnCollisionEnter(Collision collision)
-    {
-        OnImpact(collision);
-    }
 
     #endregion
 

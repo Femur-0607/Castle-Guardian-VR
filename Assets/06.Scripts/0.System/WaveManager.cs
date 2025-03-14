@@ -1,10 +1,28 @@
 using UnityEngine;
+using System;
+using System.Collections.Generic;
 
 // 웨이브를 관리하는 스크립트
 public class WaveManager : MonoBehaviour
 {
+    [Serializable]
+    public class EnemySpawnData
+    {
+        public EnemyType enemyType;
+        public int count;
+    }
+
+    [Serializable]
+    public class WaveEnemyComposition
+    {
+        public int waveNumber;
+        public List<EnemySpawnData> enemies = new List<EnemySpawnData>();
+    }
+
+    [SerializeField] private List<WaveEnemyComposition> waveCompositions = new List<WaveEnemyComposition>();
+
     #region 필드 변수
-    
+
     // 활성 SpawnManager들의 리스트 (인스펙터나 초기화 시 등록)
     [SerializeField] private SpawnManager[] spawnManagers;
 
@@ -57,11 +75,8 @@ public class WaveManager : MonoBehaviour
     public void StartNextWaveEvent()
     {
         currentWave++;
-        // 웨이브가 높아질수록 적 수 증가 (예시: 매 웨이브마다 2씩 증가)
         enemyCountInWave = 5 + (currentWave - 1) * 2;
-        
         isWaveActive = true;
-
         SoundManager.Instance.PlaySound("BattleBGM");
         
         // 이벤트 매니저에게 웨이브 시작 송신(웨이브 번호, 적의 수)
@@ -98,6 +113,12 @@ public class WaveManager : MonoBehaviour
             total += sm.LiveEnemyCount;
         }
         return total;
+    }
+    
+    // GetWaveComposition 메서드 추가
+    public WaveEnemyComposition GetWaveComposition(int waveNumber)
+    {
+        return waveCompositions.Find(w => w.waveNumber == waveNumber);
     }
     
     #endregion

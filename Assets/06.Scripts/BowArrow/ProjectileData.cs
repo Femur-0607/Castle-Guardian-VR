@@ -1,16 +1,16 @@
 // Assets/06.Scripts/ScriptableObject/ProjectileData.cs
 using UnityEngine;
 
-public enum ProjectileType
-{
-    Normal,     // 기본 화살
-    Fire,       // 화염 화살
-    Poison      // 독 화살
-}
-
 [CreateAssetMenu(fileName = "ProjectileData", menuName = "Projectiles/ProjectileData")]
 public class ProjectileData : ScriptableObject
 {
+    public enum ProjectileType
+    {
+        Normal,     // 기본 화살
+        Fire,       // 화염 화살
+        Poison      // 독 화살
+    }
+
     [Header("기본 속성")]
     public ProjectileType projectileType = ProjectileType.Normal;
     public string projectileName = "기본 화살";

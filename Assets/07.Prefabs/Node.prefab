@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4206959927046445240}
   m_Layer: 0
-  m_Name: GameObject
+  m_Name: FirePoint
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -25,7 +25,7 @@ Transform:
   m_GameObject: {fileID: 4664810428091032422}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 4.5}
+  m_LocalPosition: {x: 0, y: -0, z: 7}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -255,7 +255,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   towerData: {fileID: 11400000, guid: 71f06628da45cc9448f7803c74f96af4, type: 2}
   firePoint: {fileID: 4206959927046445240}
-  hitEffectPrefab: {fileID: 0}
+  projectilePrefab: {fileID: 5912344974454636654, guid: 52a2ba0330c5c8c4992b83c8be568070, type: 3}
+  muzzleEffectPrefab: {fileID: 4186470608034871016, guid: 4b4c97529756b3a4e9337af7ca7cca70, type: 3}
+  hitEffectPrefab: {fileID: 4186470608034871016, guid: f2e05aa5f67446d4bba6995d5c147e0b, type: 3}
 --- !u!114 &7582988939937536669
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -268,11 +270,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d8573a1dadff8a04784a795d5ff34116, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  towerData: {fileID: 11400000, guid: 71f06628da45cc9448f7803c74f96af4, type: 2}
+  towerData: {fileID: 11400000, guid: 05b0a6fd130140349a1ee7897cbfc6e8, type: 2}
   firePoint: {fileID: 4206959927046445240}
-  towerAnimator: {fileID: 0}
-  fireSound: {fileID: 0}
-  explosionEffectPrefab: {fileID: 0}
+  explosionPrefab: {fileID: 5912344974454636654, guid: 56a1153484a688a419c842fd78610b87, type: 3}
+  muzzleEffectPrefab: {fileID: 5732568103209889489, guid: c38b7d762e40e714bad9849a484ac8c7, type: 3}
+  hitEffectPrefab: {fileID: 4550076289710732121, guid: bcd6d8f376ba4bf4880bb4e67a3de49c, type: 3}
   explosionRadius: 3
 --- !u!114 &8905844949112206116
 MonoBehaviour:
@@ -286,11 +288,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4039ccbeed453d04783de354cf69f7e7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  towerData: {fileID: 11400000, guid: 71f06628da45cc9448f7803c74f96af4, type: 2}
+  towerData: {fileID: 11400000, guid: 83af761d96717b94988c594cde5070af, type: 2}
   firePoint: {fileID: 4206959927046445240}
-  towerAnimator: {fileID: 0}
-  freezeSound: {fileID: 0}
-  freezeEffectPrefab: {fileID: 0}
+  slowPrefab: {fileID: 5912344974454636654, guid: 174b164cad6fbdb4eb2769a452399510, type: 3}
+  muzzleEffectPrefab: {fileID: 5732568103209889489, guid: cc3e1ab646dc07d4ca9f86d73aa75138, type: 3}
+  hitEffectPrefab: {fileID: 4550076289710732121, guid: a73108d561dbdf34ba462e73e97ed541, type: 3}
   slowDuration: 3
   slowAmount: 0.5
 --- !u!4 &279840995347366865 stripped
