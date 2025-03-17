@@ -32,7 +32,12 @@ public class Enemy : LivingEntity
     [SerializeField] private GameObject tankerModel;
 
     private float lastAttackTime;
-    private EnemyState currentState;    // 현재 상태 알려주는 이넘 변수
+    [SerializeField] private EnemyState currentState;    // 현재 상태 알려주는 이넘 변수
+
+    public FormationManager formationManager;
+    private Vector3? assignedPosition;
+    private bool hasFormationPosition;
+    private bool isInPosition = false;  // 포지션에 도달했는지 체크하는 변수 추가
 
     #endregion
 
@@ -148,18 +153,58 @@ public class Enemy : LivingEntity
     /// </summary>
     void Chase()
     {
-        if (target != null && animator != null)
+        if (target == null || animator == null) return;
+
+        float distanceToTarget = Vector3.Distance(transform.position, target.position);
+        
+        // 아직 포메이션 포지션이 없고, 성문 근처에 왔을 때
+        if (!hasFormationPosition && distanceToTarget <= agent.stoppingDistance * 2f)
         {
-            agent.SetDestination(target.position); // 성문으로 이동
-
-            if (!agent.pathPending && agent.remainingDistance <= agent.stoppingDistance) // 공격범위안에 성문이 들어오면
+            assignedPosition = formationManager.GetFormationPosition(this, target);
+            if (assignedPosition.HasValue)
             {
-                currentState = EnemyState.Attacking; // 공격상태로 전환
-                agent.isStopped = true; // 공격 시에는 이동을 멈춤
+                hasFormationPosition = true;
+                agent.stoppingDistance = 0.1f;
             }
-
-            animator.SetBool("isChasing", true);
         }
+
+        // 포메이션 포지션이 할당된 경우
+        if (hasFormationPosition && assignedPosition.HasValue)
+        {
+            // 할당된 포지션으로 이동
+            agent.SetDestination(assignedPosition.Value);
+            
+            // 포지션에 도달했는지 체크
+            float distanceToPosition = Vector3.Distance(transform.position, assignedPosition.Value);
+            if (distanceToPosition < 0.2f && !isInPosition)
+            {
+                isInPosition = true;
+                currentState = EnemyState.Attacking;
+                agent.isStopped = true;
+                transform.LookAt(target);
+                animator.SetBool("isChasing", false);
+                
+                // 첫 공격을 바로 실행하기 위해 lastAttackTime 초기화
+                lastAttackTime = Time.time - enemyData.attackCooldown;
+                return;
+            }
+        }
+        else
+        {
+            // 포지션이 없는 경우 기본 추적
+            agent.SetDestination(target.position);
+            
+            // 기존 공격 범위 체크
+            if (!agent.pathPending && agent.remainingDistance <= agent.stoppingDistance)
+            {
+                currentState = EnemyState.Attacking;
+                agent.isStopped = true;
+                animator.SetBool("isChasing", false);
+                return;
+            }
+        }
+
+        animator.SetBool("isChasing", true);
     }
 
     /// <summary>
@@ -169,37 +214,25 @@ public class Enemy : LivingEntity
     {
         if (target != null && animator != null)
         {
-            float distance = Vector3.Distance(transform.position, target.position);
-
-            if (distance > agent.stoppingDistance)
-            {
-                // 목표가 범위를 벗어나면 다시 추격 상태로 전환
-                currentState = EnemyState.Chasing;
-                agent.isStopped = false;
-                return;
-            }
-
             // 현재시간에서 마지막시간을 뺀 값이 쿨타임보다 커질경우 공격 실행
             if (Time.time - lastAttackTime >= enemyData.attackCooldown)
             {
-                // 리빙 엔티티 스크립트가 있어야지 공격 가능
-                LivingEntity castle = target.GetComponent<LivingEntity>();
+                // 공격 애니메이션 먼저 실행
+                animator.SetBool("isChasing", false);
+                animator.SetInteger("attackType", Random.Range(0, 2));
+                animator.SetTrigger("attack");
 
+                // 데미지 적용
+                IDamageable castle = target.GetComponent<IDamageable>();
                 if (castle != null)
                 {
                     castle.TakeDamage(enemyData.attackDamage);
+                    Debug.Log($"공격 성공: {enemyData.attackDamage} 데미지");
                 }
 
                 // 현재 시간을 할당
                 lastAttackTime = Time.time;
             }
-
-            animator.SetBool("isChasing", false);
-
-            // 공격 애니메이션 랜덤 재생
-            int attackPattern = Random.Range(0, 1);
-            animator.SetInteger("attackPattern", attackPattern);
-            animator.SetTrigger("attack");
         }
     }
 
@@ -208,6 +241,12 @@ public class Enemy : LivingEntity
     /// </summary>
     public override void Die()
     {
+        if (hasFormationPosition)
+        {
+            formationManager.ReleasePosition(this);
+            hasFormationPosition = false;
+            isInPosition = false;
+        }
         base.Die();
 
         currentState = EnemyState.Dead;
