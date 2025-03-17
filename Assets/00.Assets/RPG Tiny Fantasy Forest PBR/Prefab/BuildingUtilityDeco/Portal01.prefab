@@ -97,7 +97,6 @@ GameObject:
   m_Component:
   - component: {fileID: 3604274183285564942}
   - component: {fileID: 3937710677705785535}
-  - component: {fileID: 3573402109646877120}
   - component: {fileID: 7171608150244798335}
   m_Layer: 0
   m_Name: Portal01
@@ -147,28 +146,6 @@ LODGroup:
     renderers:
     - renderer: {fileID: 5585739930605718966}
   m_Enabled: 1
---- !u!64 &3573402109646877120
-MeshCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4129559968169376948}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 5
-  m_Convex: 0
-  m_CookingOptions: 30
-  m_Mesh: {fileID: -179393741545503174, guid: f914ded4308c82f4695f7c971281d8a1, type: 3}
 --- !u!114 &7171608150244798335
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -190,9 +167,7 @@ MonoBehaviour:
   archerEnemyData: {fileID: 11400000, guid: 7d84a117c4e1ee942865729d99a4bb9d, type: 2}
   scoutEnemyData: {fileID: 11400000, guid: 8db5069b755bdeb458f7a8e756f3b2c4, type: 2}
   tankerEnemyData: {fileID: 11400000, guid: cd956db0e61a39543b7cc21c9b045b42, type: 2}
-  waveDistributions: []
   waveManager: {fileID: 0}
-  waveCompositions: []
 --- !u!1 &4722845260609599174
 GameObject:
   m_ObjectHideFlags: 0

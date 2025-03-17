@@ -1,0 +1,50 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 86292c2427f7f314780e1511db5805e1, type: 3}
+  m_Name: SoundDatabase
+  m_EditorClassIdentifier: 
+  soundList:
+  - soundID: ArrowShoot
+    category: 1
+    clip: {fileID: 8300000, guid: a58e438b7cfa445498120af0e6169082, type: 3}
+    volume: 1
+    loop: 0
+  - soundID: ArrowTowerShoot
+    category: 1
+    clip: {fileID: 8300000, guid: d9419ba0bfac1e84a95418ac5851caf6, type: 3}
+    volume: 1
+    loop: 0
+  - soundID: ExplosiveTowerShoot
+    category: 1
+    clip: {fileID: 8300000, guid: af66162561d2eed40ad49268cab318bb, type: 3}
+    volume: 1
+    loop: 1
+  - soundID: SlowTowerShoot
+    category: 1
+    clip: {fileID: 8300000, guid: a245ee5d75348c84a89ffb7992f1dc82, type: 3}
+    volume: 1
+    loop: 1
+  - soundID: TitleBGM
+    category: 0
+    clip: {fileID: 8300000, guid: cc477da07a0e95340a4e0638d3853865, type: 3}
+    volume: 1
+    loop: 1
+  - soundID: MainBGM
+    category: 0
+    clip: {fileID: 8300000, guid: dbf5ca89f27b6284298fa3cc1e733576, type: 3}
+    volume: 1
+    loop: 1
+  - soundID: BattleBGM
+    category: 0
+    clip: {fileID: 8300000, guid: 6cb789d8e3becef4599adbb2a8389601, type: 3}
+    volume: 1
+    loop: 1
