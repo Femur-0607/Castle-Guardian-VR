@@ -44,8 +44,16 @@ public class FormationManager : MonoBehaviour
             positions.Add(area.GetPositionByIndex(i));
         }
 
-        // 성문과 가까운 순서대로 정렬 (Z값이 큰 것이 성문과 가까움)
-        positions.Sort((a, b) => b.z.CompareTo(a.z));
+        // 성문과 가까운 순서대로 정렬 - 로컬 좌표 기준으로 변경
+        Transform areaTransform = area.transform;
+        positions.Sort((a, b) => {
+            // 월드 좌표를 로컬 좌표로 변환
+            Vector3 localA = areaTransform.InverseTransformPoint(a);
+            Vector3 localB = areaTransform.InverseTransformPoint(b);
+            
+            // 로컬 z축 기준 정렬 (로컬 z값이 큰 것이 성문 방향)
+            return localB.z.CompareTo(localA.z);
+        });
     }
 
     /// <summary>
