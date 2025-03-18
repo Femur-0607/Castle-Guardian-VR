@@ -17,7 +17,6 @@ public class UIManager : MonoBehaviour
     [Header("타이틀 및 게임 관련 UI")]
     public GameObject startUIPanel;
     public GameObject gameOverUIPanel;
-    public Button startGameButton;
     public TextMeshProUGUI goldAmountTMP;
 
     [Header("상점 UI")]
@@ -37,7 +36,6 @@ public class UIManager : MonoBehaviour
         HideShopUI();
         gameOverUIPanel.SetActive(false);
         startUIPanel.SetActive(true);
-        startGameButton.onClick.AddListener(GameManager.Instance.StartGame);
 
         // 초기 골드 설정
         if (goldAmountTMP != null)
@@ -95,7 +93,19 @@ public class UIManager : MonoBehaviour
     }
 
     // 게임 종료 시 UI 처리
-    private void HandleGameEndUI(bool isVictory) => waveUIPanel.SetActive(false);
+    private void HandleGameEndUI(bool isVictory)
+    {
+        if (!isVictory)
+        {
+            waveUIPanel.SetActive(false);
+            gameOverUIPanel.SetActive(true);
+        }
+        else
+        {
+            waveUIPanel.SetActive(false);
+            gameOverUIPanel.SetActive(false);
+        }
+    }
 
     // 현재 웨이브 시작 시 작동되는 메서드
     private void HandleWaveStartUI(int wave, int _)
