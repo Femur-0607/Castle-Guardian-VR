@@ -22,6 +22,8 @@ public class EventManager : MonoBehaviour
     public event Action OnGameStart;                    // 게임 시작 시 발동할 이벤트
     public event Action<bool> OnGameEnd;                // 게임 종료 시 발동할 이벤트 (승리 여부 포함)
     public event Action<int> OnMoneyChanged;            // 골드 변경 시 발동할 이벤트
+    public event Action<Castle> OnCastleInitialized;    // 성문 초기화 시 발동할 이벤트
+    public event Action<float> OnCastleHealthChanged;    // 성문 체력 변경 시 발동할 이벤트
 
     #endregion
 
@@ -47,6 +49,9 @@ public class EventManager : MonoBehaviour
     public void GameStartEvent() => OnGameStart?.Invoke();
     public void GameEndEvent(bool isVictory) => OnGameEnd?.Invoke(isVictory);
     public void MoneyChangedEvent(int currentMoney) => OnMoneyChanged?.Invoke(currentMoney);
+    
+    public void TriggerOnCastleInitialized(Castle castle) => OnCastleInitialized?.Invoke(castle);
+    public void TriggerOnCastleHealthChanged(float currentHealth) => OnCastleHealthChanged?.Invoke(currentHealth);
     
     #endregion
 }

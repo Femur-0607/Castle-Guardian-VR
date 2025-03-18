@@ -26,6 +26,9 @@ public class UIManager : MonoBehaviour
     private TextMeshProUGUI[] tabTexts;
     public GameObject[] shopPanels;
 
+    [Header("성문 UI")]
+    [SerializeField] private Slider castleHealthSlider;
+
     #endregion
 
     #region 유니티 이벤트 함수
@@ -70,6 +73,8 @@ public class UIManager : MonoBehaviour
         EventManager.Instance.OnGameStart += HandleGameStartUI;
         EventManager.Instance.OnGameEnd += HandleGameEndUI;
         EventManager.Instance.OnMoneyChanged += UpdateGoldUI;
+        EventManager.Instance.OnCastleInitialized += InitializeCastleUI;
+        EventManager.Instance.OnCastleHealthChanged += UpdateCastleHealthUI;
     }
 
     private void OnDisable()
@@ -79,6 +84,8 @@ public class UIManager : MonoBehaviour
         EventManager.Instance.OnGameStart -= HandleGameStartUI;
         EventManager.Instance.OnGameEnd -= HandleGameEndUI;
         EventManager.Instance.OnMoneyChanged -= UpdateGoldUI;
+        EventManager.Instance.OnCastleInitialized -= InitializeCastleUI;
+        EventManager.Instance.OnCastleHealthChanged -= UpdateCastleHealthUI;
     }
 
     #endregion
@@ -177,6 +184,25 @@ public class UIManager : MonoBehaviour
         
         // 선택한 탭에 해당하는 상점 패널만 활성화
         shopPanels[tabIndex].SetActive(true);
+    }
+
+    // 성문 초기화 시 작동되는 메서드
+    private void InitializeCastleUI(Castle castle)
+    {
+        if (castleHealthSlider != null)
+        {
+            castleHealthSlider.maxValue = castle.MaxHealth;
+            castleHealthSlider.value = castle.currentHealth;
+        }
+    }
+
+    // 성문 체력 변경 시 작동되는 메서드
+    private void UpdateCastleHealthUI(float currentHealth)
+    {
+        if (castleHealthSlider != null)
+        {
+            castleHealthSlider.value = currentHealth;
+        }
     }
 
     #endregion

@@ -120,7 +120,7 @@ public class GameManager : MonoBehaviour
     {
         gameStarted = false;
 
-        // 게임 종료 이벤트 발생
+        // 승리 시 다른 기능 추가
         EventManager.Instance.GameEndEvent(isVictory);
     }
     
