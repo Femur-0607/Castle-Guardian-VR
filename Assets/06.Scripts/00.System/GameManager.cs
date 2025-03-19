@@ -13,8 +13,7 @@ public class GameManager : MonoBehaviour
     public static GameManager Instance { get; private set; }
 
     [Header("참조")]
-    [SerializeField] private ArrowShooter arrowShooter;
-    [SerializeField] private PlayerLookController playerLookController;
+    [SerializeField] private CameraController cameraController;
 
     // 게임 머니(골드) 프로퍼티로 변경
     private int _gameMoney = 200;
@@ -86,12 +85,7 @@ public class GameManager : MonoBehaviour
     {
         EventManager.Instance.OnWaveStart -= HandleWaveStart;
         EventManager.Instance.OnWaveEnd -= HandleWaveEnd;
-        
-        // 다이얼로그매니저 이벤트 구독 해제
-        if (DialogueManager.instance != null)
-        {
-            DialogueManager.instance.conversationEnded -= HandleConversationEnded;
-        }
+        DialogueManager.instance.conversationEnded -= HandleConversationEnded;
     }
 
     #endregion
@@ -99,7 +93,7 @@ public class GameManager : MonoBehaviour
     #region 게임 관리 메서드
 
     /// <summary>
-    /// 게임 시작 버튼에 할당할 메서드
+    /// 게임 시작 처리 메서드 (다이얼로그 종료 후 호출)
     /// </summary>
     public void StartGame()
     {
@@ -109,8 +103,26 @@ public class GameManager : MonoBehaviour
 
             SoundManager.Instance.PlaySound("MainBGM");
 
+            // 게임 시작 이벤트 발생 - UI 업데이트 등
             EventManager.Instance.GameStartEvent();
+            
+            // 이 시점에서는 카메라 컨트롤러 활성화하지 않음
+            // 다이얼로그 종료 후 활성화됨
         }
+    }
+
+    /// <summary>
+    /// 인트로 대화 시작 메서드 - 시작 버튼에 할당
+    /// </summary>
+    public void StartIntroDialogue()
+    {
+        // 다이얼로그 시작 이벤트 발생 (인트로 타입)
+        EventManager.Instance.DialogueStartedEvent(EventManager.DialogueType.Intro);
+        
+        // Intro 대화 시작 (ID는 DSU 에디터에서 설정한 값에 맞게 조정)
+        DialogueManager.StartConversation("Intro");
+        
+        // 참고: 게임 시작 처리는 대화 종료 후 HandleConversationEnded에서 처리됨
     }
 
     /// <summary>
@@ -175,22 +187,55 @@ public class GameManager : MonoBehaviour
     /// <summary>
     /// 웨이브 시작 시 호출될 핸들러
     /// </summary>
-    private void HandleWaveStart(int _, int __)
+    private void HandleWaveStart(int waveNumber)
     {
         if (gameStarted)
         {
-            // 웨이브 시작 시 플레이어 컨트롤 활성화
-            EnablePlayerControls();
+            // 첫 번째 웨이브인 경우 조작법 설명 대화 시작
+            if (waveNumber == 1)
+            {
+                // 잠시 지연 후 대화 시작 (UI가 제대로 설정될 수 있도록)
+                StartCoroutine(StartTutorialDialogueDelayed());
+            }
+            else
+            {
+                // 첫 번째 웨이브가 아닌 경우 바로 플레이어 컨트롤 활성화
+                EnablePlayerControls();
+            }
         }
     }
     
     /// <summary>
+    /// 지연 후 튜토리얼 대화 시작 코루틴
+    /// </summary>
+    private System.Collections.IEnumerator StartTutorialDialogueDelayed()
+    {
+        // 1초 대기
+        yield return new WaitForSeconds(1f);
+        
+        // 다이얼로그 시작 이벤트 발생 (튜토리얼 타입)
+        EventManager.Instance.DialogueStartedEvent(EventManager.DialogueType.Tutorial);
+        
+        // Tutorial 대화 시작 (ID는 DSU 에디터에서 설정한 값에 맞게 조정)
+        DialogueManager.StartConversation("Tutorial");
+        
+        // 대화 중에는 플레이어 컨트롤 비활성화 상태 유지
+        // 대화가 끝나면 HandleConversationEnded에서 플레이어 컨트롤 활성화됨
+    }
+
+    /// <summary>
     /// 웨이브 종료 시 호출될 핸들러
     /// </summary>
-    private void HandleWaveEnd(int _)
+    private void HandleWaveEnd(int waveNumber)
     {
         // 웨이브 종료 시 플레이어 컨트롤 비활성화
         DisablePlayerControls();
+        
+        if (waveNumber == 10)
+        {
+            // 10웨이브 종료 시 게임 종료
+            EndGame(true);
+        }
     }
     
     #endregion
@@ -202,8 +247,11 @@ public class GameManager : MonoBehaviour
     /// </summary>
     private void EnablePlayerControls()
     {
-        arrowShooter.enabled = true;
-        playerLookController.enabled = true;
+        if (cameraController != null)
+        {
+            // 현재 활성화된 카메라의 컨트롤러 활성화
+            cameraController.SwitchToCenterCamera();
+        }
     }
     
     /// <summary>
@@ -211,8 +259,11 @@ public class GameManager : MonoBehaviour
     /// </summary>
     private void DisablePlayerControls()
     {
-        arrowShooter.enabled = false;
-        playerLookController.enabled = false;
+        if (cameraController != null)
+        {
+            // 모든 카메라의 컨트롤러 비활성화
+            cameraController.DisableAllCameras();
+        }
     }
     
     #endregion
@@ -221,15 +272,37 @@ public class GameManager : MonoBehaviour
     
     // 대화 종료 시 호출될 메서드
     private void HandleConversationEnded(Transform actor)
-    {
-        Debug.Log("대화 종료됨: " + DialogueManager.lastConversationID);
-        
-        // 튜토리얼 대화가 끝났을 때
+    {   
+        // 튜토리얼 인트로 대화가 끝났을 때
         if (DialogueManager.lastConversationID == 1)
         {
-            // 비동기로 1초 후에 처리
+            // 다이얼로그 종료 이벤트 발생 (인트로 타입)
+            EventManager.Instance.DialogueEndedEvent(EventManager.DialogueType.Intro);
+            
+            // 비동기로 0.3초 후에 처리
             StartCoroutine(HandleConversationEndedDelayed());
         }
+        // 조작법 튜토리얼 대화가 끝났을 때
+        else if (DialogueManager.lastConversationID == 2)
+        {
+            // 다이얼로그 종료 이벤트 발생 (튜토리얼 타입)
+            EventManager.Instance.DialogueEndedEvent(EventManager.DialogueType.Tutorial);
+            
+            // 지연 후 플레이어 컨트롤 활성화 (1초 후)
+            StartCoroutine(DelayedEnablePlayerControls());
+        }
+    }
+    
+    /// <summary>
+    /// 지연 후 플레이어 컨트롤 활성화 코루틴
+    /// </summary>
+    private System.Collections.IEnumerator DelayedEnablePlayerControls()
+    {
+        // 1초 대기
+        yield return new WaitForSeconds(1f);
+        
+        // 대화가 끝나면 플레이어 컨트롤 활성화
+        EnablePlayerControls();
     }
     
     // 대화 종료 후 지연 처리를 위한 코루틴
@@ -244,13 +317,11 @@ public class GameManager : MonoBehaviour
         if (isGameOver)
         {
             // 게임오버 처리
-            Debug.Log("게임오버 선택지 선택됨");
             EndGame(false);
         }
         else
         {
             // 게임 시작 처리
-            Debug.Log("게임 계속 진행 선택지 선택됨");
             StartGame();
         }
     }

@@ -16,6 +16,7 @@ public class WaveManager : MonoBehaviour
     public int CurrentWave => currentWaveIndex + 1; // 현재 웨이브 번호
     public int enemyCountInWave { get; private set; } // 현재 웨이브 적 수
     [SerializeField] private bool isWaveActive;  // 웨이브 진행 여부
+    private bool isDialogueActive = false;       // 다이얼로그 표시 중인지 여부
 
     #endregion
 
@@ -33,11 +34,19 @@ public class WaveManager : MonoBehaviour
     private void OnEnable()
     {
         EventManager.Instance.OnGameStart += OnWaveStart;
+        
+        // 다이얼로그 이벤트 구독
+        EventManager.Instance.OnDialogueStarted += HandleDialogueStarted;
+        EventManager.Instance.OnDialogueEnded += HandleDialogueEnded;
     }
 
     private void OnDisable()
     {
         EventManager.Instance.OnGameStart -= OnWaveStart;
+        
+        // 다이얼로그 이벤트 구독 해제
+        EventManager.Instance.OnDialogueStarted -= HandleDialogueStarted;
+        EventManager.Instance.OnDialogueEnded -= HandleDialogueEnded;
     }
 
     void Update()
@@ -107,7 +116,7 @@ public class WaveManager : MonoBehaviour
     private IEnumerator ProcessWave(WaveData.Wave wave)
     {
         // 웨이브 시작
-        EventManager.Instance.WaveStartEvent(CurrentWave, enemyCountInWave);
+        EventManager.Instance.WaveStartEvent(CurrentWave);
 
         // 각 스폰 패턴에 대한 코루틴 시작
         List<Coroutine> spawnCoroutines = new List<Coroutine>();
@@ -163,6 +172,24 @@ public class WaveManager : MonoBehaviour
         return total;
     }
     
+    // 다이얼로그 시작 시 호출
+    private void HandleDialogueStarted(EventManager.DialogueType type)
+    {
+        if (type == EventManager.DialogueType.Tutorial)
+        {
+            isDialogueActive = true;
+        }
+    }
+
+    // 다이얼로그 종료 시 호출
+    private void HandleDialogueEnded(EventManager.DialogueType type)
+    {
+        if (type == EventManager.DialogueType.Tutorial)
+        {
+            isDialogueActive = false;
+        }
+    }
+
     private IEnumerator SpawnEnemiesForPattern(WaveData.SpawnPointPattern pattern)
     {
         SpawnManager targetSpawnManager = spawnManagers[pattern.spawnPointIndex];
@@ -170,6 +197,13 @@ public class WaveManager : MonoBehaviour
         // 여기가 중요! pattern.count만큼 반복하여 적 생성
         for (int i = 0; i < pattern.count; i++)
         {
+            // 다이얼로그 중에는 스폰 일시 중지
+            while (isDialogueActive && GameManager.Instance.gameStarted)
+            {
+                yield return null; // 다이얼로그가 끝날 때까지 대기
+            }
+            
+            // 스폰 진행
             targetSpawnManager.SpawnEnemy(pattern.enemyType);
             yield return new WaitForSeconds(pattern.spawnInterval);
         }

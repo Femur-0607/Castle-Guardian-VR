@@ -14,6 +14,7 @@ public class BuildManager : MonoBehaviour
     [Header("카메라 관련")]
     public Camera normalCamera;     // 평소 플레이 시 사용하는 카메라
     public Camera buildCamera;      // 빌드 모드에서 사용하는 전체 맵 시야 카메라
+    [SerializeField] private CameraController cameraController;  // 멀티뷰 카메라 컨트롤러
 
     [Header("노드 관리")]
     [SerializeField] private List<BuildableNode> buildableNodes = new List<BuildableNode>(); // 건설 전 노드
@@ -21,6 +22,7 @@ public class BuildManager : MonoBehaviour
     [SerializeField] private List<BuildableNode> tier2Nodes = new List<BuildableNode>(); // 2단계 타워 노드
 
     private BuildableNode selectedNode;  // 선택된 노드
+    private Camera lastActiveCamera;     // 빌드 모드 진입 전 활성화된 카메라
 
     #endregion
 
@@ -53,6 +55,15 @@ public class BuildManager : MonoBehaviour
     {
         currentBuildMode = isUpgradeMode ? BuildModeType.UpgradeTower : BuildModeType.NewTower;
         upgradeTargetType = upgradeType;
+        
+        // 현재 활성화된 카메라 저장
+        if (cameraController != null)
+        {
+            lastActiveCamera = cameraController.GetCurrentCamera();
+            
+            // 멀티뷰 카메라 모두 비활성화
+            cameraController.DisableAllCameras();
+        }
         
         // 카메라 전환
         if (buildCamera != null && normalCamera != null)
@@ -93,6 +104,12 @@ public class BuildManager : MonoBehaviour
         {
             buildCamera.gameObject.SetActive(false);
             normalCamera.gameObject.SetActive(true);
+        }
+        
+        // 빌드 모드 종료 후 이전 활성화된 카메라 복원
+        if (cameraController != null && lastActiveCamera != null)
+        {
+            cameraController.RestoreCameraState(lastActiveCamera);
         }
 
         // 모든 노드에 빌드 모드 종료 알림

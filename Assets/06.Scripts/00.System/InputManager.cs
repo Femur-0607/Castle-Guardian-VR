@@ -9,6 +9,7 @@ public class InputManager : MonoBehaviour
     private InputAction fireAction;
     private InputAction chargingAction;
     private InputAction lookAction;
+    private InputAction cameraSwitchAction;
 
     private void Awake()
     {
@@ -20,11 +21,25 @@ public class InputManager : MonoBehaviour
         fireAction = playerInput.actions["Fire"];
         chargingAction = playerInput.actions["Charging"];
         lookAction = playerInput.actions["Look"];
+        cameraSwitchAction = playerInput.actions["CameraSwitch"];
 
         fireAction.performed += ctx => EventManager.Instance.FireStartEvent();
         fireAction.canceled += ctx => EventManager.Instance.FireReleaseEvent();
         chargingAction.performed += ctx => EventManager.Instance.FireChargingEvent(ctx.ReadValue<Vector2>());
         lookAction.performed += ctx => EventManager.Instance.LookChangedEvent(ctx.ReadValue<Vector2>());
         lookAction.canceled += ctx => EventManager.Instance.LookChangedEvent(Vector2.zero);
+        cameraSwitchAction.performed += ctx => EventManager.Instance.CameraSwitchEvent(ctx.ReadValue<float>());
+        cameraSwitchAction.canceled += ctx => EventManager.Instance.CameraSwitchEvent(0f);
+    }
+    
+    private void OnDisable()
+    {
+        fireAction.performed -= ctx => EventManager.Instance.FireStartEvent();
+        fireAction.canceled -= ctx => EventManager.Instance.FireReleaseEvent();
+        chargingAction.performed -= ctx => EventManager.Instance.FireChargingEvent(ctx.ReadValue<Vector2>());
+        lookAction.performed -= ctx => EventManager.Instance.LookChangedEvent(ctx.ReadValue<Vector2>());
+        lookAction.canceled -= ctx => EventManager.Instance.LookChangedEvent(Vector2.zero);
+        cameraSwitchAction.performed -= ctx => EventManager.Instance.CameraSwitchEvent(ctx.ReadValue<float>());
+        cameraSwitchAction.canceled -= ctx => EventManager.Instance.CameraSwitchEvent(0f);
     }
 }

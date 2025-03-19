@@ -8,6 +8,13 @@ public class EventManager : MonoBehaviour
 {
     #region 필드 변수
 
+    // 다이얼로그 타입 열거형
+    public enum DialogueType
+    {
+        Intro,
+        Tutorial
+    }
+
     // 초기화 순서가 중요한 경우 사용
     // - Instance가 먼저 설정되지 않으면 다른 스크립트에서 접근할 때 NullReferenceException 발생 가능
     // - 하지만 필요할 경우 다른 인스턴스로 교체할 수도 있음
@@ -17,13 +24,17 @@ public class EventManager : MonoBehaviour
     public event Action OnFireRelease;                  // 조준 해제 시 발동할 이벤트
     public event Action<Vector2> OnFireCharging;        // 조준 중 발동할 이벤트
     public event Action<Vector2> OnLookChanged;         // 시야 회전 시 발동할 이벤트
-    public event Action<int, int> OnWaveStart;          // 웨이브 시작 시 발동할 이벤트
+    public event Action<int> OnWaveStart;          // 웨이브 시작 시 발동할 이벤트
     public event Action<int> OnWaveEnd;                 // 웨이브 종료 시 발동할 이벤트
     public event Action OnGameStart;                    // 게임 시작 시 발동할 이벤트
     public event Action<bool> OnGameEnd;                // 게임 종료 시 발동할 이벤트 (승리 여부 포함)
     public event Action<int> OnMoneyChanged;            // 골드 변경 시 발동할 이벤트
     public event Action<Castle> OnCastleInitialized;    // 성문 초기화 시 발동할 이벤트
     public event Action<float> OnCastleHealthChanged;    // 성문 체력 변경 시 발동할 이벤트
+    public event Action<float> OnCameraSwitch;          // 카메라 전환 시 발동할 이벤트 (값: -1=왼쪽, 0=중앙, 1=오른쪽)
+    public event Action<Camera, string> OnCameraChanged;   // 카메라가 실제로 변경되었을 때 발동할 이벤트 (활성화된 카메라, 위치 문자열)
+    public event Action<DialogueType> OnDialogueStarted;   // 다이얼로그 시작 시 발동할 이벤트 (다이얼로그 타입 포함)
+    public event Action<DialogueType> OnDialogueEnded;     // 다이얼로그 종료 시 발동할 이벤트 (다이얼로그 타입 포함)
 
     #endregion
 
@@ -44,14 +55,17 @@ public class EventManager : MonoBehaviour
     public void FireReleaseEvent() => OnFireRelease?.Invoke();
     public void FireChargingEvent(Vector2 pos) => OnFireCharging?.Invoke(pos);
     public void LookChangedEvent(Vector2 lookDelta) => OnLookChanged?.Invoke(lookDelta);
-    public void WaveStartEvent(int waveNumber, int enemyCount) => OnWaveStart?.Invoke(waveNumber, enemyCount);
+    public void WaveStartEvent(int waveNumber) => OnWaveStart?.Invoke(waveNumber);
     public void WaveEndEvent(int waveNumber) => OnWaveEnd?.Invoke(waveNumber);
     public void GameStartEvent() => OnGameStart?.Invoke();
     public void GameEndEvent(bool isVictory) => OnGameEnd?.Invoke(isVictory);
     public void MoneyChangedEvent(int currentMoney) => OnMoneyChanged?.Invoke(currentMoney);
-    
     public void TriggerOnCastleInitialized(Castle castle) => OnCastleInitialized?.Invoke(castle);
     public void TriggerOnCastleHealthChanged(float currentHealth) => OnCastleHealthChanged?.Invoke(currentHealth);
+    public void CameraSwitchEvent(float direction) => OnCameraSwitch?.Invoke(direction);
+    public void CameraChangedEvent(Camera camera, string position) => OnCameraChanged?.Invoke(camera, position);
+    public void DialogueStartedEvent(DialogueType type) => OnDialogueStarted?.Invoke(type);
+    public void DialogueEndedEvent(DialogueType type) => OnDialogueEnded?.Invoke(type);
     
     #endregion
 }

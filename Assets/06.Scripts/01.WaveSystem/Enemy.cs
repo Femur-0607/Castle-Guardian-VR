@@ -33,6 +33,7 @@ public class Enemy : LivingEntity
 
     private float lastAttackTime;
     [SerializeField] private EnemyState currentState;    // 현재 상태 알려주는 이넘 변수
+    private bool isDialogueActive = false;  // 다이얼로그 표시 중인지 여부
 
     public FormationManager formationManager;
     private Vector3? assignedPosition;
@@ -63,9 +64,68 @@ public class Enemy : LivingEntity
         currentState = EnemyState.Idle;
     }
 
+    private void OnEnable()
+    {
+        // 다이얼로그 이벤트 구독
+        if (EventManager.Instance != null)
+        {
+            EventManager.Instance.OnDialogueStarted += HandleDialogueStarted;
+            EventManager.Instance.OnDialogueEnded += HandleDialogueEnded;
+        }
+    }
+
+    private void OnDisable()
+    {
+        // 다이얼로그 이벤트 구독 해제
+        if (EventManager.Instance != null)
+        {
+            EventManager.Instance.OnDialogueStarted -= HandleDialogueStarted;
+            EventManager.Instance.OnDialogueEnded -= HandleDialogueEnded;
+        }
+    }
+
+    // 다이얼로그 시작 시 호출
+    private void HandleDialogueStarted(EventManager.DialogueType type)
+    {
+        if (type == EventManager.DialogueType.Tutorial)
+        {
+            isDialogueActive = true;
+            
+            // 네비게이션 일시 중지
+            if (agent != null && agent.enabled)
+            {
+                agent.isStopped = true;
+            }
+            
+            // 애니메이션 중지 (Idle 상태로)
+            if (animator != null)
+            {
+                animator.SetBool("isChasing", false);
+            }
+        }
+    }
+
+    // 다이얼로그 종료 시 호출
+    private void HandleDialogueEnded(EventManager.DialogueType type)
+    {
+        if (type == EventManager.DialogueType.Tutorial)
+        {
+                isDialogueActive = false;
+                
+            // 네비게이션 재개
+            if (agent != null && agent.enabled && currentState == EnemyState.Chasing)
+            {
+                agent.isStopped = false;
+            }
+        }
+    }
+
     void Update()
     {
         if (!isAlive) return;
+        
+        // 다이얼로그 중이면 행동 중지
+        if (isDialogueActive) return;
 
         // FSM 구현
         switch (currentState)

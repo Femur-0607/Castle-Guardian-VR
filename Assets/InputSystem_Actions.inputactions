@@ -94,6 +94,15 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": true
+                },
+                {
+                    "name": "CameraSwitch",
+                    "type": "Button",
+                    "id": "42a9c025-6831-4cdd-b39f-82e7ebb0854d",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -371,6 +380,39 @@
                     "action": "Charging",
                     "isComposite": false,
                     "isPartOfComposite": false
+                },
+                {
+                    "name": "A/D Keys",
+                    "id": "358e2d68-fb13-4e06-b7f5-8f8b293296e1",
+                    "path": "1DAxis",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "CameraSwitch",
+                    "isComposite": true,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "negative",
+                    "id": "9d88de1b-1031-4bf9-a0be-fdfcd7a3b2c9",
+                    "path": "<Keyboard>/a",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "CameraSwitch",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "positive",
+                    "id": "e2c20b78-c76a-47bc-9ffb-bc1a4c3bfd69",
+                    "path": "<Keyboard>/d",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "CameraSwitch",
+                    "isComposite": false,
+                    "isPartOfComposite": true
                 }
             ]
         },

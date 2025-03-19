@@ -158,22 +158,22 @@ MonoBehaviour:
   - id: 1
     fields:
     - title: Name
-      value: WaveCount
+      value: IsGameOver
       type: 0
       typeString: 
     - title: Initial Value
-      value: 0
-      type: 1
-      typeString: CustomFieldType_Number
+      value: False
+      type: 2
+      typeString: CustomFieldType_Boolean
     - title: Description
-      value: "\uC6E8\uC774\uBE0C \uCE74\uC6B4\uD2B8"
+      value: "\uD29C\uD1A0\uB9AC\uC5BC \uC120\uD0DD\uC9C0 \uBD84\uAE30\uBB38"
       type: 0
       typeString: 
   conversations:
   - id: 1
     fields:
     - title: Title
-      value: "\uD29C\uD1A0\uB9AC\uC5BC"
+      value: Intro
       type: 0
       typeString: CustomFieldType_Text
     - title: Description
@@ -605,7 +605,7 @@ MonoBehaviour:
         isConnector: 0
         priority: 2
       conditionsString: 
-      userScript: 
+      userScript: Variable["IsGameOver"] = false
       onExecute:
         m_PersistentCalls:
           m_Calls: []
@@ -661,7 +661,7 @@ MonoBehaviour:
         isConnector: 0
         priority: 2
       conditionsString: 
-      userScript: 
+      userScript: Variable["IsGameOver"] = true
       onExecute:
         m_PersistentCalls:
           m_Calls: []
@@ -718,8 +718,7 @@ MonoBehaviour:
         isConnector: 0
         priority: 2
       conditionsString: 
-      userScript: "SetQuestState(\"\uC655\uAD6D\uC744 \uC9C0\uCF1C\uB77C!\", \"active\");\nVariable[\"WaveCount\"]
-        = 0;\nShowAlert(\"\uC655\uAD6D\uC744 \uC9C0\uCF1C\uB77C!\")"
+      userScript: 
       onExecute:
         m_PersistentCalls:
           m_Calls: []
@@ -758,9 +757,7 @@ MonoBehaviour:
         type: 0
         typeString: CustomFieldType_Text
       - title: Sequence
-        value: '
-
-'
+        value: 
         type: 0
         typeString: CustomFieldType_Text
       conversationID: 1
@@ -868,7 +865,7 @@ MonoBehaviour:
         type: 0
         typeString: 
       - title: Sequence
-        value: SendMessage(GameManager,EndGame,false);
+        value: 
         type: 0
         typeString: 
       - title: Response Menu Sequence
@@ -890,13 +887,13 @@ MonoBehaviour:
           m_Calls: []
       canvasRect:
         serializedVersion: 2
-        x: 289.63934
+        x: 293.08762
         y: 722
         width: 160
         height: 30
     entryGroups: []
-    canvasScrollPosition: {x: 0, y: 257.11353}
-    canvasZoom: 0.7900002
+    canvasScrollPosition: {x: 0, y: 0}
+    canvasZoom: 0.58000034
   syncInfo:
     syncActors: 0
     syncItems: 0
