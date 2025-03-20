@@ -11,6 +11,8 @@ GameObject:
   - component: {fileID: 7764157285251709130}
   - component: {fileID: 4958107454902217099}
   - component: {fileID: 1340957886008678054}
+  - component: {fileID: 8216701956906532743}
+  - component: {fileID: 6133326358674198638}
   m_Layer: 0
   m_Name: ObjectPool
   m_TagString: Untagged
@@ -60,6 +62,41 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d1efccc2e657a449908030fd57d861b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  projectilePrefab: {fileID: 4372118671643852597, guid: aa419c62197ca2e4e91b5f4552d2a7d3, type: 3}
+  projectilePrefabs:
+  - arrowType: 0
+    projectilePrefab: {fileID: 4372118671643852597, guid: aa419c62197ca2e4e91b5f4552d2a7d3, type: 3}
+  - arrowType: 1
+    projectilePrefab: {fileID: 4349789036562564097, guid: 7db7554d4fe9cb34dbade54a71a195d9, type: 3}
+  - arrowType: 2
+    projectilePrefab: {fileID: 5844293455778790593, guid: 14b85e81361dfa04798b6550852b4675, type: 3}
   defaultCapacity: 10
   maxSize: 50
+--- !u!114 &8216701956906532743
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5527576007125156301}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8946a8b790c20594f947483ea671e6b7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  audioSourcePrefab: {fileID: 8886839692875650092, guid: ae117895a1431024abd324db577401c4, type: 3}
+  defaultCapacity: 20
+  maxSize: 50
+--- !u!114 &6133326358674198638
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5527576007125156301}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 36a91e3f9263198478fafc4485e1985b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  poolParent: {fileID: 7764157285251709130}
+  defaultPoolSize: 10

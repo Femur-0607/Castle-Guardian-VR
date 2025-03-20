@@ -42,6 +42,9 @@ public class UIManager : MonoBehaviour
     [SerializeField] private GameObject dialoguePanel;
     [SerializeField] private GameObject[] dialogueImages; // 0, 1: 인트로용, 2: 튜토리얼용
 
+    [Header("화살 쿨타임 UI")]
+    [SerializeField] private GameObject cooldownImageObject; // 쿨타임 이미지 오브젝트
+
     #endregion
 
     #region 유니티 이벤트 함수
@@ -70,6 +73,12 @@ public class UIManager : MonoBehaviour
         
         // 화살표 초기 상태 (기본: 중앙 카메라 = 양쪽 화살표 모두 표시)
         UpdateCameraArrows("Center");
+
+        // 쿨타임 UI 초기화
+        if (cooldownImageObject != null)
+        {
+            cooldownImageObject.SetActive(false);
+        }
     }
     
     // 상점 탭 초기화 메서드 (기존 코드 분리)
@@ -106,6 +115,10 @@ public class UIManager : MonoBehaviour
         EventManager.Instance.OnCastleInitialized += InitializeCastleUI;
         EventManager.Instance.OnCastleHealthChanged += UpdateCastleHealthUI;
         EventManager.Instance.OnCameraChanged += HandleCameraChanged;
+        
+        // 화살 쿨타임 이벤트 구독
+        EventManager.Instance.OnArrowCooldownStart += HandleArrowCooldownStart;
+        EventManager.Instance.OnArrowCooldownEnd += HandleArrowCooldownEnd;
     }
 
     private void OnDisable()
@@ -119,6 +132,10 @@ public class UIManager : MonoBehaviour
         EventManager.Instance.OnCastleInitialized -= InitializeCastleUI;
         EventManager.Instance.OnCastleHealthChanged -= UpdateCastleHealthUI;
         EventManager.Instance.OnCameraChanged -= HandleCameraChanged;
+        
+        // 화살 쿨타임 이벤트 구독 해제
+        EventManager.Instance.OnArrowCooldownStart -= HandleArrowCooldownStart;
+        EventManager.Instance.OnArrowCooldownEnd -= HandleArrowCooldownEnd;
     }
 
     #endregion
@@ -404,6 +421,32 @@ public class UIManager : MonoBehaviour
         if (dialogueImages != null && dialogueImages.Length > 2 && dialogueImages[2] != null)
         {
             dialogueImages[2].SetActive(true);
+        }
+    }
+    
+    #endregion
+
+    #region 화살 쿨타임 UI 함수
+    
+    /// <summary>
+    /// 화살 쿨타임 시작 시 처리
+    /// </summary>
+    private void HandleArrowCooldownStart()
+    {
+        if (cooldownImageObject != null)
+        {
+            cooldownImageObject.SetActive(true);
+        }
+    }
+    
+    /// <summary>
+    /// 화살 쿨타임 종료 시 처리
+    /// </summary>
+    private void HandleArrowCooldownEnd()
+    {
+        if (cooldownImageObject != null)
+        {
+            cooldownImageObject.SetActive(false);
         }
     }
     

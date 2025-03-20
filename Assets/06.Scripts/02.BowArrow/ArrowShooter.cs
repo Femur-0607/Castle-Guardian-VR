@@ -1,47 +1,62 @@
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using ProjectileCurveVisualizerSystem;
 
-// 화살 오브젝트가 인풋을 받았을때 어떻게 처리해야하는지에 대한 스크립트
+/// <summary>
+/// 화살 발사 시스템: 화살을 발사하는 역할을 담당
+/// 사용자 입력을 처리하고 화살 발사의 힘과 방향을 제어
+/// </summary>
 public class ArrowShooter : MonoBehaviour
 {
     #region 필드 변수
 
-    [Header("참조")]
-    public Transform arrowSpawnPoint;       // 화살이 생성될 트랜스폼
-    public ProjectilePool projectilePool;   // 화살 오브젝트 풀 참조
-    public ProjectileCurveVisualizer curveVisualizer;   // 라인레더러 경로 생성 스크립트
-    // playerCamera 참조는 필요 없음 (ArrowShooter가 카메라 자식이므로)
-
     [Header("화살 설정")]
     public float minSpeed = 1f;    // 활을 가장 조금 당겼을 때의 속도(곡률 최소)
     public float maxSpeed = 40f;    // 활을 최대로 당겼을 때의 속도(곡률 최대)
-    public float dragToFullPower = 200f;
-    // 마우스를 얼마나 아래로 드래그하면 maxSpeed에 도달할지(픽셀/단위)
+    public float dragToFullPower = 200f;  // 마우스를 얼마나 아래로 드래그하면 maxSpeed에 도달할지(픽셀/단위)
 
-    private float currentArrowSpeed;
+    private float currentArrowSpeed;  // 현재 화살 속도
     private bool isAiming = false;     // 조준 중 여부
 
-    // 마우스 드래그 계산용
-    private float initialMouseY;
-    private float currentMouseY;
+    // 마우스 드래그 계산용 변수
+    private float initialMouseY;  // 조준 시작 시 마우스 Y 위치
+    private float currentMouseY;  // 현재 마우스 Y 위치
 
-    [Header("화살 효과 프리팹")]
-    [SerializeField] private GameObject muzzleEffectPrefab; // 발사 전 효과 프리팹
+    [Header("화살 프리팹-ArrowManager에서 설정")]
+    [SerializeField] private GameObject muzzleEffectPrefab; // 발사 전 효과 프리팹 (ArrowManager에서 설정)
+    [SerializeField] private GameObject projectilePrefab;  // 현재 사용 중인 화살 프리팹 (ArrowManager에서 설정)
+    [SerializeField] private ProjectileData projectileData; // 현재 화살 데이터 (ArrowManager에서 설정)
+
+    [Header("궤적 관련")]
+    [SerializeField] private Transform arrowSpawnPoint; // 화살 생성 위치
+    [SerializeField] private ProjectileCurveVisualizer curveVisualizer; // 궤적 시각화 도구
+
+    [Header("참조")]
+    [SerializeField] private ProjectilePool arrowPoolManager; // ProjectilePool 참조
 
     #endregion
 
     #region 유니티 이벤트 함수
-
+    
+    /// <summary>
+    /// 컴포넌트 활성화 시 이벤트 구독
+    /// </summary>
     private void OnEnable()
     {
+        // 이벤트 매니저 이벤트 구독
         EventManager.Instance.OnFireStart += OnFireStart;
         EventManager.Instance.OnFireRelease += OnFireRelease;
         EventManager.Instance.OnFireCharging += OnFireCharging;
     }
 
+    /// <summary>
+    /// 컴포넌트 비활성화 시 이벤트 구독 해제
+    /// </summary>
     private void OnDisable()
     {
+        // 이벤트 매니저 이벤트 구독 해제
         EventManager.Instance.OnFireStart -= OnFireStart;
         EventManager.Instance.OnFireRelease -= OnFireRelease;
         EventManager.Instance.OnFireCharging -= OnFireCharging;
@@ -49,25 +64,30 @@ public class ArrowShooter : MonoBehaviour
 
     #endregion
 
-    #region 인풋에 따른 화살 로직
+    #region 이벤트 핸들러
 
     /// <summary>
-    /// 마우스 클릭시 발동하는 메서드 ( 화살 준비 ) 
+    /// 발사 버튼 누를 때 호출 - 조준 시작
     /// </summary>
     private void OnFireStart()
     {
+        // 쿨타임 중이면 조준 무시
+        if (GameManager.Instance.IsArrowCooldown) return;
+        
         isAiming = true;
         initialMouseY = currentMouseY;  // 조준 시작 시의 마우스 Y값을 초기값으로 저장
         currentArrowSpeed = minSpeed;   // 초기값은 최소 속도
     }
 
     /// <summary>
-    /// 마우스 위치 변경 이벤트 처리
-    /// <para>주로 Y 좌표를 이용하여 드래그 거리를 계산한다.<br/>마우스를 아래로 드래그 ( 시위 당김 )</para>
+    /// 발사 버튼 누르고 있는 동안 호출 - 화살 힘 계산
     /// </summary>
-    /// <param name="pos">현재 마우스 위치 (예: Vector3 타입의 좌표)로, 주로 Y값을 사용하여 드래그 거리를 계산함</param>
+    /// <param name="pos">마우스 위치</param>
     private void OnFireCharging(Vector2 pos)
     {
+        // 쿨타임 중이면 조준 무시
+        if (GameManager.Instance.IsArrowCooldown) return;
+        
         currentMouseY = pos.y;
 
         if (isAiming)
@@ -80,45 +100,74 @@ public class ArrowShooter : MonoBehaviour
             // 0~1 범위의 t 값으로 보정 후, 선형 보간(Lerp)을 이용해 힘 계산
             float t = Mathf.Clamp01(dragDistance / dragToFullPower);
             currentArrowSpeed = Mathf.Lerp(minSpeed, maxSpeed, t);
-
-            // 궤적 시각화 갱신
+            
+            // 궤적 시각화 갱신 - 현재 속도 기반으로 화살 궤적 예측
             curveVisualizer.VisualizeProjectileCurve(
-                arrowSpawnPoint.position,
-                0f,
+                arrowSpawnPoint.position, 
+                0f, 
                 arrowSpawnPoint.forward * currentArrowSpeed,
-                0.1f,
-                0.1f,
-                false,
-                out Vector3 updatedPosition,
+                0.1f, // 화살 반지름
+                0.1f, // 타임스텝
+                false, // 수직 방향으로 발사하지 않음
+                out Vector3 impactPos,
                 out RaycastHit hit
             );
         }
     }
 
     /// <summary>
-    /// 마우스 땔때 작동되는 메서드
-    /// </summary> 화살 쏘기
+    /// 발사 버튼 뗄 때 호출 - 화살 발사
+    /// </summary>
     private void OnFireRelease()
     {
-        if (!isAiming) return;
+        // 쿨타임 중이거나 조준 중이 아니면 발사 무시
+        if (GameManager.Instance.IsArrowCooldown || !isAiming) return;
 
-        GameObject muzzleEffect = Instantiate(muzzleEffectPrefab, arrowSpawnPoint.position, arrowSpawnPoint.rotation);
-        Destroy(muzzleEffect, 2f); // 2초 후 자동 제거
+        // ParticleEffectPool을 사용하여 발사 이펙트 생성
+        ParticleEffectPool.Instance.PlayEffect(muzzleEffectPrefab, arrowSpawnPoint.position, arrowSpawnPoint.rotation);
 
+        // 발사 사운드 재생
         SoundManager.Instance.PlaySound("ArrowShoot");
 
+        // 조준 종료 및 궤적 숨김
         isAiming = false;
         curveVisualizer.HideProjectileCurve(); // 화살 궤적 숨김
 
-        // 풀에서 화살 가져오기
-        Projectile arrow = projectilePool.GetProjectileAt(arrowSpawnPoint.position);
-
-        // 발사 방향에 속도 적용
-        Vector3 launchDirection = arrowSpawnPoint.forward * currentArrowSpeed;
-
-        // 화살 발사
-        arrow.Launch(launchDirection);
+        // ProjectilePool에서 현재 화살 타입에 맞는 화살 가져오기
+        Projectile projectile = arrowPoolManager.GetProjectile();
+        
+        // 화살 위치/회전 설정
+        projectile.transform.position = arrowSpawnPoint.position;
+        projectile.transform.rotation = arrowSpawnPoint.rotation;
+        
+        // 데이터 설정 및 발사
+        projectile.SetProjectileData(projectileData);
+        projectile.Launch(arrowSpawnPoint.forward * currentArrowSpeed);
+        
+        // 쿨타임 시작 - GameManager에 요청
+        GameManager.Instance.StartArrowCooldown();
     }
-    
+
     #endregion
+
+    /// <summary>
+    /// 화살 프리팹 및 데이터 설정 - 화살 타입 변경 시 ArrowManager에서 호출
+    /// </summary>
+    /// <param name="newPrefab">새 화살 프리팹</param>
+    /// <param name="data">새 화살 데이터</param>
+    /// <param name="newMuzzleEffect">새 발사 이펙트 프리팹</param>
+    public void SetProjectilePrefab(GameObject newPrefab, ProjectileData data, GameObject newMuzzleEffect)
+    {
+        // 새 프리팹 설정
+        projectilePrefab = newPrefab;
+        
+        // 새 데이터 설정
+        projectileData = data;
+
+        // 머즐 이펙트 업데이트
+        muzzleEffectPrefab = newMuzzleEffect;
+        
+        // 화살 풀에 현재 화살 타입 설정 
+        arrowPoolManager.SetCurrentArrowType(data.projectileType);
+    }
 }

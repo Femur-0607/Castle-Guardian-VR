@@ -9,8 +9,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4013572009445798792}
-  - component: {fileID: 4372118671643852597}
   - component: {fileID: 8580147278280310207}
+  - component: {fileID: 4372118671643852597}
   m_Layer: 0
   m_Name: NormalArrow
   m_TagString: Untagged
@@ -37,25 +37,6 @@ Transform:
   - {fileID: 4698059297798752324}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &4372118671643852597
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 301425417963411170}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e8f9d9eb38a98b74cac669a3423fef85, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  projectileData: {fileID: 11400000, guid: 3fb1548a238900c40b7ba24ca3b14ba9, type: 2}
-  projectileChildPoint: {fileID: 8455699437162128095}
-  projectileRigidbody: {fileID: 8580147278280310207}
-  projectileMeshCollider: {fileID: 447032917989334655}
-  arrowTip: {fileID: 1213403111849525639}
-  arrowTail: {fileID: 8062887640836943400}
-  hitEffect: {fileID: 4186470608034871016, guid: 68622af1911e9c242a319e86ca6e6040, type: 3}
 --- !u!54 &8580147278280310207
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -83,6 +64,25 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!114 &4372118671643852597
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 301425417963411170}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e8f9d9eb38a98b74cac669a3423fef85, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  projectileData: {fileID: 11400000, guid: 3fb1548a238900c40b7ba24ca3b14ba9, type: 2}
+  projectileChildPoint: {fileID: 8455699437162128095}
+  projectileRigidbody: {fileID: 8580147278280310207}
+  projectileMeshCollider: {fileID: 447032917989334655}
+  arrowTip: {fileID: 1213403111849525639}
+  arrowTail: {fileID: 8062887640836943400}
+  hitEffect: {fileID: 4186470608034871016, guid: 68622af1911e9c242a319e86ca6e6040, type: 3}
 --- !u!1 &3681484159256639932
 GameObject:
   m_ObjectHideFlags: 0

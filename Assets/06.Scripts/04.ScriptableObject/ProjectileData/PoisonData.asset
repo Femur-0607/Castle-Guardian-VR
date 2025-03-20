@@ -10,17 +10,17 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ede5b6464355e434c9b51cfdaeb89a1e, type: 3}
-  m_Name: ProjectileData
+  m_Name: PoisonData
   m_EditorClassIdentifier: 
-  projectileType: 0
-  projectileName: "\uAE30\uBCF8 \uD654\uC0B4"
-  damage: 9999
+  projectileType: 2
+  projectileName: "\uB3C5 \uD654\uC0B4"
+  baseDamage: 50
   lifeTime: 5
-  impactRadius: 0
-  effectDuration: 0
-  dotDamage: 0
-  upgradeLevel: 1
-  upgradeCost: 100
+  baseImpactRadius: 0
+  baseEffectDuration: 5
+  baseDotDamage: 10
+  baseMultiplier: 1
   damageIncreasePerLevel: 10
   radiusIncreasePerLevel: 0.5
   durationIncreasePerLevel: 0.5
+  baseMultiplierIncreasePerLevel: 0.1

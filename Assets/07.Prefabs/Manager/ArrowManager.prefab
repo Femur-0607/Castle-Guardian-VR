@@ -1,0 +1,56 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &5208346335751676255
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8125885821845190429}
+  - component: {fileID: 6799737924343329360}
+  m_Layer: 0
+  m_Name: ArrowManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8125885821845190429
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5208346335751676255}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &6799737924343329360
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5208346335751676255}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 005895be1e7ba6b4bb3c10aa4a179cba, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  normalArrowPrefab: {fileID: 301425417963411170, guid: aa419c62197ca2e4e91b5f4552d2a7d3, type: 3}
+  explosiveArrowPrefab: {fileID: 2991580448263860260, guid: 7db7554d4fe9cb34dbade54a71a195d9, type: 3}
+  poisonArrowPrefab: {fileID: 8959975915469904091, guid: 14b85e81361dfa04798b6550852b4675, type: 3}
+  normalMuzzleEffectPrefab: {fileID: 4186470608034871016, guid: 9b50124b9c21e814892aee9419ee1c29, type: 3}
+  explosiveMuzzleEffectPrefab: {fileID: 4186470608034871016, guid: 8bc41e1472c45464980c8feeed5f1649, type: 3}
+  poisonMuzzleEffectPrefab: {fileID: 4186470608034871016, guid: def388def05052c43aeee379e0d94723, type: 3}
+  normalArrowData: {fileID: 11400000, guid: 3fb1548a238900c40b7ba24ca3b14ba9, type: 2}
+  explosiveArrowData: {fileID: 11400000, guid: d53c65b2ed4831b4ea01c93a01def5d3, type: 2}
+  poisonArrowData: {fileID: 11400000, guid: 1a5bfd1a11a89a04088cf52b762df13c, type: 2}
+  arrowShooter: {fileID: 0}

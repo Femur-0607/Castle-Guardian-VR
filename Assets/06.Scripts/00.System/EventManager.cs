@@ -35,6 +35,8 @@ public class EventManager : MonoBehaviour
     public event Action<Camera, string> OnCameraChanged;   // 카메라가 실제로 변경되었을 때 발동할 이벤트 (활성화된 카메라, 위치 문자열)
     public event Action<DialogueType> OnDialogueStarted;   // 다이얼로그 시작 시 발동할 이벤트 (다이얼로그 타입 포함)
     public event Action<DialogueType> OnDialogueEnded;     // 다이얼로그 종료 시 발동할 이벤트 (다이얼로그 타입 포함)
+    public event Action OnArrowCooldownStart;             // 화살 쿨타임 시작 시 발동할 이벤트
+    public event Action OnArrowCooldownEnd;               // 화살 쿨타임 종료 시 발동할 이벤트
 
     #endregion
 
@@ -66,6 +68,8 @@ public class EventManager : MonoBehaviour
     public void CameraChangedEvent(Camera camera, string position) => OnCameraChanged?.Invoke(camera, position);
     public void DialogueStartedEvent(DialogueType type) => OnDialogueStarted?.Invoke(type);
     public void DialogueEndedEvent(DialogueType type) => OnDialogueEnded?.Invoke(type);
+    public void ArrowCooldownStartEvent() => OnArrowCooldownStart?.Invoke();
+    public void ArrowCooldownEndEvent() => OnArrowCooldownEnd?.Invoke();
     
     #endregion
 }

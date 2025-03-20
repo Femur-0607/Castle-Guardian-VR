@@ -2,6 +2,7 @@ using UnityEngine;
 using System;
 using PixelCrushers.DialogueSystem;
 using UnityEngine.SceneManagement;
+using System.Collections;
 
 public class GameManager : MonoBehaviour
 {
@@ -31,7 +32,60 @@ public class GameManager : MonoBehaviour
     }
     
     public bool gameStarted { get; private set; } = false;
+    
+    [Header("화살 쿨타임 관련")]
+    private bool _isArrowCooldown = false; // 화살 쿨타임 상태
+    private float _arrowCooldownTime = 1f; // 화살 쿨타임 시간 (초)
+    private float _arrowCooldownStartTime; // 쿨타임 시작 시간
+    
+        /// <summary>
+    /// 화살 쿨타임 여부 확인
+    /// </summary>
+    public bool IsArrowCooldown => _isArrowCooldown;
 
+    #endregion
+
+    #region 화살 쿨타임 관련
+
+    /// <summary>
+    /// 화살 쿨타임 시작
+    /// </summary>
+    public void StartArrowCooldown()
+    {
+        // 이미 쿨타임 중이면 무시
+        if (_isArrowCooldown) return;
+
+        _isArrowCooldown = true;
+        _arrowCooldownStartTime = Time.time;
+
+        // 쿨타임 시작 이벤트 발생
+        EventManager.Instance.ArrowCooldownStartEvent();
+
+        // 쿨타임 코루틴 시작
+        StartCoroutine(ArrowCooldownCoroutine());
+    }
+    
+    /// <summary>
+    /// 화살 쿨타임 코루틴
+    /// </summary>
+    private IEnumerator ArrowCooldownCoroutine()
+    {
+        float elapsedTime = 0f;
+        
+        while (elapsedTime < _arrowCooldownTime)
+        {
+            elapsedTime = Time.time - _arrowCooldownStartTime;
+            
+            yield return null;
+        }
+        
+        // 쿨타임 종료
+        _isArrowCooldown = false;
+        
+        // 쿨타임 종료 이벤트 발생
+        EventManager.Instance.ArrowCooldownEndEvent();
+    }
+    
     #endregion
 
     #region 유니티 이벤트 함수
@@ -252,6 +306,20 @@ public class GameManager : MonoBehaviour
             // 현재 활성화된 카메라의 컨트롤러 활성화
             cameraController.SwitchToCenterCamera();
         }
+    }
+    
+    /// <summary>
+    /// 테스트 목적의 플레이어 제어 컴포넌트 활성화 (외부에서 호출 가능)
+    /// </summary>
+    public void EnablePlayerControlsForTest()
+    {
+#if UNITY_EDITOR
+        // 플레이어 컨트롤 활성화
+        EnablePlayerControls();
+        
+        // 메인 BGM 재생
+        SoundManager.Instance.PlaySound("MainBGM");
+#endif
     }
     
     /// <summary>

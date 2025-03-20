@@ -44,5 +44,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 19758ef78ad0f394b96a3980616e1cfd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  waveData: {fileID: 11400000, guid: 8e8d0a60e8f97494890519c6f97a0766, type: 2}
   spawnManagers:
   - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  isWaveActive: 0

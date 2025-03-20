@@ -134,4 +134,10 @@ public abstract class Projectile : MonoBehaviour, IProjectile
     }
     
     #endregion
+
+    public virtual void SetProjectileData(ProjectileData data)
+    {
+        projectileData = data;
+        currentDamage = data.damage;
+    }
 }

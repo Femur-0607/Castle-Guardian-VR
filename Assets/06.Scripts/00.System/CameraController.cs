@@ -212,7 +212,17 @@ public class CameraController : MonoBehaviour
         
         // 컴포넌트 활성화/비활성화
         if (lookController != null) lookController.enabled = active;
-        if (arrowShooter != null) arrowShooter.enabled = active;
+        if (arrowShooter != null) 
+        {
+            arrowShooter.enabled = active;
+            
+            // 카메라 활성화 시 ArrowManager에서 현재 화살 타입으로 초기화
+            if (active && ArrowManager.Instance != null)
+            {
+                // 현재 화살 타입으로 ArrowShooter 초기화
+                ArrowManager.Instance.InitializeArrowShooter(arrowShooter);
+            }
+        }
     }
     
     /// <summary>

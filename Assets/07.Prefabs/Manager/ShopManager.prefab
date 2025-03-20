@@ -47,6 +47,16 @@ MonoBehaviour:
   buildManager: {fileID: 0}
   waveManager: {fileID: 0}
   uiManager: {fileID: 0}
+  arrowManager: {fileID: 0}
+  arrowUpgradeButton: {fileID: 0}
+  explosiveArrowButton: {fileID: 0}
+  poisonArrowButton: {fileID: 0}
+  nomalTowerButton: {fileID: 0}
+  explosiveUpgradeButton: {fileID: 0}
+  slowUpgradeButton: {fileID: 0}
   towerCost: 50
-  explosiveUpgradeCost: 75
-  slowUpgradeCost: 50
+  explosiveUpgradeCost: 100
+  slowUpgradeCost: 100
+  bowUpgradeCost: 50
+  explosiveArrowCost: 150
+  poisonArrowCost: 150

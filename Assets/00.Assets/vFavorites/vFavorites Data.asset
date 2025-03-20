@@ -80,6 +80,15 @@ MonoBehaviour:
       isFolder: 0
       isAsset: 1
       _id: 1063702280
+    - globalId:
+        globalObjectIdString: GlobalObjectId_V1-1-fb51cdf6fd38f484b99d56593d18f212-102900000-0
+      _typeString: UnityEditor.SceneAsset, UnityEditor.CoreModule, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
+      _obj: {fileID: 102900000, guid: fb51cdf6fd38f484b99d56593d18f212, type: 3}
+      isSceneGameObject: 0
+      isFolder: 0
+      isAsset: 1
+      _id: 1060115007
     name: Tower
     _id: 1055673866
   - items:
@@ -119,6 +128,24 @@ MonoBehaviour:
       isFolder: 1
       isAsset: 0
       _id: 1052353577
+    - globalId:
+        globalObjectIdString: GlobalObjectId_V1-1-389170da8f2a7b54fab118388ba480a6-102900000-0
+      _typeString: UnityEditor.DefaultAsset, UnityEditor.CoreModule, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
+      _obj: {fileID: 102900000, guid: 389170da8f2a7b54fab118388ba480a6, type: 3}
+      isSceneGameObject: 0
+      isFolder: 1
+      isAsset: 0
+      _id: 1063738046
+    - globalId:
+        globalObjectIdString: GlobalObjectId_V1-1-2a20a13e07a40374a8c2a1aee64663a1-102900000-0
+      _typeString: UnityEditor.DefaultAsset, UnityEditor.CoreModule, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
+      _obj: {fileID: 102900000, guid: 2a20a13e07a40374a8c2a1aee64663a1, type: 3}
+      isSceneGameObject: 0
+      isFolder: 1
+      isAsset: 0
+      _id: 1061822296
     name: Page 3
     _id: 1063872270
   - items: []

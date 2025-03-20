@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 5264186679360321536}
   m_Layer: 0
   m_Name: GameManager
-  m_TagString: Untagged
+  m_TagString: GameController
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -44,6 +44,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e80b2668debabf944bed2a9a5d02aa8e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  arrowShooter: {fileID: 0}
-  playerLookController: {fileID: 0}
-  gameMoney: 200
+  cameraController: {fileID: 0}
