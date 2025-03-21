@@ -18,6 +18,10 @@ public class WaveManager : MonoBehaviour
     [SerializeField] private bool isWaveActive;  // 웨이브 진행 여부
     private bool isDialogueActive = false;       // 다이얼로그 표시 중인지 여부
 
+    [SerializeField] private Transform playerTransform;
+    [SerializeField] private float soulCollectionDelay = 1.0f;
+    [SerializeField] private float soulMoveDuration = 1.0f;
+
     #endregion
 
     #region 유니티 이벤트 함수
@@ -152,12 +156,32 @@ public class WaveManager : MonoBehaviour
             GameManager.Instance.AddMoney(waveData.waves[currentWaveIndex].clearReward);
         }
 
-        EventManager.Instance.WaveEndEvent(CurrentWave); // 이벤트 매니저에 웨이브 종료 송신
-
         if (CurrentWave >= 10) // 10웨이브가 마지막
         {
             GameManager.Instance.EndGame(true);
         }
+
+        // 영혼 수집 후 1초 대기 후 웨이브 종료 이벤트 호출
+        CollectSoulsToPlayer();
+    }
+
+    private void CollectSoulsToPlayer()
+    {
+        // 모든 남아있는 영혼을 플레이어에게 이동
+        // 영혼 수집이 끝나면 콜백 실행
+        ParticlePoolManager.Instance.CollectAllSouls(playerTransform, soulMoveDuration, () => {
+            // 경험치 증가 애니메이션이 끝나고 1.5초 후에 웨이브 종료 이벤트 발생
+            StartCoroutine(DelayedWaveEndEvent());
+        });
+    }
+
+    private IEnumerator DelayedWaveEndEvent()
+    {
+        // 경험치 애니메이션과 효과음을 위한 1.5초 대기
+        yield return new WaitForSeconds(1.5f);
+        
+        // 웨이브 종료 이벤트 발생
+        EventManager.Instance.WaveEndEvent(CurrentWave);
     }
 
     // 스폰매니저 전체의 에너미 카운트를 계속 체크하고있는 메서드

@@ -16,7 +16,7 @@ MonoBehaviour:
   moveSpeed: 7
   attackRange: 10
   attackDamage: 10
-  attackCooldown: 1
+  attackCooldown: 2
   goldDropAmount: 50
   enemyType: 0
   projectileSpeed: 15

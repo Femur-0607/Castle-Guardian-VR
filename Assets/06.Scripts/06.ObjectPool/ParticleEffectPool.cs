@@ -133,6 +133,30 @@ public class ParticleEffectPool : MonoBehaviour
             Destroy(effect);
         }
     }
+
+    // ParticleEffectPool에 추가할 메서드
+    public GameObject GetEffectInstance(GameObject prefab, Vector3 position, Quaternion rotation)
+    {
+        // 파티클 인스턴스만 가져오고 활성화 (자동 반환 없음)
+        string key = prefab.name;
+        
+        // 풀 확인 및 초기화
+        if (!particlePools.ContainsKey(key))
+        {
+            particlePools[key] = new Queue<GameObject>();
+            PreparePool(prefab, key, defaultPoolSize);
+        }
+        
+        // 풀에서 파티클 가져오기
+        GameObject effect = GetFromPool(prefab, key);
+        
+        // 위치 설정
+        effect.transform.position = position;
+        effect.transform.rotation = rotation;
+        effect.SetActive(true);
+        
+        return effect;
+    }
 }
 
 /// <summary>

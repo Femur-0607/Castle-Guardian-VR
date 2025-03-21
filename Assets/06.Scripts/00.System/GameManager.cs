@@ -1,7 +1,6 @@
 using UnityEngine;
 using System;
 using PixelCrushers.DialogueSystem;
-using UnityEngine.SceneManagement;
 using System.Collections;
 
 public class GameManager : MonoBehaviour
@@ -115,7 +114,7 @@ public class GameManager : MonoBehaviour
         StartCoroutine(TrySubscribeToDialogueManager());
     }
 
-    private System.Collections.IEnumerator TrySubscribeToDialogueManager()
+    private IEnumerator TrySubscribeToDialogueManager()
     {
         // DialogueManager가 초기화될 때까지 대기
         yield return new WaitForSeconds(0.5f);
@@ -139,7 +138,27 @@ public class GameManager : MonoBehaviour
     {
         EventManager.Instance.OnWaveStart -= HandleWaveStart;
         EventManager.Instance.OnWaveEnd -= HandleWaveEnd;
-        DialogueManager.instance.conversationEnded -= HandleConversationEnded;
+        StartCoroutine(TryDeSubscribeToDialogueManager());
+    }
+    
+        private IEnumerator TryDeSubscribeToDialogueManager()
+    {
+        // DialogueManager가 초기화될 때까지 대기
+        yield return new WaitForSeconds(0.5f);
+        
+        if (DialogueManager.instance != null)
+        {
+            DialogueManager.instance.conversationEnded -= HandleConversationEnded;
+        }
+        else
+        {
+            yield return new WaitForSeconds(1f);
+            
+            if (DialogueManager.instance != null)
+            {
+                DialogueManager.instance.conversationEnded -= HandleConversationEnded;
+            }
+        }
     }
 
     #endregion
@@ -159,7 +178,7 @@ public class GameManager : MonoBehaviour
 
             // 게임 시작 이벤트 발생 - UI 업데이트 등
             EventManager.Instance.GameStartEvent();
-            
+
             // 이 시점에서는 카메라 컨트롤러 활성화하지 않음
             // 다이얼로그 종료 후 활성화됨
         }

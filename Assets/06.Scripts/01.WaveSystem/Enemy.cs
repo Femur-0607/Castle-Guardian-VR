@@ -40,6 +40,13 @@ public class Enemy : LivingEntity
     private bool hasFormationPosition;
     private bool isInPosition = false;  // 포지션에 도달했는지 체크하는 변수 추가
 
+    [SerializeField] private float deathDelay = 2.0f;
+
+    // 죽었을 때 생성할 파티클 키
+    private const string DEATH_POOF_KEY = "Loot_Poof_Variant";
+    private const string SOUL_BEAM_KEY = "LootBeam_Generic_Epic_Variant";
+
+
     #endregion
 
     #region 유니티 이벤트 함수 및 상속 관련
@@ -66,22 +73,14 @@ public class Enemy : LivingEntity
 
     private void OnEnable()
     {
-        // 다이얼로그 이벤트 구독
-        if (EventManager.Instance != null)
-        {
-            EventManager.Instance.OnDialogueStarted += HandleDialogueStarted;
-            EventManager.Instance.OnDialogueEnded += HandleDialogueEnded;
-        }
+        EventManager.Instance.OnDialogueStarted += HandleDialogueStarted;
+        EventManager.Instance.OnDialogueEnded += HandleDialogueEnded;
     }
 
     private void OnDisable()
     {
-        // 다이얼로그 이벤트 구독 해제
-        if (EventManager.Instance != null)
-        {
-            EventManager.Instance.OnDialogueStarted -= HandleDialogueStarted;
-            EventManager.Instance.OnDialogueEnded -= HandleDialogueEnded;
-        }
+        EventManager.Instance.OnDialogueStarted -= HandleDialogueStarted;
+        EventManager.Instance.OnDialogueEnded -= HandleDialogueEnded;
     }
 
     // 다이얼로그 시작 시 호출
@@ -146,12 +145,19 @@ public class Enemy : LivingEntity
 
     public override void TakeDamage(float damage)
     {
-        base.TakeDamage(damage);
-
         if (!isAlive) return;
 
-        // 50% 확률로 히트 모션 재생 (과도한 히트 모션 방지)
-        if (Random.value > 0.5f) animator.SetTrigger("hit");
+        base.TakeDamage(damage);
+
+        if (currentHealth <= 0)
+        {
+            return; // 체력이 0이하면 히트 모션 재생 안함
+        }
+        else
+        {
+            // 50% 확률로 히트 모션 재생 (과도한 히트 모션 방지)
+            if (Random.value > 0.5f) animator.SetTrigger("hit");
+        }
     }
 
     #endregion
@@ -307,18 +313,39 @@ public class Enemy : LivingEntity
             hasFormationPosition = false;
             isInPosition = false;
         }
+
         base.Die();
 
         currentState = EnemyState.Dead;
 
-        spawnManager.EnemyDied(this);
-
-        pool?.Release(this);
-
         // 사망 시 게임매니저에게 골드 전달 (프로퍼티 사용을 위해 AddMoney 메서드 호출)
         GameManager.Instance.AddMoney((int)enemyData.goldDropAmount);
 
-        animator.SetBool("isDead", true);
+        animator.SetTrigger("isDead");
+        
+        // 일정 시간 후 파티클 효과 및 오브젝트 비활성화
+        StartCoroutine(DeathSequence());
+    }
+
+    private IEnumerator DeathSequence()
+    {
+        // 사망 모션을 위한 대기 시간
+        yield return new WaitForSeconds(deathDelay);
+
+        // 파티클 효과 생성
+        Vector3 particlePosition = transform.position + Vector3.up * 0.5f; // 바닥보다 약간 위에서 생성
+
+        // 1. 일시적인 파티클 효과 (Loot_Poof)
+        ParticlePoolManager.Instance.GetParticle(DEATH_POOF_KEY, particlePosition, Quaternion.identity);
+
+        // 2. 지속적인 파티클 효과 (LootBeam)
+        ParticlePoolManager.Instance.GetParticle(SOUL_BEAM_KEY, particlePosition, Quaternion.identity, true);
+
+        // 오브젝트 풀에 반환 (비활성화)
+        pool?.Release(this);
+        
+        // 스폰 매니저한테 죽음을 알림 (웨이브 체크를 위해)
+        spawnManager.EnemyDied(this);
     }
 
     #endregion
