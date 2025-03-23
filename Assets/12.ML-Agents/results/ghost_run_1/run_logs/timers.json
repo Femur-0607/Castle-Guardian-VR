@@ -1,0 +1,68 @@
+{
+    "name": "root",
+    "metadata": {
+        "timer_format_version": "0.1.0",
+        "start_time_seconds": "1742646763",
+        "python_version": "3.10.12 | packaged by Anaconda, Inc. | (main, Jul  5 2023, 19:01:18) [MSC v.1916 64 bit (AMD64)]",
+        "command_line_arguments": "C:\\Users\\USER\\miniconda3\\envs\\mlagents\\Scripts\\mlagents-learn Training/GhostTraining.yaml --run-id=ghost_run_1 --force",
+        "mlagents_version": "1.1.0",
+        "mlagents_envs_version": "1.1.0",
+        "communication_protocol_version": "1.5.0",
+        "pytorch_version": "2.6.0+cpu",
+        "numpy_version": "1.23.5",
+        "end_time_seconds": "1742646902"
+    },
+    "total": 139.31636799999978,
+    "count": 1,
+    "self": 0.005343700002413243,
+    "children": {
+        "run_training.setup": {
+            "total": 0.11048739999750978,
+            "count": 1,
+            "self": 0.11048739999750978
+        },
+        "TrainerController.start_learning": {
+            "total": 139.20053689999986,
+            "count": 1,
+            "self": 0.00013410000610747375,
+            "children": {
+                "TrainerController._reset_env": {
+                    "total": 17.609376199998223,
+                    "count": 1,
+                    "self": 17.609376199998223
+                },
+                "TrainerController.advance": {
+                    "total": 121.51688509999804,
+                    "count": 1,
+                    "self": 2.0299998141126707e-05,
+                    "children": {
+                        "env_step": {
+                            "total": 121.5168647999999,
+                            "count": 1,
+                            "self": 121.51685739999812,
+                            "children": {
+                                "SubprocessEnvManager._take_step": {
+                                    "total": 7.400001777568832e-06,
+                                    "count": 1,
+                                    "self": 7.400001777568832e-06
+                                }
+                            }
+                        }
+                    }
+                },
+                "TrainerController._save_models": {
+                    "total": 0.07414149999749498,
+                    "count": 1,
+                    "self": 0.0011572999974305276,
+                    "children": {
+                        "RLTrainer._checkpoint": {
+                            "total": 0.07298420000006445,
+                            "count": 1,
+                            "self": 0.07298420000006445
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
