@@ -1,0 +1,47 @@
+{
+    "GhostBehavior": {
+        "checkpoints": [
+            {
+                "steps": 499957,
+                "file_path": "results\\ghost_run_7\\GhostBehavior\\GhostBehavior-499957.onnx",
+                "reward": 0.32062499690800905,
+                "creation_time": 1742833823.7033026,
+                "auxillary_file_paths": [
+                    "results\\ghost_run_7\\GhostBehavior\\GhostBehavior-499957.pt"
+                ]
+            },
+            {
+                "steps": 999978,
+                "file_path": "results\\ghost_run_7\\GhostBehavior\\GhostBehavior-999978.onnx",
+                "reward": 0.8385714206312384,
+                "creation_time": 1742835969.9880416,
+                "auxillary_file_paths": [
+                    "results\\ghost_run_7\\GhostBehavior\\GhostBehavior-999978.pt"
+                ]
+            },
+            {
+                "steps": 1000034,
+                "file_path": "results\\ghost_run_7\\GhostBehavior\\GhostBehavior-1000034.onnx",
+                "reward": 0.8433333253487945,
+                "creation_time": 1742835970.025158,
+                "auxillary_file_paths": [
+                    "results\\ghost_run_7\\GhostBehavior\\GhostBehavior-1000034.pt"
+                ]
+            }
+        ],
+        "final_checkpoint": {
+            "steps": 1000034,
+            "file_path": "results\\ghost_run_7\\GhostBehavior.onnx",
+            "reward": 0.8433333253487945,
+            "creation_time": 1742835970.025158,
+            "auxillary_file_paths": [
+                "results\\ghost_run_7\\GhostBehavior\\GhostBehavior-1000034.pt"
+            ]
+        }
+    },
+    "metadata": {
+        "stats_format_version": "0.3.0",
+        "mlagents_version": "1.1.0",
+        "torch_version": "2.6.0+cpu"
+    }
+}
