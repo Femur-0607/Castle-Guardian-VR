@@ -335,12 +335,10 @@ public class Enemy : LivingEntity
         // 파티클 효과 생성
         Vector3 particlePosition = transform.position + Vector3.up * 0.5f; // 바닥보다 약간 위에서 생성
 
-        // 1. 일시적인 파티클 효과 (Loot_Poof)
-        ParticlePoolManager.Instance.GetParticle(DEATH_POOF_KEY, particlePosition, Quaternion.identity);
-
-        // 2. 지속적인 파티클 효과 (LootBeam)
-        ParticlePoolManager.Instance.GetParticle(SOUL_BEAM_KEY, particlePosition, Quaternion.identity, true);
-
+        // 상수 사용으로 타입 안정성 확보
+        ParticlePool.Instance.PlayEffect(ParticlePool.ParticleKeys.DEATH_POOF, particlePosition, Quaternion.identity);
+        ParticlePool.Instance.GetParticle(ParticlePool.ParticleKeys.SOUL_BEAM, particlePosition, Quaternion.identity);
+        
         // 오브젝트 풀에 반환 (비활성화)
         pool?.Release(this);
         

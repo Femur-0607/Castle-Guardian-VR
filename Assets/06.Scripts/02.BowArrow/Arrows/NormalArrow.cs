@@ -27,7 +27,7 @@ public class NormalArrow : Projectile
             // 충돌 효과 재생 (충돌 지점에 파티클 생성)
             if (hitEffect != null)
             {
-                ParticleEffectPool.Instance.PlayEffect(hitEffect, collision.contacts[0].point, Quaternion.identity);
+                ParticlePool.Instance.PlayEffect(hitEffect.name, collision.contacts[0].point, Quaternion.identity);
             }
         }
         

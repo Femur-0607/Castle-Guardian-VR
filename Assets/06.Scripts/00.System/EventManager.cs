@@ -37,6 +37,8 @@ public class EventManager : MonoBehaviour
     public event Action<DialogueType> OnDialogueEnded;     // 다이얼로그 종료 시 발동할 이벤트 (다이얼로그 타입 포함)
     public event Action OnArrowCooldownStart;             // 화살 쿨타임 시작 시 발동할 이벤트
     public event Action OnArrowCooldownEnd;               // 화살 쿨타임 종료 시 발동할 이벤트
+    public event Action<int> OnSoulCollected;           // 영혼 수집 시 발동할 이벤트 (경험치량)
+    public event Action OnAllSoulsCollected;            // 모든 영혼 수집 완료 시 발동할 이벤트
 
     #endregion
 
@@ -70,6 +72,8 @@ public class EventManager : MonoBehaviour
     public void DialogueEndedEvent(DialogueType type) => OnDialogueEnded?.Invoke(type);
     public void ArrowCooldownStartEvent() => OnArrowCooldownStart?.Invoke();
     public void ArrowCooldownEndEvent() => OnArrowCooldownEnd?.Invoke();
+    public void SoulCollectedEvent(int expAmount) => OnSoulCollected?.Invoke(expAmount);
+    public void AllSoulsCollectedEvent() => OnAllSoulsCollected?.Invoke();
     
     #endregion
 }

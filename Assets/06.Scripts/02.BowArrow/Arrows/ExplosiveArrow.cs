@@ -26,7 +26,7 @@ public class ExplosiveArrow : Projectile
         // 폭발 효과 재생 (충돌 지점에 파티클 생성)
         if (explosionEffect != null)
         {
-            ParticleEffectPool.Instance.PlayEffect(explosionEffect, transform.position, Quaternion.identity);
+            ParticlePool.Instance.PlayEffect(explosionEffect.name, transform.position, Quaternion.identity);
         }
         
         // 폭발 범위 내 적 탐지 및 데미지 적용 (Physics.OverlapSphere로 구체 범위 내 콜라이더 검출)

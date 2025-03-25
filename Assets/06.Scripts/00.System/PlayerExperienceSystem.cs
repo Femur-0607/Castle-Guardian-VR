@@ -12,7 +12,7 @@ public class PlayerExperienceSystem : MonoBehaviour
     [Header("레벨 시스템")]
     [SerializeField] private int currentLevel = 1;
     [SerializeField] private int currentExp = 0;
-    [SerializeField] private int[] expRequiredPerLevel;
+    [SerializeField] private int[] expRequiredPerLevel; // 레벨 당 경험치 요구량
 
     [Header("UI 요소")]
     [SerializeField] private Slider expBar;

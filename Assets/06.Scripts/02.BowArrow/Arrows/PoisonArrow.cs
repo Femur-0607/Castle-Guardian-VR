@@ -25,7 +25,7 @@ public class PoisonArrow : Projectile
         // 충돌 효과 재생 (충돌 지점에 파티클 생성)
         if (impactEffect != null)
         {
-            ParticleEffectPool.Instance.PlayEffect(impactEffect, collision.contacts[0].point, Quaternion.identity);
+            ParticlePool.Instance.PlayEffect(impactEffect.name, collision.contacts[0].point, Quaternion.identity);
         }
         
         // 데미지를 받을 수 있는 객체인지 확인 (IDamageable 인터페이스 구현 여부)

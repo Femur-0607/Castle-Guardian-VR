@@ -30,9 +30,6 @@ public class ArrowManager : MonoBehaviour
     [SerializeField] private GameObject normalArrowPrefab;    // 기본 화살 프리팹
     [SerializeField] private GameObject explosiveArrowPrefab; // 폭발 화살 프리팹
     [SerializeField] private GameObject poisonArrowPrefab;    // 독 화살 프리팹
-    [SerializeField] private GameObject normalMuzzleEffectPrefab;   // 기본 화살 머즐 이펙트 프리팹 
-    [SerializeField] private GameObject explosiveMuzzleEffectPrefab; // 폭발 화살 머즐 이펙트 프리팹
-    [SerializeField] private GameObject poisonMuzzleEffectPrefab;    // 독 화살 머즐 이펙트 프리팹
     
     [Header("화살 데이터")]
     [SerializeField] private ProjectileData normalArrowData;    // 기본 화살 데이터
@@ -117,19 +114,25 @@ public class ArrowManager : MonoBehaviour
         // 현재 화살 타입을 새로운 타입으로 변경
         CurrentArrowType = arrowType;
         
+        // 각 화살 타입에 맞는 머즐 이펙트 키 선택
+        string muzzleEffectKey = "";
+        
         // 화살 발사기에 새 프리팹과 데이터 설정 (각 화살 타입에 맞게)
         switch (arrowType)
         {
             case ProjectileData.ProjectileType.Normal:
-                arrowShooter.SetProjectilePrefab(normalArrowPrefab, normalArrowData, normalMuzzleEffectPrefab);
+                muzzleEffectKey = ParticlePool.ParticleKeys.NORMAL_MUZZLE;
+                arrowShooter.SetProjectilePrefab(normalArrowPrefab, normalArrowData, muzzleEffectKey);
                 break;
                 
             case ProjectileData.ProjectileType.Explosive:
-                arrowShooter.SetProjectilePrefab(explosiveArrowPrefab, explosiveArrowData, explosiveMuzzleEffectPrefab);
+                muzzleEffectKey = ParticlePool.ParticleKeys.EXPLOSIVE_MUZZLE;
+                arrowShooter.SetProjectilePrefab(explosiveArrowPrefab, explosiveArrowData, muzzleEffectKey);
                 break;
                 
             case ProjectileData.ProjectileType.Poison:
-                arrowShooter.SetProjectilePrefab(poisonArrowPrefab, poisonArrowData, poisonMuzzleEffectPrefab);
+                muzzleEffectKey = ParticlePool.ParticleKeys.POISON_MUZZLE;
+                arrowShooter.SetProjectilePrefab(poisonArrowPrefab, poisonArrowData, muzzleEffectKey);
                 break;
         }
         
@@ -252,7 +255,7 @@ public class ArrowManager : MonoBehaviour
     public event ArrowTypeChangedHandler OnArrowTypeChanged;
 
     /// <summary>
-    /// 활 업그레이드 - 모든 화살의 공통 성능 향상 
+    /// 휘 업그레이드 - 모든 화살의 공통 성능 향상 
     /// </summary>
     /// <returns>업그레이드 성공 여부</returns>
     public bool UpgradeAllArrows()
@@ -287,18 +290,23 @@ public class ArrowManager : MonoBehaviour
         if (targetShooter == null) return;
         
         // 현재 활성화된 화살 타입에 따라 ArrowShooter 초기화
+        string muzzleEffectKey = "";
+        
         switch (CurrentArrowType)
         {
             case ProjectileData.ProjectileType.Normal:
-                targetShooter.SetProjectilePrefab(normalArrowPrefab, normalArrowData, normalMuzzleEffectPrefab);
+                muzzleEffectKey = ParticlePool.ParticleKeys.NORMAL_MUZZLE;
+                targetShooter.SetProjectilePrefab(normalArrowPrefab, normalArrowData, muzzleEffectKey);
                 break;
                 
             case ProjectileData.ProjectileType.Explosive:
-                targetShooter.SetProjectilePrefab(explosiveArrowPrefab, explosiveArrowData, explosiveMuzzleEffectPrefab);
+                muzzleEffectKey = ParticlePool.ParticleKeys.EXPLOSIVE_MUZZLE;
+                targetShooter.SetProjectilePrefab(explosiveArrowPrefab, explosiveArrowData, muzzleEffectKey);
                 break;
                 
             case ProjectileData.ProjectileType.Poison:
-                targetShooter.SetProjectilePrefab(poisonArrowPrefab, poisonArrowData, poisonMuzzleEffectPrefab);
+                muzzleEffectKey = ParticlePool.ParticleKeys.POISON_MUZZLE;
+                targetShooter.SetProjectilePrefab(poisonArrowPrefab, poisonArrowData, muzzleEffectKey);
                 break;
         }
         

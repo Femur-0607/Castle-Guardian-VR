@@ -169,7 +169,7 @@ public class WaveManager : MonoBehaviour
     {
         // 모든 남아있는 영혼을 플레이어에게 이동
         // 영혼 수집이 끝나면 콜백 실행
-        ParticlePoolManager.Instance.CollectAllSouls(playerTransform, soulMoveDuration, () => {
+        ParticlePool.Instance.CollectAllSouls(playerTransform, soulMoveDuration, () => {
             // 경험치 증가 애니메이션이 끝나고 1.5초 후에 웨이브 종료 이벤트 발생
             StartCoroutine(DelayedWaveEndEvent());
         });

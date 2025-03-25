@@ -25,7 +25,7 @@ public class ArrowShooter : MonoBehaviour
     private float currentMouseY;  // 현재 마우스 Y 위치
 
     [Header("화살 프리팹-ArrowManager에서 설정")]
-    [SerializeField] private GameObject muzzleEffectPrefab; // 발사 전 효과 프리팹 (ArrowManager에서 설정)
+    [SerializeField] private string muzzleEffectKey; // 발사 전 효과 키 (ArrowManager에서 설정)
     [SerializeField] private GameObject projectilePrefab;  // 현재 사용 중인 화살 프리팹 (ArrowManager에서 설정)
     [SerializeField] private ProjectileData projectileData; // 현재 화살 데이터 (ArrowManager에서 설정)
 
@@ -124,7 +124,7 @@ public class ArrowShooter : MonoBehaviour
         if (GameManager.Instance.IsArrowCooldown || !isAiming) return;
 
         // ParticleEffectPool을 사용하여 발사 이펙트 생성
-        ParticleEffectPool.Instance.PlayEffect(muzzleEffectPrefab, arrowSpawnPoint.position, arrowSpawnPoint.rotation);
+        ParticlePool.Instance.PlayEffect(muzzleEffectKey, arrowSpawnPoint.position, arrowSpawnPoint.rotation);
 
         // 발사 사운드 재생
         SoundManager.Instance.PlaySound("ArrowShoot");
@@ -155,8 +155,8 @@ public class ArrowShooter : MonoBehaviour
     /// </summary>
     /// <param name="newPrefab">새 화살 프리팹</param>
     /// <param name="data">새 화살 데이터</param>
-    /// <param name="newMuzzleEffect">새 발사 이펙트 프리팹</param>
-    public void SetProjectilePrefab(GameObject newPrefab, ProjectileData data, GameObject newMuzzleEffect)
+    /// <param name="newMuzzleEffectKey">새 발사 이펙트 키</param>
+    public void SetProjectilePrefab(GameObject newPrefab, ProjectileData data, string newMuzzleEffectKey)
     {
         // 새 프리팹 설정
         projectilePrefab = newPrefab;
@@ -164,8 +164,8 @@ public class ArrowShooter : MonoBehaviour
         // 새 데이터 설정
         projectileData = data;
 
-        // 머즐 이펙트 업데이트
-        muzzleEffectPrefab = newMuzzleEffect;
+        // 머즐 이펙트 키 업데이트
+        muzzleEffectKey = newMuzzleEffectKey;
         
         // 화살 풀에 현재 화살 타입 설정 
         arrowPoolManager.SetCurrentArrowType(data.projectileType);
