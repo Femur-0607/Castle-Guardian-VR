@@ -6,11 +6,12 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/08.Scenes/ML-AgentsScene.unity
-    guid: 037845301e0e8fb448dcdcb3c22ae918
+    path: Assets/08.Scenes/MainScene.unity
+    guid: fb51cdf6fd38f484b99d56593d18f212
   m_configObjects:
     Unity.XR.Oculus.Settings: {fileID: 11400000, guid: 861e02af3387c634da7523b54a6c520b, type: 2}
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+    com.unity.xr.arfoundation.simulation_settings: {fileID: 11400000, guid: 052181a7243e1874cb669ed4f98c3a9f, type: 2}
     com.unity.xr.management.loader_settings: {fileID: 11400000, guid: fbad3972e639e2a4f97c7ae7c7a39b2a, type: 2}
     com.unity.xr.openxr.settings4: {fileID: 11400000, guid: 2826d316b91b88244a53ad7df6e0544f, type: 2}
   m_UseUCBPForAssetBundles: 0
