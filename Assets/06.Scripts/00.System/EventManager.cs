@@ -31,8 +31,8 @@ public class EventManager : MonoBehaviour
     public event Action<int> OnMoneyChanged;            // 골드 변경 시 발동할 이벤트
     public event Action<Castle> OnCastleInitialized;    // 성문 초기화 시 발동할 이벤트
     public event Action<float> OnCastleHealthChanged;    // 성문 체력 변경 시 발동할 이벤트
-    public event Action<float> OnCameraSwitch;          // 카메라 전환 시 발동할 이벤트 (값: -1=왼쪽, 0=중앙, 1=오른쪽)
-    public event Action<Camera, string> OnCameraChanged;   // 카메라가 실제로 변경되었을 때 발동할 이벤트 (활성화된 카메라, 위치 문자열)
+    public event Action<float> OnCameraSwitch;          // 카메라 전환 시 발동할 이벤트 (방향값)
+    public event Action<CameraController.CameraPosition> OnCameraChanged;   // 카메라가 실제로 변경되었을 때 발동할 이벤트 (위치)
     public event Action<DialogueType> OnDialogueStarted;   // 다이얼로그 시작 시 발동할 이벤트 (다이얼로그 타입 포함)
     public event Action<DialogueType> OnDialogueEnded;     // 다이얼로그 종료 시 발동할 이벤트 (다이얼로그 타입 포함)
     public event Action OnArrowCooldownStart;             // 화살 쿨타임 시작 시 발동할 이벤트
@@ -65,7 +65,7 @@ public class EventManager : MonoBehaviour
     public void TriggerOnCastleInitialized(Castle castle) => OnCastleInitialized?.Invoke(castle);
     public void TriggerOnCastleHealthChanged(float currentHealth) => OnCastleHealthChanged?.Invoke(currentHealth);
     public void CameraSwitchEvent(float direction) => OnCameraSwitch?.Invoke(direction);
-    public void CameraChangedEvent(Camera camera, string position) => OnCameraChanged?.Invoke(camera, position);
+    public void CameraChangedEvent(CameraController.CameraPosition position) => OnCameraChanged?.Invoke(position);
     public void DialogueStartedEvent(DialogueType type) => OnDialogueStarted?.Invoke(type);
     public void DialogueEndedEvent(DialogueType type) => OnDialogueEnded?.Invoke(type);
     public void ArrowCooldownStartEvent() => OnArrowCooldownStart?.Invoke();

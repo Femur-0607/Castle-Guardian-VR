@@ -372,6 +372,17 @@
                 },
                 {
                     "name": "",
+                    "id": "5b8ce9fb-621e-4aa6-a38c-8528097df2ba",
+                    "path": "",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";XR",
+                    "action": "Fire",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
                     "id": "ec8d0d8d-5442-45c0-b9a4-388fa530a139",
                     "path": "<Mouse>/position",
                     "interactions": "",

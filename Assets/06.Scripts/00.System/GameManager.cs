@@ -322,8 +322,8 @@ public class GameManager : MonoBehaviour
     {
         if (cameraController != null)
         {
-            // 현재 활성화된 카메라의 컨트롤러 활성화
-            cameraController.SwitchToCenterCamera();
+            // CameraPosition을 CameraController를 통해 접근
+            cameraController.SwitchCamera(CameraController.CameraPosition.Center);
         }
     }
     
@@ -348,8 +348,8 @@ public class GameManager : MonoBehaviour
     {
         if (cameraController != null)
         {
-            // 모든 카메라의 컨트롤러 비활성화
-            cameraController.DisableAllCameras();
+            // VR 환경에서는 카메라를 중앙 위치로 이동
+            cameraController.SwitchCamera(CameraController.CameraPosition.Center);
         }
     }
     

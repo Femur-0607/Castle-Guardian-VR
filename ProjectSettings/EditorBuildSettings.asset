@@ -6,8 +6,8 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/08.Scenes/MainScene.unity
-    guid: fb51cdf6fd38f484b99d56593d18f212
+    path: Assets/Samples/Meta XR Core SDK/74.0.0/Sample Scenes/ControllerDrivenHandPoses.unity
+    guid: 7ea9f7c90c2fa404d86276a633b59903
   m_configObjects:
     Unity.XR.Oculus.Settings: {fileID: 11400000, guid: 861e02af3387c634da7523b54a6c520b, type: 2}
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}

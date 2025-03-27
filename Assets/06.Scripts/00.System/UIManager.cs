@@ -72,7 +72,7 @@ public class UIManager : MonoBehaviour
         InitializeShopTabs();
         
         // 화살표 초기 상태 (기본: 중앙 카메라 = 양쪽 화살표 모두 표시)
-        UpdateCameraArrows("Center");
+        UpdateCameraArrows(CameraController.CameraPosition.Center);
 
         // 쿨타임 UI 초기화
         if (cooldownImageObject != null)
@@ -260,7 +260,7 @@ public class UIManager : MonoBehaviour
     /// <summary>
     /// 카메라 변경 이벤트 처리
     /// </summary>
-    private void HandleCameraChanged(Camera camera, string position)
+    private void HandleCameraChanged(CameraController.CameraPosition position)
     {
         // 위치에 따라 화살표 UI 업데이트
         UpdateCameraArrows(position);
@@ -269,25 +269,25 @@ public class UIManager : MonoBehaviour
     /// <summary>
     /// 카메라 위치에 따라 화살표 업데이트
     /// </summary>
-    private void UpdateCameraArrows(string position)
+    private void UpdateCameraArrows(CameraController.CameraPosition position)
     {
         if (leftArrow == null || rightArrow == null) return;
         
         switch (position)
         {
-            case "Left":
+            case CameraController.CameraPosition.Left:
                 // 왼쪽 카메라일 때는 오른쪽(중앙으로 이동) 화살표만 활성화
                 leftArrow.SetActive(true);
                 rightArrow.SetActive(false);
                 break;
                 
-            case "Center":
+            case CameraController.CameraPosition.Center:
                 // 중앙 카메라일 때는 양쪽 화살표 모두 활성화
                 leftArrow.SetActive(true);
                 rightArrow.SetActive(true);
                 break;
                 
-            case "Right":
+            case CameraController.CameraPosition.Right:
                 // 오른쪽 카메라일 때는 왼쪽(중앙으로 이동) 화살표만 활성화
                 leftArrow.SetActive(false);
                 rightArrow.SetActive(true);
