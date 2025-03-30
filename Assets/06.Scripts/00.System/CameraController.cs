@@ -16,11 +16,12 @@ public class CameraController : MonoBehaviour
     [SerializeField] private Transform leftPosition;     // 왼쪽 위치
     [SerializeField] private Transform rightPosition;    // 오른쪽 위치
     [SerializeField] private Transform buildPosition;    // 빌드 모드 위치
+    [SerializeField] private Transform uiPosition;       // UI 카메라 위치
 
     // 빌드 모드 참조
     [SerializeField] private BuildManager buildManager;
     
-    public enum CameraPosition { Left, Center, Right }
+    public enum CameraPosition { Left, Center, Right, UI }
     private CameraPosition currentPosition = CameraPosition.Center;
     
     private bool isTransitioning = false;
@@ -34,11 +35,11 @@ public class CameraController : MonoBehaviour
         // 각 위치의 Transform 생성 및 설정
         CreateCameraPositions();
         
-        // 초기 위치 설정
-        if (ovrCameraRig != null && centerPosition != null)
+        // 초기 위치 설정 (UI 모드)
+        if (ovrCameraRig != null && uiPosition != null)
         {
-            ovrCameraRig.transform.position = centerPosition.position;
-            ovrCameraRig.transform.rotation = centerPosition.rotation;
+            ovrCameraRig.transform.position = uiPosition.position;
+            ovrCameraRig.transform.rotation = uiPosition.rotation;
         }
     }
     
@@ -46,12 +47,18 @@ public class CameraController : MonoBehaviour
     {
         EventManager.Instance.OnCameraSwitch += HandleCameraSwitch;
         EventManager.Instance.OnWaveEnd += HandleWaveEnd;
+        EventManager.Instance.OnDialogueStarted += HandleDialogueStarted;
+        EventManager.Instance.OnDialogueEnded += HandleDialogueEnded;
+        EventManager.Instance.OnGameStart += HandleGameStart;
     }
     
     private void OnDisable()
     {
         EventManager.Instance.OnCameraSwitch -= HandleCameraSwitch;
         EventManager.Instance.OnWaveEnd -= HandleWaveEnd;
+        EventManager.Instance.OnDialogueStarted -= HandleDialogueStarted;
+        EventManager.Instance.OnDialogueEnded -= HandleDialogueEnded;
+        EventManager.Instance.OnGameStart -= HandleGameStart;
     }
     
     #endregion
@@ -78,10 +85,44 @@ public class CameraController : MonoBehaviour
         buildPos.transform.rotation = Quaternion.Euler(55f, 135f, 0f);
         buildPosition = buildPos.transform;
 
+        // UI 카메라 위치 생성
+        GameObject uiPos = new GameObject("UICameraPosition");
+        uiPos.transform.position = new Vector3(0f, 0f, 0f); // UI 위치는 씬에서 설정
+        uiPos.transform.rotation = Quaternion.identity;
+        uiPosition = uiPos.transform;
+
         // 모든 위치를 CameraController의 자식으로 설정
         leftPos.transform.SetParent(transform);
         rightPos.transform.SetParent(transform);
         buildPos.transform.SetParent(transform);
+        uiPos.transform.SetParent(transform);
+    }
+
+    #endregion
+
+    #region 이벤트 핸들러
+
+    private void HandleDialogueStarted(EventManager.DialogueType type)
+    {
+        SwitchCamera(CameraPosition.UI);
+    }
+    
+    private void HandleDialogueEnded(EventManager.DialogueType type)
+    {
+        if (type == EventManager.DialogueType.Intro)
+        {
+            SwitchCamera(CameraPosition.Center);
+        }
+    }
+    
+    private void HandleGameStart()
+    {
+        SwitchCamera(CameraPosition.Center);
+    }
+    
+    private void HandleWaveEnd(int waveNumber)
+    {
+        SwitchCamera(CameraPosition.UI);
     }
 
     #endregion
@@ -102,6 +143,12 @@ public class CameraController : MonoBehaviour
         
         // 빌드 모드 체크 - 빌드 모드가 활성화되어 있으면 카메라 전환 무시
         if (buildManager != null && buildManager.isBuildMode)
+        {
+            return;
+        }
+        
+        // UI 모드에서는 카메라 전환 무시
+        if (currentPosition == CameraPosition.UI)
         {
             return;
         }
@@ -165,6 +212,9 @@ public class CameraController : MonoBehaviour
                 break;
             case CameraPosition.Right:
                 targetTransform = rightPosition;
+                break;
+            case CameraPosition.UI:
+                targetTransform = uiPosition;
                 break;
         }
         
@@ -255,19 +305,6 @@ public class CameraController : MonoBehaviour
         if (targetTransform != null)
         {
             StartCoroutine(TransitionCamera(targetTransform));
-        }
-    }
-    
-    /// <summary>
-    /// 웨이브 종료 시 호출되는 메서드
-    /// </summary>
-    private void HandleWaveEnd(int waveNumber)
-    {
-        // 웨이브 종료시 카메라가 꺼지는 문제 해결
-        // 현재 카메라 위치가 중앙이 아니면 중앙으로 변경
-        if (currentPosition != CameraPosition.Center)
-        {
-            SwitchCamera(CameraPosition.Center);
         }
     }
     
