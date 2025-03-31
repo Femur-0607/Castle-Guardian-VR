@@ -77,29 +77,29 @@ public class ArrowManager : MonoBehaviour
     /// <summary>
     /// 매 프레임 호출 - 키보드 및 마우스 입력을 처리하여 화살 타입 전환
     /// </summary>
-    void Update()
-    {
-        // 키보드 숫자키로 화살 타입 전환
-        if (Input.GetKeyDown(KeyCode.Alpha1) || Input.GetKeyDown(KeyCode.Keypad1))
-        {
-            SwitchArrowType(ProjectileData.ProjectileType.Normal);
-        }
-        else if (Input.GetKeyDown(KeyCode.Alpha2) || Input.GetKeyDown(KeyCode.Keypad2))
-        {
-            SwitchArrowType(ProjectileData.ProjectileType.Explosive);
-        }
-        else if (Input.GetKeyDown(KeyCode.Alpha3) || Input.GetKeyDown(KeyCode.Keypad3))
-        {
-            SwitchArrowType(ProjectileData.ProjectileType.Poison);
-        }
+    // void Update()
+    // {
+    //     // 키보드 숫자키로 화살 타입 전환
+    //     if (Input.GetKeyDown(KeyCode.Alpha1) || Input.GetKeyDown(KeyCode.Keypad1))
+    //     {
+    //         SwitchArrowType(ProjectileData.ProjectileType.Normal);
+    //     }
+    //     else if (Input.GetKeyDown(KeyCode.Alpha2) || Input.GetKeyDown(KeyCode.Keypad2))
+    //     {
+    //         SwitchArrowType(ProjectileData.ProjectileType.Explosive);
+    //     }
+    //     else if (Input.GetKeyDown(KeyCode.Alpha3) || Input.GetKeyDown(KeyCode.Keypad3))
+    //     {
+    //         SwitchArrowType(ProjectileData.ProjectileType.Poison);
+    //     }
         
-        // 마우스 휠로 화살 순환
-        float scrollWheel = Input.GetAxis("Mouse ScrollWheel");
-        if (scrollWheel != 0)
-        {
-            CycleNextArrow();
-        }
-    }
+    //     // 마우스 휠로 화살 순환
+    //     float scrollWheel = Input.GetAxis("Mouse ScrollWheel");
+    //     if (scrollWheel != 0)
+    //     {
+    //         CycleNextArrow();
+    //     }
+    // }
     
     /// <summary>
     /// 화살 타입 전환 - 다른 종류의 화살로 바꾸는 기능

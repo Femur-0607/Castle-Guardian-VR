@@ -117,7 +117,7 @@ public class GameManager : MonoBehaviour
     private IEnumerator TrySubscribeToDialogueManager()
     {
         // DialogueManager가 초기화될 때까지 대기
-        yield return new WaitForSeconds(0.5f);
+        yield return new WaitForSeconds(2.0f);
         
         if (DialogueManager.instance != null)
         {
@@ -144,7 +144,7 @@ public class GameManager : MonoBehaviour
         private IEnumerator TryDeSubscribeToDialogueManager()
     {
         // DialogueManager가 초기화될 때까지 대기
-        yield return new WaitForSeconds(0.5f);
+        yield return new WaitForSeconds(2f);
         
         if (DialogueManager.instance != null)
         {

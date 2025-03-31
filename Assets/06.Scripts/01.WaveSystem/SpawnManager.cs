@@ -35,16 +35,16 @@ public class SpawnManager : MonoBehaviour
 
     #region 유니티 이벤트 함수
 
-    private void Update()
-    {
-#if UNITY_EDITOR
-        // 테스트용: F1 키 입력 시 모든 적 강제 Kill
-        if (Input.GetKeyDown(KeyCode.F1))
-        {
-            ForceKillAllEnemies();
-        }
-#endif
-    }
+//     private void Update()
+//     {
+// #if UNITY_EDITOR
+//         // 테스트용: F1 키 입력 시 모든 적 강제 Kill
+//         if (Input.GetKeyDown(KeyCode.F1))
+//         {
+//             ForceKillAllEnemies();
+//         }
+// #endif
+//     }
 
     #endregion
 

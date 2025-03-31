@@ -12,7 +12,7 @@ public class CameraController : MonoBehaviour
     [SerializeField] private GameObject ovrCameraRig;    // OVR 카메라 리그
 
     [Header("카메라 위치 설정")]
-    [SerializeField] private Transform centerPosition;   // 중앙 위치 (씬에서 설정)
+    [SerializeField] private Transform centerPosition;   // 중앙 위치
     [SerializeField] private Transform leftPosition;     // 왼쪽 위치
     [SerializeField] private Transform rightPosition;    // 오른쪽 위치
     [SerializeField] private Transform buildPosition;    // 빌드 모드 위치
@@ -32,9 +32,6 @@ public class CameraController : MonoBehaviour
 
     private void Awake()
     {
-        // 각 위치의 Transform 생성 및 설정
-        CreateCameraPositions();
-        
         // 초기 위치 설정 (UI 모드)
         if (ovrCameraRig != null && uiPosition != null)
         {
@@ -59,43 +56,6 @@ public class CameraController : MonoBehaviour
         EventManager.Instance.OnDialogueStarted -= HandleDialogueStarted;
         EventManager.Instance.OnDialogueEnded -= HandleDialogueEnded;
         EventManager.Instance.OnGameStart -= HandleGameStart;
-    }
-    
-    #endregion
-
-    #region 카메라 위치 설정
-
-    private void CreateCameraPositions()
-    {
-        // 왼쪽 위치 생성
-        GameObject leftPos = new GameObject("LeftCameraPosition");
-        leftPos.transform.position = new Vector3(35f, 35f, -50f);
-        leftPos.transform.rotation = Quaternion.Euler(40f, -80f, 0f);
-        leftPosition = leftPos.transform;
-
-        // 오른쪽 위치 생성
-        GameObject rightPos = new GameObject("RightCameraPosition");
-        rightPos.transform.position = new Vector3(-70f, 35f, -30f);
-        rightPos.transform.rotation = Quaternion.Euler(40f, -300f, 0f);
-        rightPosition = rightPos.transform;
-
-        // 빌드 모드 위치 생성
-        GameObject buildPos = new GameObject("BuildCameraPosition");
-        buildPos.transform.position = new Vector3(-10f, 60f, 10f);
-        buildPos.transform.rotation = Quaternion.Euler(55f, 135f, 0f);
-        buildPosition = buildPos.transform;
-
-        // UI 카메라 위치 생성
-        GameObject uiPos = new GameObject("UICameraPosition");
-        uiPos.transform.position = new Vector3(0f, 0f, 0f); // UI 위치는 씬에서 설정
-        uiPos.transform.rotation = Quaternion.identity;
-        uiPosition = uiPos.transform;
-
-        // 모든 위치를 CameraController의 자식으로 설정
-        leftPos.transform.SetParent(transform);
-        rightPos.transform.SetParent(transform);
-        buildPos.transform.SetParent(transform);
-        uiPos.transform.SetParent(transform);
     }
 
     #endregion
