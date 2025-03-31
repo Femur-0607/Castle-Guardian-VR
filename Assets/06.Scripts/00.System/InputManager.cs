@@ -5,6 +5,7 @@ using UnityEngine;
 public class InputManager : MonoBehaviour
 {
     private float lastStickValue = 0f;  // 이전 조이스틱 입력값 저장
+    private bool wasTriggerPressed = false;  // 이전 프레임의 트리거 상태
 
     private void Update()
     {
@@ -27,5 +28,26 @@ public class InputManager : MonoBehaviour
             EventManager.Instance.CameraSwitchEvent(currentStickValue);
             lastStickValue = currentStickValue;
         }
+
+        // VR 컨트롤러 트리거 입력 처리
+        bool isTriggerPressed = OVRInput.Get(OVRInput.Button.PrimaryIndexTrigger, OVRInput.Controller.RTouch);
+        
+        // 트리거를 처음 눌렀을 때
+        if (isTriggerPressed && !wasTriggerPressed)
+        {
+            EventManager.Instance.FireStartEvent();
+        }
+        // 트리거를 누르고 있는 동안
+        else if (isTriggerPressed)
+        {
+            EventManager.Instance.FireChargingEvent();
+        }
+        // 트리거를 뗐을 때
+        else if (!isTriggerPressed && wasTriggerPressed)
+        {
+            EventManager.Instance.FireReleaseEvent();
+        }
+
+        wasTriggerPressed = isTriggerPressed;
     }
 }

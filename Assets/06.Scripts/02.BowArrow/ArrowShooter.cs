@@ -15,14 +15,11 @@ public class ArrowShooter : MonoBehaviour
     [Header("화살 설정")]
     public float minSpeed = 1f;    // 활을 가장 조금 당겼을 때의 속도(곡률 최소)
     public float maxSpeed = 40f;    // 활을 최대로 당겼을 때의 속도(곡률 최대)
-    public float dragToFullPower = 200f;  // 마우스를 얼마나 아래로 드래그하면 maxSpeed에 도달할지(픽셀/단위)
+    public float chargeTime = 1.5f;  // 최대 힘까지 걸리는 시간
 
     private float currentArrowSpeed;  // 현재 화살 속도
     private bool isAiming = false;     // 조준 중 여부
-
-    // 마우스 드래그 계산용 변수
-    private float initialMouseY;  // 조준 시작 시 마우스 Y 위치
-    private float currentMouseY;  // 현재 마우스 Y 위치
+    private float chargeTimer = 0f;  // 차징 타이머
 
     [Header("화살 프리팹-ArrowManager에서 설정")]
     [SerializeField] private GameObject muzzleEffectPrefab; // 발사 전 효과 프리팹 (ArrowManager에서 설정)
@@ -75,33 +72,29 @@ public class ArrowShooter : MonoBehaviour
         if (GameManager.Instance.IsArrowCooldown) return;
         
         isAiming = true;
-        initialMouseY = currentMouseY;  // 조준 시작 시의 마우스 Y값을 초기값으로 저장
-        currentArrowSpeed = minSpeed;   // 초기값은 최소 속도
+        currentArrowSpeed = minSpeed;
+        chargeTimer = 0f;  // 타이머 초기화
     }
 
     /// <summary>
     /// 발사 버튼 누르고 있는 동안 호출 - 화살 힘 계산
     /// </summary>
-    /// <param name="pos">마우스 위치</param>
-    private void OnFireCharging(Vector2 pos)
+    private void OnFireCharging()
     {
-        // 쿨타임 중이면 조준 무시
         if (GameManager.Instance.IsArrowCooldown) return;
         
-        currentMouseY = pos.y;
-
         if (isAiming)
         {
-            // 드래그 거리 계산: 처음 클릭한 Y와 현재 Y의 차이 (아래로 드래그 시 양수가 됨)
-            float dragDistance = initialMouseY - currentMouseY;
-            if (dragDistance < 0)
-                dragDistance = 0;
-
-            // 0~1 범위의 t 값으로 보정 후, 선형 보간(Lerp)을 이용해 힘 계산
-            float t = Mathf.Clamp01(dragDistance / dragToFullPower);
+            // 차징 타이머 증가
+            chargeTimer += Time.deltaTime;
+            
+            // 0~1 범위의 t 값 계산
+            float t = Mathf.Clamp01(chargeTimer / chargeTime);
+            
+            // 선형 보간으로 힘 계산
             currentArrowSpeed = Mathf.Lerp(minSpeed, maxSpeed, t);
             
-            // 궤적 시각화 갱신 - 현재 속도 기반으로 화살 궤적 예측
+            // 궤적 시각화 갱신
             curveVisualizer.VisualizeProjectileCurve(
                 arrowSpawnPoint.position, 
                 0f, 
