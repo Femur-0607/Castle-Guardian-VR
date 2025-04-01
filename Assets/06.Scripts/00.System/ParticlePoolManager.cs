@@ -110,7 +110,7 @@ public class ParticlePoolManager : MonoBehaviour
         return particleObj;
     }
 
-    private System.Collections.IEnumerator ReturnToPoolAfterPlay(GameObject obj, string poolKey, float delay)
+    private IEnumerator ReturnToPoolAfterPlay(GameObject obj, string poolKey, float delay)
     {
         yield return new WaitForSeconds(delay);
         ReturnToPool(obj, poolKey);
@@ -237,7 +237,7 @@ public class ParticlePoolManager : MonoBehaviour
                         // 플레이어 경험치 증가
                         if (PlayerExperienceSystem.Instance != null)
                         {
-                            PlayerExperienceSystem.Instance.AddExperience(1);
+                            PlayerExperienceSystem.Instance.AddExperience(20);
                         }
                         
                         // 트레일 파티클 비활성화 및 풀로 반환

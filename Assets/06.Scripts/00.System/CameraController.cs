@@ -9,7 +9,8 @@ public class CameraController : MonoBehaviour
     #region 필드 변수
 
     [Header("VR 카메라 설정")]
-    [SerializeField] private GameObject ovrCameraRig;    // OVR 카메라 리그
+    public GameObject ovrCameraRig;    // OVR 카메라 리그
+    [SerializeField] private OVRScreenFade screenFade;   // OVR 스크린 페이드
 
     [Header("카메라 위치 설정")]
     [SerializeField] private Transform centerPosition;   // 중앙 위치
@@ -17,6 +18,9 @@ public class CameraController : MonoBehaviour
     [SerializeField] private Transform rightPosition;    // 오른쪽 위치
     [SerializeField] private Transform buildPosition;    // 빌드 모드 위치
     [SerializeField] private Transform uiPosition;       // UI 카메라 위치
+
+    [Header("페이드 설정")]
+    [SerializeField] private float fadeTime = 0.3f;      // 페이드 시간
 
     // 빌드 모드 참조
     [SerializeField] private BuildManager buildManager;
@@ -82,6 +86,7 @@ public class CameraController : MonoBehaviour
     
     private void HandleWaveEnd(int waveNumber)
     {
+        Debug.Log("WaveEnd");
         SwitchCamera(CameraPosition.UI);
     }
 
@@ -203,27 +208,23 @@ public class CameraController : MonoBehaviour
     {
         isTransitioning = true;
         
-        // 부드러운 이동을 위한 초기값
-        Vector3 startPosition = ovrCameraRig.transform.position;
-        Quaternion startRotation = ovrCameraRig.transform.rotation;
-        float elapsedTime = 0f;
-        float transitionDuration = 0.5f; // 전환 시간
-        
-        while (elapsedTime < transitionDuration)
+        // 페이드 아웃
+        if (screenFade != null)
         {
-            elapsedTime += Time.deltaTime;
-            float t = elapsedTime / transitionDuration;
-            
-            // 부드러운 보간
-            ovrCameraRig.transform.position = Vector3.Lerp(startPosition, targetTransform.position, t);
-            ovrCameraRig.transform.rotation = Quaternion.Lerp(startRotation, targetTransform.rotation, t);
-            
-            yield return null;
+            screenFade.FadeOut();
+            yield return new WaitForSeconds(fadeTime);
         }
         
-        // 정확한 위치와 회전 설정
+        // 즉시 위치 이동
         ovrCameraRig.transform.position = targetTransform.position;
         ovrCameraRig.transform.rotation = targetTransform.rotation;
+        
+        // 페이드 인
+        if (screenFade != null)
+        {
+            screenFade.FadeIn();
+            yield return new WaitForSeconds(fadeTime);
+        }
         
         isTransitioning = false;
         

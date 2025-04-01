@@ -138,27 +138,6 @@ public class GameManager : MonoBehaviour
     {
         EventManager.Instance.OnWaveStart -= HandleWaveStart;
         EventManager.Instance.OnWaveEnd -= HandleWaveEnd;
-        StartCoroutine(TryDeSubscribeToDialogueManager());
-    }
-    
-        private IEnumerator TryDeSubscribeToDialogueManager()
-    {
-        // DialogueManager가 초기화될 때까지 대기
-        yield return new WaitForSeconds(2f);
-        
-        if (DialogueManager.instance != null)
-        {
-            DialogueManager.instance.conversationEnded -= HandleConversationEnded;
-        }
-        else
-        {
-            yield return new WaitForSeconds(1f);
-            
-            if (DialogueManager.instance != null)
-            {
-                DialogueManager.instance.conversationEnded -= HandleConversationEnded;
-            }
-        }
     }
 
     #endregion
