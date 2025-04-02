@@ -1,6 +1,7 @@
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using System.Collections.Generic;
+using System.Collections;
 
 public class BuildManager : MonoBehaviour
 {
@@ -21,6 +22,13 @@ public class BuildManager : MonoBehaviour
 
     private BuildableNode selectedNode;  // 선택된 노드
 
+    [Header("VR 설정")]
+    [SerializeField] private float rayDistance = 10f;        // VR 레이캐스트 최대 거리
+    [SerializeField] private LayerMask buildableLayer;       // 건설 가능한 레이어
+    private bool isBuilding;                                 // 건설 모드 상태
+
+    private BuildableNode currentHoveredNode; // 현재 레이캐스트가 가리키는 노드
+
     #endregion
 
     #region 유니티 이벤트 함수
@@ -31,6 +39,59 @@ public class BuildManager : MonoBehaviour
         {
             // 초기 상태에서는 모든 노드의 콜라이더와 렌더러 비활성화
             node.SetNodeVisibility(false);
+        }
+    }
+
+    private void OnEnable()
+    {
+        EventManager.Instance.OnBuildNodeHit += HandleBuildNodeHit;
+    }
+
+    private void OnDisable()
+    {
+        EventManager.Instance.OnBuildNodeHit -= HandleBuildNodeHit;
+    }
+
+    void Update()
+    {
+        if (!isBuilding) return;
+
+        // 현재 활성화된 레이캐스트의 결과를 가져옴
+        RaycastHit hit;
+        
+        if (Physics.Raycast(transform.position, transform.forward, out hit, rayDistance, buildableLayer))
+        {
+            BuildableNode node = hit.collider.GetComponent<BuildableNode>();
+            if (node != null)
+            {
+                // 새로운 노드를 가리킬 때
+                if (node != currentHoveredNode)
+                {
+                    // 이전 노드에서 벗어남
+                    if (currentHoveredNode != null)
+                        currentHoveredNode.OnRaycastExit();
+                    
+                    // 새 노드 진입
+                    currentHoveredNode = node;
+                    currentHoveredNode.OnRaycastEnter();
+                }
+            }
+        }
+        else if (currentHoveredNode != null)
+        {
+            // 레이캐스트가 노드에서 벗어남
+            currentHoveredNode.OnRaycastExit();
+            currentHoveredNode = null;
+        }
+    }
+
+    private void HandleBuildNodeHit()
+    {
+        if (currentHoveredNode != null)
+        {
+            currentHoveredNode.OnRaycastHit();
+            OVRInput.SetControllerVibration(0.3f, 0.3f, OVRInput.Controller.LTouch);
+            StartCoroutine(StopVibration());
         }
     }
 
@@ -172,4 +233,17 @@ public class BuildManager : MonoBehaviour
     }
     
     #endregion
+
+    // 햅틱 피드백 중지
+    private IEnumerator StopVibration()
+    {
+        yield return new WaitForSeconds(0.1f);
+        OVRInput.SetControllerVibration(0, 0, OVRInput.Controller.LTouch);
+    }
+
+    // 건설 모드 토글
+    public void ToggleBuildMode(bool enable)
+    {
+        isBuilding = enable;
+    }
 }

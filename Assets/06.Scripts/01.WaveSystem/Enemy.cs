@@ -293,7 +293,6 @@ public class Enemy : LivingEntity
                 if (castle != null)
                 {
                     castle.TakeDamage(enemyData.attackDamage);
-                    Debug.Log($"공격 성공: {enemyData.attackDamage} 데미지");
                 }
 
                 // 현재 시간을 할당

@@ -246,6 +246,24 @@ public class ArrowManager : MonoBehaviour
     }
     
     /// <summary>
+    /// 이전 화살로 순환 - 마우스 휠 등으로 사용 가능한 화살을 순차적으로 전환
+    /// </summary>
+    public void CyclePreviousArrow()
+    {
+        // 사용 가능한 화살이 1개 이하면 무시
+        if (unlockedArrows.Count <= 1) return;
+        
+        // 현재 화살의 인덱스 찾기
+        int currentIndex = unlockedArrows.IndexOf(CurrentArrowType);
+        
+        // 이전 화살로 인덱스 이동 (첫 번째 화살이면 마지막으로 순환)
+        int previousIndex = (currentIndex - 1 + unlockedArrows.Count) % unlockedArrows.Count;
+        
+        // 이전 화살로 전환
+        SwitchArrowType(unlockedArrows[previousIndex]);
+    }
+    
+    /// <summary>
     /// 화살 타입 변경 이벤트 - UI 등에서 구독하여 화살 변경 시 알림 받음
     /// </summary>
     public delegate void ArrowTypeChangedHandler(ProjectileData.ProjectileType newType);

@@ -17,10 +17,9 @@ public class WaveManager : MonoBehaviour
     [SerializeField] private bool isWaveActive;  // 웨이브 진행 여부
     private bool isDialogueActive = false;       // 다이얼로그 표시 중인지 여부
 
-    [SerializeField] private float soulCollectionDelay = 1.0f;
-    [SerializeField] private float soulMoveDuration = 1.0f;
+    [SerializeField] private float soulMoveDuration = 1.0f; // 영혼 수집 시간
 
-    private CameraController cameraController;
+   public Transform cameraRig;
 
     #endregion
 
@@ -40,6 +39,7 @@ public class WaveManager : MonoBehaviour
         EventManager.Instance.OnGameStart += OnWaveStart;
         EventManager.Instance.OnDialogueStarted += HandleDialogueStarted;
         EventManager.Instance.OnDialogueEnded += HandleDialogueEnded;
+        EventManager.Instance.OnEnemyForceKill += ForceKillAllEnemies;
     }
 
     private void OnDisable()
@@ -47,6 +47,7 @@ public class WaveManager : MonoBehaviour
         EventManager.Instance.OnGameStart -= OnWaveStart;
         EventManager.Instance.OnDialogueStarted -= HandleDialogueStarted;
         EventManager.Instance.OnDialogueEnded -= HandleDialogueEnded;
+        EventManager.Instance.OnEnemyForceKill -= ForceKillAllEnemies;
     }
 
     void Update()
@@ -145,11 +146,13 @@ public class WaveManager : MonoBehaviour
         isWaveActive = false;
 
         SoundManager.Instance.PlaySound("MainBGM");
+        Debug.Log("웨이브 종료(사운드 재생)");
 
         // 웨이브 클리어 보상
         if (currentWaveIndex < waveData.waves.Count)
         {
             GameManager.Instance.AddMoney(waveData.waves[currentWaveIndex].clearReward);
+            Debug.Log("웨이브 종료(돈 증가)");
         }
 
         if (CurrentWave >= 10) // 10웨이브가 마지막
@@ -163,17 +166,16 @@ public class WaveManager : MonoBehaviour
 
     private void CollectSoulsToPlayer()
     {
-        if (cameraController == null)
+        Debug.Log("코루틴 시작");
+
+        if (cameraRig == null)
         {
-            Debug.LogError("CameraController가 없어 영혼을 수집할 수 없습니다!");
+            Debug.LogError("CameraRig이 없어 영혼을 수집할 수 없습니다!");
             return;
         }
-
-        // OVRCameraRig의 centerEyeAnchor를 사용
-        Transform targetTransform = cameraController.ovrCameraRig.transform;
         
         // 모든 남아있는 영혼을 플레이어에게 이동
-        ParticlePoolManager.Instance.CollectAllSouls(targetTransform, soulMoveDuration, () => {
+        ParticlePoolManager.Instance.CollectAllSouls(cameraRig, soulMoveDuration, () => {
             // 경험치 증가 애니메이션이 끝나고 1.5초 후에 웨이브 종료 이벤트 발생
             StartCoroutine(DelayedWaveEndEvent());
         });
@@ -182,7 +184,6 @@ public class WaveManager : MonoBehaviour
     private IEnumerator DelayedWaveEndEvent()
     {
         Debug.Log("영혼 수집 완료");
-
 
         // 경험치 애니메이션과 효과음을 위한 1.5초 대기
         yield return new WaitForSeconds(1.5f);
@@ -237,6 +238,17 @@ public class WaveManager : MonoBehaviour
             // 스폰 진행
             targetSpawnManager.SpawnEnemy(pattern.enemyType);
             yield return new WaitForSeconds(pattern.spawnInterval);
+        }
+    }
+    
+    public void ForceKillAllEnemies()
+    {
+        foreach (var spawnManager in spawnManagers)
+        {
+            if (spawnManager != null)
+            {
+                spawnManager.ForceKillAllEnemies();
+            }
         }
     }
     

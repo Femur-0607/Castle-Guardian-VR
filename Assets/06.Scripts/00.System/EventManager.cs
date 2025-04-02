@@ -37,6 +37,12 @@ public class EventManager : MonoBehaviour
     public event Action<DialogueType> OnDialogueEnded;     // 다이얼로그 종료 시 발동할 이벤트 (다이얼로그 타입 포함)
     public event Action OnArrowCooldownStart;             // 화살 쿨타임 시작 시 발동할 이벤트
     public event Action OnArrowCooldownEnd;               // 화살 쿨타임 종료 시 발동할 이벤트
+    public event Action OnGhostSpawn;              // 유령 스폰 이벤트
+    public event Action OnGhostDestroy;            // 유령 제거 이벤트
+    public event Action OnEnemyForceKill;          // 적 강제 제거 이벤트
+    public event Action OnBuildModeToggle;         // 빌드 모드 토글 이벤트
+    public event Action<bool> OnBuildModeChanged;  // 빌드 모드 상태 변경 이벤트
+    public event Action OnBuildNodeHit;  // 노드 건설/업그레이드 이벤트
 
     #endregion
 
@@ -70,6 +76,12 @@ public class EventManager : MonoBehaviour
     public void DialogueEndedEvent(DialogueType type) => OnDialogueEnded?.Invoke(type);
     public void ArrowCooldownStartEvent() => OnArrowCooldownStart?.Invoke();
     public void ArrowCooldownEndEvent() => OnArrowCooldownEnd?.Invoke();
+    public void GhostSpawnEvent() => OnGhostSpawn?.Invoke();
+    public void GhostDestroyEvent() => OnGhostDestroy?.Invoke();
+    public void EnemyForceKillEvent() => OnEnemyForceKill?.Invoke();
+    public void BuildModeToggleEvent() => OnBuildModeToggle?.Invoke();
+    public void BuildModeChangedEvent(bool isEnabled) => OnBuildModeChanged?.Invoke(isEnabled);
+    public void BuildNodeHitEvent() => OnBuildNodeHit?.Invoke();
     
     #endregion
 }

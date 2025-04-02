@@ -33,19 +33,6 @@ public class SpawnManager : MonoBehaviour
 
     #endregion
 
-    #region 유니티 이벤트 함수
-
-    private void Update()
-    {
-        // VR 왼쪽 컨트롤러의 Y 버튼 입력 시 모든 적 강제 Kill
-        if (OVRInput.GetDown(OVRInput.Button.Two, OVRInput.Controller.LTouch))
-        {
-            ForceKillAllEnemies();
-        }
-    }
-
-    #endregion
-
     #region 스폰 관련 로직
 
     /// <summary>
@@ -95,8 +82,10 @@ public class SpawnManager : MonoBehaviour
     #endregion
 
     // ★ 테스트용: 모든 적에게 큰 데미지를 줘서 강제 Kill
-    private void ForceKillAllEnemies()
+    public void ForceKillAllEnemies()
     {
+        Debug.Log("ForceKillAllEnemies");
+
         // activeEnemies 리스트 복사본을 만들어 순회(동적 제거 방지)
         foreach (Enemy enemy in activeEnemies.ToArray())
         {

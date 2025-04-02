@@ -57,74 +57,6 @@ public class BuildableNode : MonoBehaviour
         slowTower.enabled = false;
     }
 
-    private void OnMouseEnter()
-    {
-        // UI 위에 있을 경우엔 클릭/오버 효과를 무시
-        if (EventSystem.current.IsPointerOverGameObject()) return;
-        // 빌드모드가 아닐 경우엔 효과 적용하지 않음
-        if (!buildManager.isBuildMode) return;
-
-        // 빌드 모드에 따라 분기 처리
-        if (buildManager.currentBuildMode == BuildManager.BuildModeType.NewTower)
-        {
-            // 0단계 노드만 하이라이트
-            if (towerLevel == 0) SetColor(hoverColor);
-        }
-        else if (buildManager.currentBuildMode == BuildManager.BuildModeType.UpgradeTower)
-        {
-            // 1단계 타워만 하이라이트
-            if (towerLevel == 1) SetColor(hoverColor);
-        }
-    }
-
-    private void OnMouseExit()
-    {
-        // 빌드 모드가 아니면 효과 적용하지 않음
-        if (!buildManager.isBuildMode) return;
-        
-        // 0단계나 1단계 노드는 빌드 모드에서 baseColor로 복귀
-        if (towerLevel == 0 || towerLevel == 1)
-        {
-            SetColor(baseColor);
-        }
-    }
-
-    private void OnMouseDown()
-    {
-        // 빌드 모드가 아니면 아무것도 하지 않음
-        if (!buildManager.isBuildMode) return;
-        
-        // 새 타워 건설 모드
-        if (buildManager.currentBuildMode == BuildManager.BuildModeType.NewTower)
-        {
-            // 건설 가능한 노드일 경우에만 건설
-            if (towerLevel == 0)
-            {
-                BuildTower();
-            }
-        }
-        // 업그레이드 모드
-        else if (buildManager.currentBuildMode == BuildManager.BuildModeType.UpgradeTower)
-        {
-            // 1단계 타워만 업그레이드 가능
-            if (towerLevel == 1)
-            {
-                // 업그레이드 타입에 따라 처리
-                if (buildManager.GetUpgradeTargetType() == TowerType.Explosive)
-                {
-                    UpgradeToExplosiveTower();
-                }
-                else if (buildManager.GetUpgradeTargetType() == TowerType.Slow)
-                {
-                    UpgradeToSlowTower();
-                }
-                
-                // 업그레이드 후 빌드 모드 종료
-                buildManager.ExitBuildMode();
-            }
-        }
-    }
-
     #endregion
 
     #region 기초 타워 건설
@@ -310,4 +242,64 @@ public class BuildableNode : MonoBehaviour
     }
     
     #endregion
+
+    // VR 레이캐스트 히트 시 호출될 메서드 추가
+    public void OnRaycastHit()
+    {
+        // 빌드 모드가 아니면 아무것도 하지 않음
+        if (!buildManager.isBuildMode) return;
+        
+        // 새 타워 건설 모드
+        if (buildManager.currentBuildMode == BuildManager.BuildModeType.NewTower)
+        {
+            // 건설 가능한 노드일 경우에만 건설
+            if (towerLevel == 0)
+            {
+                BuildTower();
+            }
+        }
+        // 업그레이드 모드
+        else if (buildManager.currentBuildMode == BuildManager.BuildModeType.UpgradeTower)
+        {
+            // 1단계 타워만 업그레이드 가능
+            if (towerLevel == 1)
+            {
+                if (buildManager.GetUpgradeTargetType() == TowerType.Explosive)
+                {
+                    UpgradeToExplosiveTower();
+                }
+                else if (buildManager.GetUpgradeTargetType() == TowerType.Slow)
+                {
+                    UpgradeToSlowTower();
+                }
+                buildManager.ExitBuildMode();
+            }
+        }
+    }
+
+    // VR 레이캐스트가 노드를 가리킬 때
+    public void OnRaycastEnter()
+    {
+        if (!buildManager.isBuildMode) return;
+
+        if (buildManager.currentBuildMode == BuildManager.BuildModeType.NewTower)
+        {
+            if (towerLevel == 0) SetColor(hoverColor);
+        }
+        else if (buildManager.currentBuildMode == BuildManager.BuildModeType.UpgradeTower)
+        {
+            if (towerLevel == 1) SetColor(hoverColor);
+        }
+    }
+
+    // VR 레이캐스트가 노드에서 벗어날 때
+    public void OnRaycastExit()
+    {
+        if (!buildManager.isBuildMode) return;
+        
+        if (towerLevel == 0 || towerLevel == 1)
+        {
+            SetColor(baseColor);
+        }
+    }
 }

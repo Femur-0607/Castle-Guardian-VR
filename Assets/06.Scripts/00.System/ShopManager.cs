@@ -48,27 +48,31 @@ public class ShopManager : MonoBehaviour
     // 화살 버튼 상태 업데이트
     private void UpdateArrowButtonInteractable()
     {
-        // 폭발 화살 버튼: 해금되지 않았으면 "해금" 텍스트로 변경
+        // 폭발 화살 버튼
         if (explosiveArrowButton != null)
         {
             Text buttonText = explosiveArrowButton.GetComponentInChildren<Text>();
             if (buttonText != null)
             {
-                buttonText.text = arrowManager.IsArrowUnlocked(ProjectileData.ProjectileType.Explosive) ? "업그레이드됨" : "해금";
+                bool isUnlocked = arrowManager.IsArrowUnlocked(ProjectileData.ProjectileType.Explosive);
+                buttonText.text = isUnlocked ? "업그레이드됨" : "해금";
+                explosiveArrowButton.interactable = !isUnlocked; // 해금되면 버튼 비활성화
             }
         }
         
-        // 독 화살 버튼: 해금되지 않았으면 "해금" 텍스트로 변경
+        // 독 화살 버튼
         if (poisonArrowButton != null)
         {
             Text buttonText = poisonArrowButton.GetComponentInChildren<Text>();
             if (buttonText != null)
             {
-                buttonText.text = arrowManager.IsArrowUnlocked(ProjectileData.ProjectileType.Poison) ? "업그레이드됨" : "해금";
+                bool isUnlocked = arrowManager.IsArrowUnlocked(ProjectileData.ProjectileType.Poison);
+                buttonText.text = isUnlocked ? "업그레이드됨" : "해금";
+                poisonArrowButton.interactable = !isUnlocked; // 해금되면 버튼 비활성화
             }
         }
         
-        // 활 업그레이드 버튼
+        // 활 업그레이드 버튼은 항상 활성화 상태 유지
         if (arrowUpgradeButton != null)
         {
             Text buttonText = arrowUpgradeButton.GetComponentInChildren<Text>();
