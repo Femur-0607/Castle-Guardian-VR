@@ -52,6 +52,16 @@ public class ArrowManager : MonoBehaviour
     private Dictionary<ProjectileData.ProjectileType, int> arrowLevels = new Dictionary<ProjectileData.ProjectileType, int>();
     private Dictionary<ProjectileData.ProjectileType, bool> arrowUnlocked = new Dictionary<ProjectileData.ProjectileType, bool>();
     
+    private void OnEnable()
+    {
+        EventManager.Instance.OnLevelUp += HandleLevelUp;
+    }
+
+    private void OnDisable()
+    {
+        EventManager.Instance.OnLevelUp -= HandleLevelUp;
+    }
+    
     /// <summary>
     /// 초기화 - 시작 시 기본 화살 잠금 해제 및 다른 화살 초기화
     /// </summary>
@@ -73,33 +83,20 @@ public class ArrowManager : MonoBehaviour
         // 시작 시 기본 화살 장착
         SwitchArrowType(ProjectileData.ProjectileType.Normal);
     }
-
+    
     /// <summary>
-    /// 매 프레임 호출 - 키보드 및 마우스 입력을 처리하여 화살 타입 전환
+    /// 레벨업 시 화살 데미지 증가
     /// </summary>
-    // void Update()
-    // {
-    //     // 키보드 숫자키로 화살 타입 전환
-    //     if (Input.GetKeyDown(KeyCode.Alpha1) || Input.GetKeyDown(KeyCode.Keypad1))
-    //     {
-    //         SwitchArrowType(ProjectileData.ProjectileType.Normal);
-    //     }
-    //     else if (Input.GetKeyDown(KeyCode.Alpha2) || Input.GetKeyDown(KeyCode.Keypad2))
-    //     {
-    //         SwitchArrowType(ProjectileData.ProjectileType.Explosive);
-    //     }
-    //     else if (Input.GetKeyDown(KeyCode.Alpha3) || Input.GetKeyDown(KeyCode.Keypad3))
-    //     {
-    //         SwitchArrowType(ProjectileData.ProjectileType.Poison);
-    //     }
-        
-    //     // 마우스 휠로 화살 순환
-    //     float scrollWheel = Input.GetAxis("Mouse ScrollWheel");
-    //     if (scrollWheel != 0)
-    //     {
-    //         CycleNextArrow();
-    //     }
-    // }
+    private void HandleLevelUp(int newLevel)
+    {
+        // 모든 화살의 데미지 증가
+        normalArrowData.baseDamage += normalArrowData.damageIncreasePerLevel;
+        explosiveArrowData.baseDamage += explosiveArrowData.damageIncreasePerLevel;
+        poisonArrowData.baseDamage += poisonArrowData.damageIncreasePerLevel;
+
+        // 현재 장착된 화살 UI 갱신
+        SwitchArrowType(CurrentArrowType);
+    }
     
     /// <summary>
     /// 화살 타입 전환 - 다른 종류의 화살로 바꾸는 기능
@@ -110,7 +107,6 @@ public class ArrowManager : MonoBehaviour
         // 잠금 해제된 화살인지 확인
         if (!arrowUnlocked[arrowType])
         {
-            Debug.LogWarning("화살이 잠겨있습니다: " + arrowType);
             return;
         }
         
@@ -166,65 +162,6 @@ public class ArrowManager : MonoBehaviour
         unlockedArrows.Add(arrowType);     // 사용 가능한 화살 목록에 추가
         
         return true;
-    }
-    
-    /// <summary>
-    /// 화살 업그레이드 - 화살 성능 향상
-    /// </summary>
-    /// <param name="arrowType">업그레이드할 화살 타입</param>
-    /// <returns>업그레이드 성공 여부</returns>
-    public bool UpgradeArrow(ProjectileData.ProjectileType arrowType)
-    {
-        // 해금된 화살인지 확인
-        if (!arrowUnlocked[arrowType])
-        {
-            return false;
-        }
-        
-        // 레벨 증가
-        arrowLevels[arrowType]++;
-        
-        // 화살 데이터 업데이트 (레벨에 따른 능력치 향상)
-        UpdateArrowData(arrowType);
-        
-        return true;
-    }
-    
-    /// <summary>
-    /// 화살 데이터 업데이트 - 레벨에 따른 능력치 향상 적용
-    /// </summary>
-    /// <param name="arrowType">업데이트할 화살 타입</param>
-    private void UpdateArrowData(ProjectileData.ProjectileType arrowType)
-    {
-        int level = arrowLevels[arrowType];
-        
-        // 화살 타입별 업그레이드 능력치 적용
-        switch(arrowType)
-        {
-            case ProjectileData.ProjectileType.Normal:
-                // 기본 화살: 데미지만 증가
-                normalArrowData.baseDamage += normalArrowData.damageIncreasePerLevel;
-                break;
-                
-            case ProjectileData.ProjectileType.Explosive:
-                // 폭발 화살: 데미지와 폭발 반경 증가
-                explosiveArrowData.baseDamage += explosiveArrowData.damageIncreasePerLevel;
-                explosiveArrowData.baseImpactRadius += explosiveArrowData.radiusIncreasePerLevel;
-                break;
-                
-            case ProjectileData.ProjectileType.Poison:
-                // 독 화살: 데미지, 독 데미지, 지속시간 증가
-                poisonArrowData.baseDamage += poisonArrowData.damageIncreasePerLevel;
-                poisonArrowData.baseDotDamage += 5f;  // 독 데미지 증가량 (고정)
-                poisonArrowData.baseEffectDuration += poisonArrowData.durationIncreasePerLevel;
-                break;
-        }
-        
-        // 현재 장착 중인 화살의 데이터가 업데이트된 경우 화살 발사기에 새 데이터 적용
-        if (CurrentArrowType == arrowType)
-        {
-            SwitchArrowType(arrowType);
-        }
     }
     
     /// <summary>
@@ -293,34 +230,5 @@ public class ArrowManager : MonoBehaviour
         SwitchArrowType(CurrentArrowType);
         
         return true;
-    }
-
-    /// <summary>
-    /// 특정 ArrowShooter를 현재 화살 타입으로 초기화
-    /// 카메라 전환 시 호출됨
-    /// </summary>
-    /// <param name="targetShooter">초기화할 ArrowShooter</param>
-    public void InitializeArrowShooter(ArrowShooter targetShooter)
-    {
-        if (targetShooter == null) return;
-        
-        // 현재 활성화된 화살 타입에 따라 ArrowShooter 초기화
-        switch (CurrentArrowType)
-        {
-            case ProjectileData.ProjectileType.Normal:
-                targetShooter.SetProjectilePrefab(normalArrowPrefab, normalArrowData, normalMuzzleEffectPrefab);
-                break;
-                
-            case ProjectileData.ProjectileType.Explosive:
-                targetShooter.SetProjectilePrefab(explosiveArrowPrefab, explosiveArrowData, explosiveMuzzleEffectPrefab);
-                break;
-                
-            case ProjectileData.ProjectileType.Poison:
-                targetShooter.SetProjectilePrefab(poisonArrowPrefab, poisonArrowData, poisonMuzzleEffectPrefab);
-                break;
-        }
-        
-        // ArrowShooter 참조 업데이트 (나중에 업그레이드 시 필요할 수 있음)
-        arrowShooter = targetShooter;
     }
 }

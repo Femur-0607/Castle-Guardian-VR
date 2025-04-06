@@ -24,9 +24,6 @@ public class PlayerExperienceSystem : MonoBehaviour
     public float CurrentDamage => baseDamage + (currentLevel - 1) * damageIncreasePerLevel;
     public float CurrentAttackSpeed => baseAttackSpeed + (currentLevel - 1) * attackSpeedIncreasePerLevel;
 
-    // 레벨업 이벤트
-    public event Action<int> OnLevelUp;
-
     private void Awake()
     {
         _instance = this;
@@ -66,7 +63,7 @@ public class PlayerExperienceSystem : MonoBehaviour
             currentExp = 0;
             
             // 레벨업 이벤트 발생
-            OnLevelUp?.Invoke(currentLevel);
+            EventManager.Instance.LevelUpEvent(currentLevel);
         }
     }
 

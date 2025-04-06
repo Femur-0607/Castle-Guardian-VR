@@ -25,7 +25,7 @@ public class CameraController : MonoBehaviour
     // 빌드 모드 참조
     [SerializeField] private BuildManager buildManager;
     
-    public enum CameraPosition { Left, Center, Right, UI }
+    public enum CameraPosition { Left, Center, Right, UI, Build }
     private CameraPosition currentPosition = CameraPosition.Center;
     
     private bool isTransitioning = false;
@@ -66,29 +66,13 @@ public class CameraController : MonoBehaviour
 
     #region 이벤트 핸들러
 
-    private void HandleDialogueStarted(EventManager.DialogueType type)
-    {
-        SwitchCamera(CameraPosition.UI);
-    }
+    private void HandleDialogueStarted(EventManager.DialogueType type) => SwitchCamera(CameraPosition.UI);
     
-    private void HandleDialogueEnded(EventManager.DialogueType type)
-    {
-        if (type == EventManager.DialogueType.Intro)
-        {
-            SwitchCamera(CameraPosition.Center);
-        }
-    }
+    private void HandleDialogueEnded(EventManager.DialogueType type) => SwitchCamera(CameraPosition.Center);
     
-    private void HandleGameStart()
-    {
-        SwitchCamera(CameraPosition.Center);
-    }
+    private void HandleGameStart() => SwitchCamera(CameraPosition.Center);
     
-    private void HandleWaveEnd(int waveNumber)
-    {
-        Debug.Log("WaveEnd");
-        SwitchCamera(CameraPosition.UI);
-    }
+    private void HandleWaveEnd(int waveNumber) => SwitchCamera(CameraPosition.UI);
 
     #endregion
 
@@ -112,8 +96,8 @@ public class CameraController : MonoBehaviour
             return;
         }
         
-        // UI 모드에서는 카메라 전환 무시
-        if (currentPosition == CameraPosition.UI)
+        // UI 모드나 빌드 모드에서는 카메라 전환 무시
+        if (currentPosition == CameraPosition.UI || currentPosition == CameraPosition.Build)
         {
             return;
         }
@@ -181,6 +165,9 @@ public class CameraController : MonoBehaviour
             case CameraPosition.UI:
                 targetTransform = uiPosition;
                 break;
+            case CameraPosition.Build:
+                targetTransform = buildPosition;
+                break;
         }
         
         // 대상 카메라 위치가 없으면 무시
@@ -191,14 +178,6 @@ public class CameraController : MonoBehaviour
         
         // 현재 위치 업데이트
         currentPosition = position;
-        
-        /*
-        // 사운드 재생
-        if (SoundManager.Instance)
-        {
-            SoundManager.Instance.PlaySound(cameraSwitchSoundName);
-        }
-        */
     }
     
     /// <summary>
@@ -234,40 +213,6 @@ public class CameraController : MonoBehaviour
             EventManager.Instance.CameraChangedEvent(currentPosition);
         }
     }
-    
-    /// <summary>
-    /// 빌드 모드용 카메라 전환
-    /// </summary>
-    public void SwitchToBuildMode()
-    {
-        if (buildPosition == null) return;
-        StartCoroutine(TransitionCamera(buildPosition));
-    }
-    
-    /// <summary>
-    /// 빌드 모드에서 원래 위치로 복귀
-    /// </summary>
-    public void RestoreFromBuildMode()
-    {
-        Transform targetTransform = null;
-        switch (currentPosition)
-        {
-            case CameraPosition.Left:
-                targetTransform = leftPosition;
-                break;
-            case CameraPosition.Center:
-                targetTransform = centerPosition;
-                break;
-            case CameraPosition.Right:
-                targetTransform = rightPosition;
-                break;
-        }
-        
-        if (targetTransform != null)
-        {
-            StartCoroutine(TransitionCamera(targetTransform));
-        }
-    }
-    
+
     #endregion
 } 

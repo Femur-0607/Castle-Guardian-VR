@@ -1,53 +1,20 @@
 using UnityEngine;
 
-public class Castle : MonoBehaviour, IDamageable
+public class Castle : LivingEntity
 {
-    private static float sharedMaxHealth;
-    private static float sharedCurrentHealth;
-    private static bool isInitialized = false;
-    
-    [Header("스테이터스")]
     [SerializeField] private float maxHealth = 1000f;
     
-    public float MaxHealth => sharedMaxHealth;
-    public float currentHealth => sharedCurrentHealth;
-
-    private void Awake()
+    protected override void Start()
     {
-        // 첫 번째 Castle 인스턴스에서만 초기화
-        if (!isInitialized)
-        {
-            sharedMaxHealth = maxHealth;
-            sharedCurrentHealth = maxHealth;
-            isInitialized = true;
-        }
+        startingHealth = maxHealth;
+        base.Start();
     }
     
-    protected void Start()
-    {
-        EventManager.Instance.TriggerOnCastleInitialized(this);
-    }
+    public override void TakeDamage(float damage) => base.TakeDamage(damage);
     
-    public void TakeDamage(float damage)
+    public override void Die()
     {
-        sharedCurrentHealth -= damage;
-        sharedCurrentHealth = Mathf.Max(0f, sharedCurrentHealth);
-        
-        EventManager.Instance.TriggerOnCastleHealthChanged(sharedCurrentHealth);
-        
-        if (sharedCurrentHealth <= 0)
-        {
-            Die();
-        }
-    }
-    
-    public bool IsAlive()
-    {
-        return sharedCurrentHealth > 0;
-    }
-    
-    private void Die()
-    {
+        base.Die();
         GameManager.Instance.EndGame(false);
     }
 }

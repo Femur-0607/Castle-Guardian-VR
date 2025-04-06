@@ -14,9 +14,9 @@ public class BuildableNode : MonoBehaviour
     [SerializeField] private BuildManager buildManager;
 
     [Header("노드 시각 셋팅")]
-    private Color baseColor = Color.red;       // 기본 색상 (건설 전)
+    public Color baseColor = Color.red;       // 기본 색상 (건설 전)
     private Color towerColor = Color.white;     // 기본 색상 (건설 후)
-    private Color hoverColor = Color.green;     // 마우스 올렸을 때 건설 가능한 색상
+    public Color hoverColor = Color.green;     // 마우스 올렸을 때 건설 가능한 색상
     
     [Header("머터리얼 설정")]
     [SerializeField] private Material initialMaterial;
@@ -65,7 +65,7 @@ public class BuildableNode : MonoBehaviour
     /// Renderer의 머터리얼 색상을 지정된 색상으로 변경합니다.
     /// </summary>
     /// <param name="color">적용할 색상</param>
-    private void SetColor(Color color)
+    public void SetColor(Color color)
     {
         if (nodeRenderer != null && nodeRenderer.material != null)
         {

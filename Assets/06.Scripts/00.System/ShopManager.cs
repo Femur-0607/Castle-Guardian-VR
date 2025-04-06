@@ -51,35 +51,15 @@ public class ShopManager : MonoBehaviour
         // 폭발 화살 버튼
         if (explosiveArrowButton != null)
         {
-            Text buttonText = explosiveArrowButton.GetComponentInChildren<Text>();
-            if (buttonText != null)
-            {
                 bool isUnlocked = arrowManager.IsArrowUnlocked(ProjectileData.ProjectileType.Explosive);
-                buttonText.text = isUnlocked ? "업그레이드됨" : "해금";
                 explosiveArrowButton.interactable = !isUnlocked; // 해금되면 버튼 비활성화
-            }
         }
         
         // 독 화살 버튼
         if (poisonArrowButton != null)
         {
-            Text buttonText = poisonArrowButton.GetComponentInChildren<Text>();
-            if (buttonText != null)
-            {
                 bool isUnlocked = arrowManager.IsArrowUnlocked(ProjectileData.ProjectileType.Poison);
-                buttonText.text = isUnlocked ? "업그레이드됨" : "해금";
                 poisonArrowButton.interactable = !isUnlocked; // 해금되면 버튼 비활성화
-            }
-        }
-        
-        // 활 업그레이드 버튼은 항상 활성화 상태 유지
-        if (arrowUpgradeButton != null)
-        {
-            Text buttonText = arrowUpgradeButton.GetComponentInChildren<Text>();
-            if (buttonText != null)
-            {
-                buttonText.text = "활 업그레이드";
-            }
         }
     }
 
@@ -102,7 +82,6 @@ public class ShopManager : MonoBehaviour
         // 업그레이드 가능한 1단계 타워가 없으면 리턴
         if (!buildManager.HasUpgradeableTowers())
         {
-            Debug.LogWarning("No upgradeable towers available");
             return;
         }
         
@@ -134,31 +113,21 @@ public class ShopManager : MonoBehaviour
             // 성공 시 효과음 재생 또는 UI 업데이트 등 추가 가능
             if (success)
             {
-                Debug.Log("활 업그레이드 성공!");
                 // 효과음 재생
-                SoundManager.Instance.PlaySound("Upgrade");
+                // SoundManager.Instance.PlaySound("Upgrade");
                 // UI 업데이트 메소드 호출 (필요시)
                 // uiManager.UpdateArrowUI();
             }
         }
         else
         {
-            Debug.Log("돈이 부족합니다!");
-            SoundManager.Instance.PlaySound("Error");
+            // SoundManager.Instance.PlaySound("Error");
         }
     }
 
     // 폭발 화살 해금
     public void UnlockExplosiveArrow()
     {
-        // 이미 해금되었는지 확인
-        if (arrowManager.IsArrowUnlocked(ProjectileData.ProjectileType.Explosive))
-        {
-            Debug.Log("이미 해금된 화살입니다!");
-            SoundManager.Instance.PlaySound("Error");
-            return;
-        }
-        
         // 해금되지 않은 경우 해금 - 돈 확인
         if (GameManager.Instance.HasEnoughMoney(explosiveArrowCost))
         {
@@ -170,8 +139,7 @@ public class ShopManager : MonoBehaviour
             
             if (success)
             {
-                Debug.Log("폭발 화살 해금 성공!");
-                SoundManager.Instance.PlaySound("Unlock");
+                // SoundManager.Instance.PlaySound("Unlock");
                 // 버튼 상태 업데이트
                 UpdateArrowButtonInteractable();
                 // UI 업데이트
@@ -179,22 +147,13 @@ public class ShopManager : MonoBehaviour
         }
         else
         {
-            Debug.Log("돈이 부족합니다!");
-            SoundManager.Instance.PlaySound("Error");
+            // SoundManager.Instance.PlaySound("Error");
         }
     }
 
     // 독 화살 해금
     public void UnlockPoisonArrow()
     {
-        // 이미 해금되었는지 확인
-        if (arrowManager.IsArrowUnlocked(ProjectileData.ProjectileType.Poison))
-        {
-            Debug.Log("이미 해금된 화살입니다!");
-            SoundManager.Instance.PlaySound("Error");
-            return;
-        }
-        
         // 해금되지 않은 경우 해금 - 돈 확인
         if (GameManager.Instance.HasEnoughMoney(poisonArrowCost))
         {
@@ -206,8 +165,7 @@ public class ShopManager : MonoBehaviour
             
             if (success)
             {
-                Debug.Log("독 화살 해금 성공!");
-                SoundManager.Instance.PlaySound("Unlock");
+                // SoundManager.Instance.PlaySound("Unlock");
                 // 버튼 상태 업데이트
                 UpdateArrowButtonInteractable();
                 // UI 업데이트
@@ -215,8 +173,7 @@ public class ShopManager : MonoBehaviour
         }
         else
         {
-            Debug.Log("돈이 부족합니다!");
-            SoundManager.Instance.PlaySound("Error");
+            // SoundManager.Instance.PlaySound("Error");
         }
     }
     #endregion

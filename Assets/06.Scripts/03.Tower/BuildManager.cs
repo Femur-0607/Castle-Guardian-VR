@@ -1,16 +1,17 @@
-using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using System.Collections.Generic;
-using System.Collections;
 
 public class BuildManager : MonoBehaviour
 {
     #region 필드 변수
 
+    public static BuildManager instance;
+
     [Header("빌드 모드 셋팅")]
     [SerializeField] private UIManager uiManager;
     public BuildModeType currentBuildMode = BuildModeType.None;
     private TowerType upgradeTargetType;
+    private bool isBuilding = false;   // 건설 모드 상태
 
     [Header("카메라 관련")]
     [SerializeField] private CameraController cameraController;  // 카메라 컨트롤러 참조
@@ -21,13 +22,10 @@ public class BuildManager : MonoBehaviour
     [SerializeField] private List<BuildableNode> tier2Nodes = new List<BuildableNode>(); // 2단계 타워 노드
 
     private BuildableNode selectedNode;  // 선택된 노드
+    private int currentNodeIndex = 0;  // 현재 선택된 노드 인덱스
 
     [Header("VR 설정")]
-    [SerializeField] private float rayDistance = 10f;        // VR 레이캐스트 최대 거리
-    [SerializeField] private LayerMask buildableLayer;       // 건설 가능한 레이어
-    private bool isBuilding;                                 // 건설 모드 상태
-
-    private BuildableNode currentHoveredNode; // 현재 레이캐스트가 가리키는 노드
+    [SerializeField] private Transform leftControllerAnchor;
 
     #endregion
 
@@ -35,6 +33,15 @@ public class BuildManager : MonoBehaviour
 
     private void Awake()
     {
+        if (instance == null)
+        {
+            instance = this;
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+
         foreach (BuildableNode node in buildableNodes)
         {
             // 초기 상태에서는 모든 노드의 콜라이더와 렌더러 비활성화
@@ -52,47 +59,101 @@ public class BuildManager : MonoBehaviour
         EventManager.Instance.OnBuildNodeHit -= HandleBuildNodeHit;
     }
 
-    void Update()
+    private void Update()
     {
-        if (!isBuilding) return;
+        if (isBuilding)
+        {
+            HandleVRNodeSelection();
+        }
+    }
 
-        // 현재 활성화된 레이캐스트의 결과를 가져옴
-        RaycastHit hit;
+    #endregion
+
+    #region VR 노드 선택 관련
+
+    private void HandleVRNodeSelection()
+    {
+        // 왼쪽 컨트롤러 스틱 입력 처리
+        Vector2 leftStick = OVRInput.Get(OVRInput.Axis2D.PrimaryThumbstick, OVRInput.Controller.LTouch);
         
-        if (Physics.Raycast(transform.position, transform.forward, out hit, rayDistance, buildableLayer))
+        if (Mathf.Abs(leftStick.x) > 0.5f)
         {
-            BuildableNode node = hit.collider.GetComponent<BuildableNode>();
-            if (node != null)
-            {
-                // 새로운 노드를 가리킬 때
-                if (node != currentHoveredNode)
-                {
-                    // 이전 노드에서 벗어남
-                    if (currentHoveredNode != null)
-                        currentHoveredNode.OnRaycastExit();
-                    
-                    // 새 노드 진입
-                    currentHoveredNode = node;
-                    currentHoveredNode.OnRaycastEnter();
-                }
-            }
+            int direction = leftStick.x > 0 ? 1 : -1;
+            MoveNodeSelection(direction);
         }
-        else if (currentHoveredNode != null)
+    }
+
+    public void MoveNodeSelection(int direction)
+    {
+        List<BuildableNode> currentNodeList = GetCurrentNodeList();
+        if (currentNodeList.Count == 0) return;
+
+        // 현재 인덱스 갱신
+        currentNodeIndex += direction;
+        
+        // 인덱스 순환 처리
+        if (currentNodeIndex >= currentNodeList.Count)
         {
-            // 레이캐스트가 노드에서 벗어남
-            currentHoveredNode.OnRaycastExit();
-            currentHoveredNode = null;
+            currentNodeIndex = 0;
         }
+        else if (currentNodeIndex < 0)
+        {
+            currentNodeIndex = currentNodeList.Count - 1;
+        }
+        
+        // 새 노드 선택
+        SelectNode(currentNodeList[currentNodeIndex]);
+    }
+
+    private List<BuildableNode> GetCurrentNodeList()
+    {
+        switch (currentBuildMode)
+        {
+            case BuildModeType.NewTower:
+                return buildableNodes;
+            case BuildModeType.UpgradeTower:
+                return tier1Nodes;
+            default:
+                return buildableNodes;
+        }
+    }
+
+    private void SelectNode(BuildableNode node)
+    {
+        // 이전 선택 노드 색상 초기화
+        if (selectedNode != null)
+        {
+            selectedNode.SetColor(selectedNode.baseColor);
+        }
+        
+        // 새 노드 선택 및 색상 변경
+        selectedNode = node;
+        selectedNode.SetColor(selectedNode.hoverColor);
     }
 
     private void HandleBuildNodeHit()
     {
-        if (currentHoveredNode != null)
+        if (!isBuilding || selectedNode == null) return;
+
+        // 빌드 모드에 따른 처리
+        switch (currentBuildMode)
         {
-            currentHoveredNode.OnRaycastHit();
-            OVRInput.SetControllerVibration(0.3f, 0.3f, OVRInput.Controller.LTouch);
-            StartCoroutine(StopVibration());
+            case BuildModeType.NewTower:
+                selectedNode.BuildTower();
+                break;
+            case BuildModeType.UpgradeTower:
+                if (upgradeTargetType == TowerType.Explosive)
+                {
+                    selectedNode.UpgradeToExplosiveTower();
+                }
+                else if (upgradeTargetType == TowerType.Slow)
+                {
+                    selectedNode.UpgradeToSlowTower();
+                }
+                break;
         }
+
+        ExitBuildMode();
     }
 
     #endregion
@@ -113,11 +174,11 @@ public class BuildManager : MonoBehaviour
     {
         currentBuildMode = isUpgradeMode ? BuildModeType.UpgradeTower : BuildModeType.NewTower;
         upgradeTargetType = upgradeType;
-        
+
         // 빌드 모드로 카메라 전환
         if (cameraController != null)
         {
-            cameraController.SwitchToBuildMode();
+            cameraController.SwitchCamera(CameraController.CameraPosition.Build);
         }
 
         // 노드 가시성 설정
@@ -129,6 +190,11 @@ public class BuildManager : MonoBehaviour
                 node.SetNodeVisibility(true);
                 node.OnBuildModeEnter();
             }
+            // 첫 번째 노드 선택
+            if (tier1Nodes.Count > 0)
+            {
+                SelectNode(tier1Nodes[0]);
+            }
         }
         else
         {
@@ -138,30 +204,50 @@ public class BuildManager : MonoBehaviour
                 node.SetNodeVisibility(true);
                 node.OnBuildModeEnter();
             }
+            // 첫 번째 노드 선택
+            if (buildableNodes.Count > 0)
+            {
+                SelectNode(buildableNodes[0]);
+            }
         }
-        
+
         // 상점 UI 숨김
         uiManager.HideShopUI();
+        
+        // 빌드 모드 활성화
+        ToggleBuildMode(true);
     }
 
-    // 타워 건설 완료 후 호출하여 빌드 모드 종료
+    // 빌드 모드 종료
     public void ExitBuildMode()
     {
+        // 빌드 모드 비활성화
+        ToggleBuildMode(false);
+        
+        // 선택된 노드 초기화
+        if (selectedNode != null)
+        {
+            selectedNode.SetColor(selectedNode.baseColor);
+            selectedNode = null;
+        }
+        
         // 빌드 모드에서 원래 위치로 복귀
         if (cameraController != null)
         {
-            cameraController.RestoreFromBuildMode();
+            cameraController.SwitchCamera(CameraController.CameraPosition.UI);
         }
 
         // 모든 노드에 빌드 모드 종료 알림
         foreach (BuildableNode node in buildableNodes)
         {
             node.OnBuildModeExit();
+            node.SetNodeVisibility(false);  // 노드 비활성화 추가
         }
         
         foreach (BuildableNode node in tier1Nodes)
         {
             node.OnBuildModeExit();
+            node.SetNodeVisibility(false);  // 노드 비활성화 추가
         }
         
         // 빌드 모드 상태 초기화
@@ -211,12 +297,6 @@ public class BuildManager : MonoBehaviour
         return selectedNode;
     }
     
-    // 선택된 노드 설정 메서드 추가
-    public void SelectNode(BuildableNode node)
-    {
-        selectedNode = node;
-    }
-    
     // 건설 가능한 노드가 있는지 확인
     public bool HasBuildableNodes() => buildableNodes.Count > 0;
 
@@ -233,13 +313,6 @@ public class BuildManager : MonoBehaviour
     }
     
     #endregion
-
-    // 햅틱 피드백 중지
-    private IEnumerator StopVibration()
-    {
-        yield return new WaitForSeconds(0.1f);
-        OVRInput.SetControllerVibration(0, 0, OVRInput.Controller.LTouch);
-    }
 
     // 건설 모드 토글
     public void ToggleBuildMode(bool enable)

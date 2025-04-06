@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using System.Collections;
+using DG.Tweening;
 
 public class UIManager : MonoBehaviour
 {
@@ -45,9 +46,29 @@ public class UIManager : MonoBehaviour
     [Header("화살 쿨타임 UI")]
     [SerializeField] private GameObject cooldownImageObject; // 쿨타임 이미지 오브젝트
 
+    [Header("레벨업 UI")]
+    [SerializeField] private GameObject levelUpPanel;
+    [SerializeField] private TextMeshProUGUI levelText;
+    [SerializeField] private TextMeshProUGUI damageText;
+    [SerializeField] private TextMeshProUGUI attackSpeedText;
+    [SerializeField] private float levelUpPanelDuration = 2f;
+
     #endregion
 
     #region 유니티 이벤트 함수
+
+    private void Awake()
+    {
+        // 탭 관련 UI 초기화
+        lineFocusImages = new Image[tabButtons.Length];
+        tabTexts = new TextMeshProUGUI[tabButtons.Length];
+        
+        for (int i = 0; i < tabButtons.Length; i++)
+        {
+            lineFocusImages[i] = tabButtons[i].transform.Find("LineFocus").GetComponent<Image>();
+            tabTexts[i] = tabButtons[i].GetComponentInChildren<TextMeshProUGUI>();
+        }
+    }
 
     private void Start()
     {
@@ -84,14 +105,6 @@ public class UIManager : MonoBehaviour
     // 상점 탭 초기화 메서드 (기존 코드 분리)
     private void InitializeShopTabs()
     {
-        lineFocusImages = new Image[tabButtons.Length];
-        tabTexts = new TextMeshProUGUI[tabButtons.Length];
-
-        for (int i = 0; i < tabButtons.Length; i++)
-        {
-            lineFocusImages[i] = tabButtons[i].transform.GetChild(0).GetComponent<Image>();
-            tabTexts[i] = tabButtons[i].GetComponent<TextMeshProUGUI>();
-        }
         // 탭 버튼 이벤트 설정
         for (int i = 0; i < tabButtons.Length; i++)
         {
@@ -103,7 +116,6 @@ public class UIManager : MonoBehaviour
         SwitchTab(0);
     }
 
-    // 웨이브 이벤트 구독
     private void OnEnable()
     {
         EventManager.Instance.OnDialogueEnded += HandleDialogueEnded;
@@ -112,9 +124,8 @@ public class UIManager : MonoBehaviour
         EventManager.Instance.OnWaveStart += HandleWaveStartUI;
         EventManager.Instance.OnWaveEnd += HandleWaveEndUI;
         EventManager.Instance.OnMoneyChanged += UpdateGoldUI;
-        EventManager.Instance.OnCastleInitialized += InitializeCastleUI;
-        EventManager.Instance.OnCastleHealthChanged += UpdateCastleHealthUI;
         EventManager.Instance.OnCameraChanged += HandleCameraChanged;
+        EventManager.Instance.OnLevelUp += HandleLevelUp;
         
         // 화살 쿨타임 이벤트 구독
         EventManager.Instance.OnArrowCooldownStart += HandleArrowCooldownStart;
@@ -129,9 +140,8 @@ public class UIManager : MonoBehaviour
         EventManager.Instance.OnWaveStart -= HandleWaveStartUI;
         EventManager.Instance.OnWaveEnd -= HandleWaveEndUI;
         EventManager.Instance.OnMoneyChanged -= UpdateGoldUI;
-        EventManager.Instance.OnCastleInitialized -= InitializeCastleUI;
-        EventManager.Instance.OnCastleHealthChanged -= UpdateCastleHealthUI;
         EventManager.Instance.OnCameraChanged -= HandleCameraChanged;
+        EventManager.Instance.OnLevelUp -= HandleLevelUp;
         
         // 화살 쿨타임 이벤트 구독 해제
         EventManager.Instance.OnArrowCooldownStart -= HandleArrowCooldownStart;
@@ -238,19 +248,6 @@ public class UIManager : MonoBehaviour
         
         // 선택한 탭에 해당하는 상점 패널만 활성화
         shopPanels[tabIndex].SetActive(true);
-    }
-
-    // 성문 초기화 시 작동되는 메서드
-    private void InitializeCastleUI(Castle castle)
-    {
-        castleHealthSlider.maxValue = castle.MaxHealth;
-        castleHealthSlider.value = castle.currentHealth;
-    }
-
-    // 성문 체력 변경 시 작동되는 메서드
-    private void UpdateCastleHealthUI(float currentHealth)
-    {
-        castleHealthSlider.value = currentHealth;
     }
 
     #endregion
@@ -450,5 +447,42 @@ public class UIManager : MonoBehaviour
         }
     }
     
+    #endregion
+
+    #region 레벨업 UI 관련
+
+    /// <summary>
+    /// 레벨업 UI 표시
+    /// </summary>
+    private void HandleLevelUp(int newLevel)
+    {
+        // 레벨업 UI 업데이트
+        levelText.text = $"Level {newLevel}";
+        damageText.text = $"Damage: {PlayerExperienceSystem.Instance.CurrentDamage:F1}";
+        attackSpeedText.text = $"Attack Speed: {PlayerExperienceSystem.Instance.CurrentAttackSpeed:F1}";
+
+        // 레벨업 UI 표시
+        levelUpPanel.SetActive(true);
+        
+        // 애니메이션 효과
+        levelUpPanel.transform.localScale = Vector3.zero;
+        levelUpPanel.transform.DOScale(Vector3.one, 0.3f).SetEase(Ease.OutBack);
+
+        // 일정 시간 후 자동으로 숨김
+        StartCoroutine(HideLevelUpPanel());
+    }
+
+    /// <summary>
+    /// 레벨업 UI 자동 숨김
+    /// </summary>
+    private IEnumerator HideLevelUpPanel()
+    {
+        yield return new WaitForSeconds(levelUpPanelDuration);
+        
+        // 애니메이션 효과
+        levelUpPanel.transform.DOScale(Vector3.zero, 0.3f).SetEase(Ease.InBack)
+            .OnComplete(() => levelUpPanel.SetActive(false));
+    }
+
     #endregion
 }

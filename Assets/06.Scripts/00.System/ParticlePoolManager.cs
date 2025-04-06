@@ -63,7 +63,6 @@ public class ParticlePoolManager : MonoBehaviour
     {
         if (!particlePools.ContainsKey(key))
         {
-            Debug.LogError($"풀에 {key} 파티클이 등록되지 않았습니다.");
             return null;
         }
 
@@ -79,7 +78,6 @@ public class ParticlePoolManager : MonoBehaviour
             }
             else
             {
-                Debug.LogWarning($"{key} 풀이 비었으며 자동 확장이 비활성화되었습니다.");
                 return null;
             }
         }
@@ -129,7 +127,7 @@ public class ParticlePoolManager : MonoBehaviour
     }
 
     // 모든 필드 영혼을 플레이어에게 이동시키는 메서드
-    public void CollectAllSouls(Transform target, float duration = 1.0f, System.Action onComplete = null)
+    public void CollectAllSouls(Transform target, float duration, System.Action onComplete = null)
     {
         // 수집할 영혼이 없으면 즉시 콜백 실행
         if (activeFieldSouls.Count == 0)
@@ -194,7 +192,6 @@ public class ParticlePoolManager : MonoBehaviour
         GameObject trailParticle = GetParticle("VFX_Trail_Void_Variant", startPos, Quaternion.identity);
         if (trailParticle == null)
         {
-            Debug.LogError("VFX_Trail_Void_Variant 파티클을 찾을 수 없습니다.");
             onSoulCollected?.Invoke();
             return;
         }

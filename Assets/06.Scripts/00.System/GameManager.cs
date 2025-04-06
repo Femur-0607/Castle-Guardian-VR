@@ -36,8 +36,9 @@ public class GameManager : MonoBehaviour
     private bool _isArrowCooldown = false; // 화살 쿨타임 상태
     private float _arrowCooldownTime = 1f; // 화살 쿨타임 시간 (초)
     private float _arrowCooldownStartTime; // 쿨타임 시작 시간
+    private const float COOLDOWN_DECREASE_PER_LEVEL = 0.1f; // 레벨당 쿨타임 감소량
     
-        /// <summary>
+    /// <summary>
     /// 화살 쿨타임 여부 확인
     /// </summary>
     public bool IsArrowCooldown => _isArrowCooldown;
@@ -84,6 +85,15 @@ public class GameManager : MonoBehaviour
         // 쿨타임 종료 이벤트 발생
         EventManager.Instance.ArrowCooldownEndEvent();
     }
+
+    /// <summary>
+    /// 레벨업 시 쿨타임 감소
+    /// </summary>
+    private void HandleLevelUp(int newLevel)
+    {
+        // 레벨업마다 쿨타임 0.1초 감소 (최소 0.1초)
+        _arrowCooldownTime = Mathf.Max(0.1f, 1f - (newLevel - 1) * COOLDOWN_DECREASE_PER_LEVEL);
+    }
     
     #endregion
 
@@ -108,6 +118,7 @@ public class GameManager : MonoBehaviour
     {
         EventManager.Instance.OnWaveStart += HandleWaveStart;
         EventManager.Instance.OnWaveEnd += HandleWaveEnd;
+        EventManager.Instance.OnLevelUp += HandleLevelUp;
         
         // 다이얼로그매니저 이벤트 구독 추가
         // DialogueManager가 아직 초기화되지 않았을 수 있으므로 코루틴으로 시도
@@ -138,6 +149,7 @@ public class GameManager : MonoBehaviour
     {
         EventManager.Instance.OnWaveStart -= HandleWaveStart;
         EventManager.Instance.OnWaveEnd -= HandleWaveEnd;
+        EventManager.Instance.OnLevelUp -= HandleLevelUp;
     }
 
     #endregion
@@ -304,20 +316,6 @@ public class GameManager : MonoBehaviour
             // CameraPosition을 CameraController를 통해 접근
             cameraController.SwitchCamera(CameraController.CameraPosition.Center);
         }
-    }
-    
-    /// <summary>
-    /// 테스트 목적의 플레이어 제어 컴포넌트 활성화 (외부에서 호출 가능)
-    /// </summary>
-    public void EnablePlayerControlsForTest()
-    {
-#if UNITY_EDITOR
-        // 플레이어 컨트롤 활성화
-        EnablePlayerControls();
-        
-        // 메인 BGM 재생
-        SoundManager.Instance.PlaySound("MainBGM");
-#endif
     }
     
     /// <summary>

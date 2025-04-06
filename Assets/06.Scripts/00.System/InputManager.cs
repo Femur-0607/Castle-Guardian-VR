@@ -11,6 +11,10 @@ public class InputManager : MonoBehaviour
     private bool wasTriggerPressed = false;    // 이전 프레임의 트리거 상태
     private const float STICK_THRESHOLD = 0.5f; // 조이스틱 감도 임계값
 
+    // 노드 선택 관련
+    private float lastNodeSelectionTime = 0f;  // 마지막 노드 선택 시간
+    private const float NODE_SELECTION_COOLDOWN = 0.3f; // 노드 선택 쿨다운 시간
+
     #endregion
 
     #region 유니티 이벤트 함수
@@ -43,6 +47,23 @@ public class InputManager : MonoBehaviour
         Vector2 leftStick = OVRInput.Get(OVRInput.Axis2D.PrimaryThumbstick, OVRInput.Controller.LTouch);
         float currentStickValue = 0f;
 
+        // 빌드 모드일 때는 노드 선택 처리
+        if (BuildManager.instance.isBuildMode)
+        {
+            if (Mathf.Abs(leftStick.x) > STICK_THRESHOLD)
+            {
+                // 쿨다운 체크
+                if (Time.time - lastNodeSelectionTime >= NODE_SELECTION_COOLDOWN)
+                {
+                    int direction = leftStick.x > 0 ? 1 : -1;
+                    BuildManager.instance.MoveNodeSelection(direction);
+                    lastNodeSelectionTime = Time.time;
+                }
+            }
+            return;
+        }
+
+        // 일반 모드일 때는 카메라 전환 처리
         if (Mathf.Abs(leftStick.x) > STICK_THRESHOLD)
         {
             currentStickValue = Mathf.Sign(leftStick.x);
@@ -69,7 +90,6 @@ public class InputManager : MonoBehaviour
         // Y 버튼 - 고스트/적 제거
         if (OVRInput.GetDown(OVRInput.Button.Two, OVRInput.Controller.LTouch))
         {
-            Debug.Log("Y 버튼 눌림");
             EventManager.Instance.GhostDestroyEvent();
             EventManager.Instance.EnemyForceKillEvent();
         }
@@ -80,9 +100,9 @@ public class InputManager : MonoBehaviour
     /// </summary>
     private void HandleLeftBumper()
     {
-        Debug.Log("LeftBumper");
         if (OVRInput.GetDown(OVRInput.Button.PrimaryHandTrigger, OVRInput.Controller.LTouch))
         {
+            Debug.Log("LeftBumper");
             EventManager.Instance.BuildNodeHitEvent();
         }
     }
