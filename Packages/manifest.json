@@ -1,6 +1,5 @@
 {
   "dependencies": {
-    "com.justinpbarnett.unity-mcp": "https://github.com/justinpbarnett/unity-mcp.git",
     "com.meta.xr.sdk.core": "74.0.1",
     "com.meta.xr.simulator": "74.0.0",
     "com.unity.2d.sprite": "1.0.0",

@@ -150,9 +150,13 @@ public class ArrowManager : MonoBehaviour
     /// <returns>해금 성공 여부</returns>
     public bool UnlockArrow(ProjectileData.ProjectileType arrowType)
     {
+        Debug.Log($"화살 해금 시도: {arrowType}");
+        Debug.Log($"현재 잠금 해제된 화살 목록: {string.Join(", ", unlockedArrows)}");
+        
         // 이미 해금된 화살인지 확인
         if (arrowUnlocked[arrowType])
         {
+            Debug.Log($"이미 해금된 화살입니다: {arrowType}");
             return false;
         }
         
@@ -161,6 +165,9 @@ public class ArrowManager : MonoBehaviour
         arrowLevels[arrowType] = 1;        // 초기 레벨 1
         unlockedArrows.Add(arrowType);     // 사용 가능한 화살 목록에 추가
         
+        Debug.Log($"화살 해금 성공: {arrowType}");
+        Debug.Log($"현재 잠금 해제된 화살 목록 (해금 후): {string.Join(", ", unlockedArrows)}");
+        Debug.Log($"현재 잠금 해제된 화살 수: {unlockedArrows.Count}");
         return true;
     }
     
@@ -170,16 +177,22 @@ public class ArrowManager : MonoBehaviour
     public void CycleNextArrow()
     {
         // 사용 가능한 화살이 1개 이하면 무시
-        if (unlockedArrows.Count <= 1) return;
+        if (unlockedArrows.Count <= 1) 
+        {
+            Debug.Log("사용 가능한 화살이 1개 이하입니다.");
+            return;
+        }
         
         // 현재 화살의 인덱스 찾기
         int currentIndex = unlockedArrows.IndexOf(CurrentArrowType);
+        Debug.Log($"현재 화살 인덱스: {currentIndex}, 잠금 해제된 화살 수: {unlockedArrows.Count}");
         
         // 다음 화살로 인덱스 이동 (마지막 화살이면 처음으로 순환)
         int nextIndex = (currentIndex + 1) % unlockedArrows.Count;
         
         // 다음 화살로 전환
         SwitchArrowType(unlockedArrows[nextIndex]);
+        Debug.Log($"다음 화살로 변경: {unlockedArrows[nextIndex]}");
     }
     
     /// <summary>
@@ -188,16 +201,22 @@ public class ArrowManager : MonoBehaviour
     public void CyclePreviousArrow()
     {
         // 사용 가능한 화살이 1개 이하면 무시
-        if (unlockedArrows.Count <= 1) return;
+        if (unlockedArrows.Count <= 1) 
+        {
+            Debug.Log("사용 가능한 화살이 1개 이하입니다.");
+            return;
+        }
         
         // 현재 화살의 인덱스 찾기
         int currentIndex = unlockedArrows.IndexOf(CurrentArrowType);
+        Debug.Log($"현재 화살 인덱스: {currentIndex}, 잠금 해제된 화살 수: {unlockedArrows.Count}");
         
         // 이전 화살로 인덱스 이동 (첫 번째 화살이면 마지막으로 순환)
         int previousIndex = (currentIndex - 1 + unlockedArrows.Count) % unlockedArrows.Count;
         
         // 이전 화살로 전환
         SwitchArrowType(unlockedArrows[previousIndex]);
+        Debug.Log($"이전 화살로 변경: {unlockedArrows[previousIndex]}");
     }
     
     /// <summary>

@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4206959927046445240}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: FirePoint
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -47,9 +47,13 @@ PrefabInstance:
       propertyPath: m_Name
       value: Node
       objectReference: {fileID: 0}
+    - target: {fileID: 100000, guid: 5921e45280d702e44ad0fb582ac16d26, type: 3}
+      propertyPath: m_Layer
+      value: 7
+      objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: 5921e45280d702e44ad0fb582ac16d26, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 14
+      value: 52
       objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: 5921e45280d702e44ad0fb582ac16d26, type: 3}
       propertyPath: m_LocalPosition.y
@@ -57,7 +61,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: 5921e45280d702e44ad0fb582ac16d26, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -31
+      value: 2.5
       objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: 5921e45280d702e44ad0fb582ac16d26, type: 3}
       propertyPath: m_LocalRotation.w
@@ -159,7 +163,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: a3242dcf98c62a842b56d966c6c8d3bf, type: 2}
+  - {fileID: 2100000, guid: 6dedbcec84751d5438c20b2894923122, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -236,7 +240,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   buildManager: {fileID: 0}
-  initialMaterial: {fileID: 2100000, guid: a3242dcf98c62a842b56d966c6c8d3bf, type: 2}
+  baseColor: {r: 1, g: 0, b: 0, a: 1}
+  hoverColor: {r: 0, g: 1, b: 0, a: 1}
+  initialMaterial: {fileID: 2100000, guid: 6dedbcec84751d5438c20b2894923122, type: 2}
   towerMaterial: {fileID: 2100000, guid: ee90f878377271b4fbbf915249f24476, type: 2}
   archerTower: {fileID: 4814830753184301173}
   explosiveTower: {fileID: 7582988939937536669}

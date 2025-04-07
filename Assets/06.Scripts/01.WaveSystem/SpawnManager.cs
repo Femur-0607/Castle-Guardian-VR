@@ -84,8 +84,6 @@ public class SpawnManager : MonoBehaviour
     // ★ 테스트용: 모든 적에게 큰 데미지를 줘서 강제 Kill
     public void ForceKillAllEnemies()
     {
-        Debug.Log("ForceKillAllEnemies");
-
         // activeEnemies 리스트 복사본을 만들어 순회(동적 제거 방지)
         foreach (Enemy enemy in activeEnemies.ToArray())
         {

@@ -289,15 +289,26 @@ public class Enemy : LivingEntity
                 animator.SetTrigger("attack");
 
                 // 데미지 적용
+                Debug.Log($"공격 시도: target={target.name}, attackDamage={enemyData.attackDamage}");
                 IDamageable castle = target.GetComponent<IDamageable>();
                 if (castle != null)
                 {
+                    Debug.Log("Castle 컴포넌트를 찾았습니다. 데미지를 가합니다.");
                     castle.TakeDamage(enemyData.attackDamage);
+                }
+                else
+                {
+                    Debug.LogError("Castle 컴포넌트를 찾을 수 없습니다!");
                 }
 
                 // 현재 시간을 할당
                 lastAttackTime = Time.time;
             }
+        }
+        else
+        {
+            if (target == null) Debug.LogError("target이 null입니다!");
+            if (animator == null) Debug.LogError("animator가 null입니다!");
         }
     }
 

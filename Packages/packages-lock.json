@@ -1,14 +1,5 @@
 {
   "dependencies": {
-    "com.justinpbarnett.unity-mcp": {
-      "version": "https://github.com/justinpbarnett/unity-mcp.git",
-      "depth": 0,
-      "source": "git",
-      "dependencies": {
-        "com.unity.nuget.newtonsoft-json": "3.0.2"
-      },
-      "hash": "7cfb821eb38cdb6c680f98dd4bfbbf8ac97ef341"
-    },
     "com.meta.xr.sdk.core": {
       "version": "74.0.1",
       "depth": 0,

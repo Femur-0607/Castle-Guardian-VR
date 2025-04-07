@@ -6,14 +6,11 @@ public class InputManager : MonoBehaviour
 {
     #region 필드변수
 
-    private float lastStickValue = 0f;         // 이전 조이스틱 입력값 저장 (카메라용)
-    private float lastArrowStickValue = 0f;    // 이전 조이스틱 입력값 저장 (화살용)
     private bool wasTriggerPressed = false;    // 이전 프레임의 트리거 상태
     private const float STICK_THRESHOLD = 0.5f; // 조이스틱 감도 임계값
-
-    // 노드 선택 관련
-    private float lastNodeSelectionTime = 0f;  // 마지막 노드 선택 시간
-    private const float NODE_SELECTION_COOLDOWN = 0.3f; // 노드 선택 쿨다운 시간
+    private bool stickInputProcessed = false;  // 조이스틱 입력이 처리되었는지 여부
+    private bool arrowStickInputProcessed = false;  // 화살 전환용 조이스틱 입력이 처리되었는지 여부
+    private bool leftStickWasNeutral = true;  // 이전 프레임에서 왼쪽 스틱이 중립이었는지 여부
 
     #endregion
 
@@ -21,6 +18,10 @@ public class InputManager : MonoBehaviour
 
     private void Update()
     {
+        // 오른쪽 스틱 값 직접 확인
+        Vector2 rightStickDebug = OVRInput.Get(OVRInput.Axis2D.SecondaryThumbstick);
+        Debug.Log($"Update에서 직접 확인한 오른쪽 스틱 값: X={rightStickDebug.x}, Y={rightStickDebug.y}");
+        
         HandleLeftControllerInput();   // 왼쪽 컨트롤러 입력 처리
         HandleRightControllerInput();  // 오른쪽 컨트롤러 입력 처리
     }
@@ -44,36 +45,32 @@ public class InputManager : MonoBehaviour
     /// </summary>
     private void HandleLeftStick()
     {
-        Vector2 leftStick = OVRInput.Get(OVRInput.Axis2D.PrimaryThumbstick, OVRInput.Controller.LTouch);
-        float currentStickValue = 0f;
+        float stickX = OVRInput.Get(OVRInput.Axis2D.PrimaryThumbstick, OVRInput.Controller.LTouch).x;
+
+        bool isNeutral = Mathf.Abs(stickX) < STICK_THRESHOLD;
 
         // 빌드 모드일 때는 노드 선택 처리
         if (BuildManager.instance.isBuildMode)
         {
-            if (Mathf.Abs(leftStick.x) > STICK_THRESHOLD)
+            // 중립에서 벗어난 순간에만 신호 전송
+            if (!isNeutral && leftStickWasNeutral)
             {
-                // 쿨다운 체크
-                if (Time.time - lastNodeSelectionTime >= NODE_SELECTION_COOLDOWN)
-                {
-                    int direction = leftStick.x > 0 ? 1 : -1;
-                    BuildManager.instance.MoveNodeSelection(direction);
-                    lastNodeSelectionTime = Time.time;
-                }
+                int direction = stickX > 0 ? 1 : -1;
+                BuildManager.instance.MoveNodeSelection(direction);
             }
-            return;
         }
-
         // 일반 모드일 때는 카메라 전환 처리
-        if (Mathf.Abs(leftStick.x) > STICK_THRESHOLD)
+        else
         {
-            currentStickValue = Mathf.Sign(leftStick.x);
+            // 중립에서 벗어난 순간에만 신호 전송
+            if (!isNeutral && leftStickWasNeutral)
+            {
+                float direction = Mathf.Sign(stickX);
+                EventManager.Instance.CameraSwitchEvent(direction);
+            }
         }
 
-        if (currentStickValue != lastStickValue)
-        {
-            EventManager.Instance.CameraSwitchEvent(currentStickValue);
-            lastStickValue = currentStickValue;
-        }
+        leftStickWasNeutral = isNeutral;
     }
 
     /// <summary>
@@ -102,7 +99,6 @@ public class InputManager : MonoBehaviour
     {
         if (OVRInput.GetDown(OVRInput.Button.PrimaryHandTrigger, OVRInput.Controller.LTouch))
         {
-            Debug.Log("LeftBumper");
             EventManager.Instance.BuildNodeHitEvent();
         }
     }
@@ -125,26 +121,26 @@ public class InputManager : MonoBehaviour
     /// </summary>
     private void HandleArrowSwitch()
     {
-        Vector2 rightStick = OVRInput.Get(OVRInput.Axis2D.SecondaryThumbstick, OVRInput.Controller.RTouch);
-        float currentArrowStickValue = 0f;
+        float stickX = OVRInput.Get(OVRInput.Axis2D.SecondaryThumbstick, OVRInput.Controller.RTouch).x;
+        Debug.Log($"오른쪽 스틱 X값: {stickX}");
 
-        if (Mathf.Abs(rightStick.x) > STICK_THRESHOLD)
-        {
-            currentArrowStickValue = Mathf.Sign(rightStick.x);
-        }
+        bool isNeutral = Mathf.Abs(stickX) < STICK_THRESHOLD;
 
-        if (currentArrowStickValue != lastArrowStickValue)
+        // 중립에서 벗어난 순간에만 신호 전송
+        if (!isNeutral && leftStickWasNeutral)
         {
-            if (currentArrowStickValue > 0)
+            Debug.Log($"스틱 입력 감지: {(stickX > 0 ? "오른쪽" : "왼쪽")}");
+            if (stickX > 0)
             {
                 ArrowManager.Instance.CycleNextArrow();
             }
-            else if (currentArrowStickValue < 0)
+            else
             {
                 ArrowManager.Instance.CyclePreviousArrow();
             }
-            lastArrowStickValue = currentArrowStickValue;
         }
+
+        leftStickWasNeutral = isNeutral;
     }
 
     /// <summary>

@@ -56,7 +56,7 @@ public class BuildableNode : MonoBehaviour
         explosiveTower.enabled = false;
         slowTower.enabled = false;
     }
-
+    
     #endregion
 
     #region 기초 타워 건설
