@@ -8,9 +8,8 @@ public class InputManager : MonoBehaviour
 
     private bool wasTriggerPressed = false;    // 이전 프레임의 트리거 상태
     private const float STICK_THRESHOLD = 0.5f; // 조이스틱 감도 임계값
-    private bool stickInputProcessed = false;  // 조이스틱 입력이 처리되었는지 여부
-    private bool arrowStickInputProcessed = false;  // 화살 전환용 조이스틱 입력이 처리되었는지 여부
     private bool leftStickWasNeutral = true;  // 이전 프레임에서 왼쪽 스틱이 중립이었는지 여부
+    private bool rightStickWasNeutral = true;  // 이전 프레임에서 오른쪽 스틱이 중립이었는지 여부
 
     #endregion
 
@@ -18,10 +17,6 @@ public class InputManager : MonoBehaviour
 
     private void Update()
     {
-        // 오른쪽 스틱 값 직접 확인
-        Vector2 rightStickDebug = OVRInput.Get(OVRInput.Axis2D.SecondaryThumbstick);
-        Debug.Log($"Update에서 직접 확인한 오른쪽 스틱 값: X={rightStickDebug.x}, Y={rightStickDebug.y}");
-        
         HandleLeftControllerInput();   // 왼쪽 컨트롤러 입력 처리
         HandleRightControllerInput();  // 오른쪽 컨트롤러 입력 처리
     }
@@ -45,9 +40,9 @@ public class InputManager : MonoBehaviour
     /// </summary>
     private void HandleLeftStick()
     {
-        float stickX = OVRInput.Get(OVRInput.Axis2D.PrimaryThumbstick, OVRInput.Controller.LTouch).x;
+        float leftStickX = OVRInput.Get(OVRInput.Axis2D.PrimaryThumbstick, OVRInput.Controller.LTouch).x;
 
-        bool isNeutral = Mathf.Abs(stickX) < STICK_THRESHOLD;
+        bool isNeutral = Mathf.Abs(leftStickX) < STICK_THRESHOLD;
 
         // 빌드 모드일 때는 노드 선택 처리
         if (BuildManager.instance.isBuildMode)
@@ -55,7 +50,7 @@ public class InputManager : MonoBehaviour
             // 중립에서 벗어난 순간에만 신호 전송
             if (!isNeutral && leftStickWasNeutral)
             {
-                int direction = stickX > 0 ? 1 : -1;
+                int direction = leftStickX > 0 ? 1 : -1;
                 BuildManager.instance.MoveNodeSelection(direction);
             }
         }
@@ -65,7 +60,7 @@ public class InputManager : MonoBehaviour
             // 중립에서 벗어난 순간에만 신호 전송
             if (!isNeutral && leftStickWasNeutral)
             {
-                float direction = Mathf.Sign(stickX);
+                float direction = Mathf.Sign(leftStickX);
                 EventManager.Instance.CameraSwitchEvent(direction);
             }
         }
@@ -121,16 +116,15 @@ public class InputManager : MonoBehaviour
     /// </summary>
     private void HandleArrowSwitch()
     {
-        float stickX = OVRInput.Get(OVRInput.Axis2D.SecondaryThumbstick, OVRInput.Controller.RTouch).x;
-        Debug.Log($"오른쪽 스틱 X값: {stickX}");
+        float rightStickX = OVRInput.Get(OVRInput.Axis2D.SecondaryThumbstick, OVRInput.Controller.RTouch).x;
 
-        bool isNeutral = Mathf.Abs(stickX) < STICK_THRESHOLD;
+        bool isNeutral = Mathf.Abs(rightStickX) < STICK_THRESHOLD;
+        // Mathf.Abs()로 절대값 계산, 이 값이 STICK_THRESHOLD(0.5)보다 작으면 중립 상태(isNeutral = true)
 
         // 중립에서 벗어난 순간에만 신호 전송
-        if (!isNeutral && leftStickWasNeutral)
+        if (!isNeutral && rightStickWasNeutral)
         {
-            Debug.Log($"스틱 입력 감지: {(stickX > 0 ? "오른쪽" : "왼쪽")}");
-            if (stickX > 0)
+            if (rightStickX > 0)
             {
                 ArrowManager.Instance.CycleNextArrow();
             }
@@ -140,7 +134,7 @@ public class InputManager : MonoBehaviour
             }
         }
 
-        leftStickWasNeutral = isNeutral;
+        rightStickWasNeutral = isNeutral;   // isNeutral이 폴스고 rightStickWasNeutral가 트루가 되어야지만  화살전환이 일어나니까 스틱이 다시 0.5보다 낮아지기전까지(중립) 작동안됨!
     }
 
     /// <summary>

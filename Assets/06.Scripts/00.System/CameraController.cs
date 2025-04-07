@@ -43,7 +43,7 @@ public class CameraController : MonoBehaviour
             ovrCameraRig.transform.rotation = uiPosition.rotation;
         }
     }
-    
+
     private void OnEnable()
     {
         EventManager.Instance.OnCameraSwitch += HandleCameraSwitch;
@@ -51,8 +51,9 @@ public class CameraController : MonoBehaviour
         EventManager.Instance.OnDialogueStarted += HandleDialogueStarted;
         EventManager.Instance.OnDialogueEnded += HandleDialogueEnded;
         EventManager.Instance.OnGameStart += HandleGameStart;
+        EventManager.Instance.OnGameEnd += HandleGameEnd;
     }
-    
+
     private void OnDisable()
     {
         EventManager.Instance.OnCameraSwitch -= HandleCameraSwitch;
@@ -60,6 +61,7 @@ public class CameraController : MonoBehaviour
         EventManager.Instance.OnDialogueStarted -= HandleDialogueStarted;
         EventManager.Instance.OnDialogueEnded -= HandleDialogueEnded;
         EventManager.Instance.OnGameStart -= HandleGameStart;
+        EventManager.Instance.OnGameEnd += HandleGameEnd;
     }
 
     #endregion
@@ -73,6 +75,8 @@ public class CameraController : MonoBehaviour
     private void HandleGameStart() => SwitchCamera(CameraPosition.Center);
     
     private void HandleWaveEnd(int waveNumber) => SwitchCamera(CameraPosition.UI);
+    
+    private void HandleGameEnd(bool None) => SwitchCamera(CameraPosition.UI);
 
     #endregion
 
@@ -89,27 +93,27 @@ public class CameraController : MonoBehaviour
         {
             return;
         }
-        
+
         // 빌드 모드 체크 - 빌드 모드가 활성화되어 있으면 카메라 전환 무시
         if (buildManager != null && buildManager.isBuildMode)
         {
             return;
         }
-        
+
         // UI 모드나 빌드 모드에서는 카메라 전환 무시
         if (currentPosition == CameraPosition.UI || currentPosition == CameraPosition.Build)
         {
             return;
         }
-        
+
         // 중립 상태는 무시 (키 릴리즈 등)
         if (direction == 0)
         {
             return;
         }
-        
+
         CameraPosition targetPosition = currentPosition;
-        
+
         // 카메라 위치에 따라 다른 전환 로직 적용
         switch (currentPosition)
         {
@@ -117,7 +121,7 @@ public class CameraController : MonoBehaviour
                 // 센터 카메라에서는 a(-1)키는 왼쪽, d(1)키는 오른쪽으로 이동
                 targetPosition = direction < 0 ? CameraPosition.Left : CameraPosition.Right;
                 break;
-                
+
             case CameraPosition.Left:
                 // 왼쪽 카메라에서는 a(-1)키를 눌러야 센터로 이동
                 if (direction < 0)
@@ -125,7 +129,7 @@ public class CameraController : MonoBehaviour
                     targetPosition = CameraPosition.Center;
                 }
                 break;
-                
+
             case CameraPosition.Right:
                 // 오른쪽 카메라에서는 d(1)키를 눌러야 센터로 이동
                 if (direction > 0)
@@ -134,7 +138,7 @@ public class CameraController : MonoBehaviour
                 }
                 break;
         }
-        
+
         // 현재 위치와 타겟 위치가 다를 때만 전환
         if (targetPosition != currentPosition)
         {

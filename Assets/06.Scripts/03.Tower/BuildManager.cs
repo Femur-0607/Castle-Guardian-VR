@@ -59,29 +59,9 @@ public class BuildManager : MonoBehaviour
         EventManager.Instance.OnBuildNodeHit -= HandleBuildNodeHit;
     }
 
-    private void Update()
-    {
-        if (isBuilding)
-        {
-            HandleVRNodeSelection();
-        }
-    }
-
     #endregion
 
     #region VR 노드 선택 관련
-
-    private void HandleVRNodeSelection()
-    {
-        // 왼쪽 컨트롤러 스틱 입력 처리
-        Vector2 leftStick = OVRInput.Get(OVRInput.Axis2D.PrimaryThumbstick, OVRInput.Controller.LTouch);
-        
-        if (Mathf.Abs(leftStick.x) > 0.5f)
-        {
-            int direction = leftStick.x > 0 ? 1 : -1;
-            MoveNodeSelection(direction);
-        }
-    }
 
     public void MoveNodeSelection(int direction)
     {

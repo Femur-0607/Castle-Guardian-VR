@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using System.Collections;
+using DG.Tweening;
 
 public class UIManager : MonoBehaviour
 {
@@ -43,6 +44,14 @@ public class UIManager : MonoBehaviour
 
     [Header("화살 쿨타임 UI")]
     [SerializeField] private GameObject cooldownImageObject; // 쿨타임 이미지 오브젝트
+    
+    
+    [Header("레벨업 UI")]
+    [SerializeField] private GameObject levelUpPanel;
+    [SerializeField] private TextMeshProUGUI levelText;
+    [SerializeField] private TextMeshProUGUI damageText;
+    [SerializeField] private TextMeshProUGUI attackSpeedText;
+    [SerializeField] private float levelUpPanelDuration = 2f;
 
     #endregion
 
@@ -57,7 +66,7 @@ public class UIManager : MonoBehaviour
         leftArrow.SetActive(false);
         rightArrow.SetActive(false);
         CameraIndicatorUIPanel.SetActive(false);
-        
+
         // 다이얼로그 UI 초기화
         HideAllDialogueImages();
 
@@ -66,10 +75,10 @@ public class UIManager : MonoBehaviour
 
         // 시작 버튼에 대화 시작 메서드 연결
         startButton.onClick.AddListener(() => GameManager.Instance.StartIntroDialogue());
-        
+
         // 상점 탭 초기화
         InitializeShopTabs();
-        
+
         // 화살표 초기 상태 (기본: 중앙 카메라 = 양쪽 화살표 모두 표시)
         UpdateCameraArrows(CameraController.CameraPosition.Center);
 
@@ -115,7 +124,8 @@ public class UIManager : MonoBehaviour
         EventManager.Instance.OnArrowCooldownStart += HandleArrowCooldownStart;
         EventManager.Instance.OnArrowCooldownEnd += HandleArrowCooldownEnd;
         EventManager.Instance.OnCastleHealthChanged += UpdateCastleHealthUI;
-        EventManager.Instance.OnCastleInitialized += InitializeCastleHealthUI;  // 성문 초기화 이벤트 구독
+        EventManager.Instance.OnCastleInitialized += InitializeCastleHealthUI;
+        EventManager.Instance.OnLevelUp += HandleLevelUp;
     }
 
     private void OnDisable()
@@ -130,7 +140,8 @@ public class UIManager : MonoBehaviour
         EventManager.Instance.OnArrowCooldownStart -= HandleArrowCooldownStart;
         EventManager.Instance.OnArrowCooldownEnd -= HandleArrowCooldownEnd;
         EventManager.Instance.OnCastleHealthChanged -= UpdateCastleHealthUI;
-        EventManager.Instance.OnCastleInitialized -= InitializeCastleHealthUI;  // 성문 초기화 이벤트 구독 해제
+        EventManager.Instance.OnCastleInitialized -= InitializeCastleHealthUI;
+        EventManager.Instance.OnLevelUp -= HandleLevelUp;
     }
 
     #endregion
@@ -234,11 +245,45 @@ public class UIManager : MonoBehaviour
         // 선택한 탭에 해당하는 상점 패널만 활성화
         shopPanels[tabIndex].SetActive(true);
     }
+    
+    /// <summary>
+    /// 레벨업 UI 표시
+    /// </summary>
+    private void HandleLevelUp(int newLevel)
+    {
+        // 레벨업 UI 업데이트
+        levelText.text = $"Level {newLevel}";
+        damageText.text = $"Damage: {PlayerExperienceSystem.Instance.CurrentDamage:F1}";
+        attackSpeedText.text = $"Attack Speed: {PlayerExperienceSystem.Instance.CurrentAttackSpeed:F1}";
+
+        // 레벨업 UI 표시
+        levelUpPanel.SetActive(true);
+        
+        // 애니메이션 효과
+        levelUpPanel.transform.localScale = Vector3.zero;
+        levelUpPanel.transform.DOScale(Vector3.one, 0.3f).SetEase(Ease.OutBack);
+
+        // 일정 시간 후 자동으로 숨김
+        StartCoroutine(HideLevelUpPanel());
+    }
+
+    /// <summary>
+    /// 레벨업 UI 자동 숨김
+    /// </summary>
+    private IEnumerator HideLevelUpPanel()
+    {
+        yield return new WaitForSeconds(levelUpPanelDuration);
+        
+        // 애니메이션 효과
+        levelUpPanel.transform.DOScale(Vector3.zero, 0.3f).SetEase(Ease.InBack)
+            .OnComplete(() => levelUpPanel.SetActive(false));
+    }
+
 
     #endregion
-    
+
     #region 카메라 UI 함수
-    
+
     /// <summary>
     /// 카메라 변경 이벤트 처리
     /// </summary>

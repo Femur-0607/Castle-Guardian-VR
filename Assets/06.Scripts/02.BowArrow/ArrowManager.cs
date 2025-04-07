@@ -8,6 +8,7 @@ using UnityEngine;
 public class ArrowManager : MonoBehaviour
 {
     #region 싱글톤
+
     // 싱글톤 인스턴스 - 전역적으로 접근 가능
     public static ArrowManager Instance { get; private set; }
     
@@ -24,8 +25,11 @@ public class ArrowManager : MonoBehaviour
         }
         Instance = this;
     }
+
     #endregion
-    
+
+    #region 필드 변수
+
     [Header("화살 타입 및 프리팹")]
     [SerializeField] private GameObject normalArrowPrefab;    // 기본 화살 프리팹
     [SerializeField] private GameObject explosiveArrowPrefab; // 폭발 화살 프리팹
@@ -51,6 +55,10 @@ public class ArrowManager : MonoBehaviour
     // 각 화살별 레벨과 잠금 상태 관리를 위한 딕셔너리
     private Dictionary<ProjectileData.ProjectileType, int> arrowLevels = new Dictionary<ProjectileData.ProjectileType, int>();
     private Dictionary<ProjectileData.ProjectileType, bool> arrowUnlocked = new Dictionary<ProjectileData.ProjectileType, bool>();
+
+    #endregion
+
+    #region 유니티 이벤트 함수
     
     private void OnEnable()
     {
@@ -83,6 +91,10 @@ public class ArrowManager : MonoBehaviour
         // 시작 시 기본 화살 장착
         SwitchArrowType(ProjectileData.ProjectileType.Normal);
     }
+
+    #endregion
+
+    #region 능력치 상승
     
     /// <summary>
     /// 레벨업 시 화살 데미지 증가
@@ -93,10 +105,9 @@ public class ArrowManager : MonoBehaviour
         normalArrowData.baseDamage += normalArrowData.damageIncreasePerLevel;
         explosiveArrowData.baseDamage += explosiveArrowData.damageIncreasePerLevel;
         poisonArrowData.baseDamage += poisonArrowData.damageIncreasePerLevel;
-
-        // 현재 장착된 화살 UI 갱신
-        SwitchArrowType(CurrentArrowType);
     }
+    
+    #endregion
     
     /// <summary>
     /// 화살 타입 전환 - 다른 종류의 화살로 바꾸는 기능
@@ -109,26 +120,26 @@ public class ArrowManager : MonoBehaviour
         {
             return;
         }
-        
+
         // 현재 화살 타입을 새로운 타입으로 변경
         CurrentArrowType = arrowType;
-        
+
         // 화살 발사기에 새 프리팹과 데이터 설정 (각 화살 타입에 맞게)
         switch (arrowType)
         {
             case ProjectileData.ProjectileType.Normal:
                 arrowShooter.SetProjectilePrefab(normalArrowPrefab, normalArrowData, normalMuzzleEffectPrefab);
                 break;
-                
+
             case ProjectileData.ProjectileType.Explosive:
                 arrowShooter.SetProjectilePrefab(explosiveArrowPrefab, explosiveArrowData, explosiveMuzzleEffectPrefab);
                 break;
-                
+
             case ProjectileData.ProjectileType.Poison:
                 arrowShooter.SetProjectilePrefab(poisonArrowPrefab, poisonArrowData, poisonMuzzleEffectPrefab);
                 break;
         }
-        
+
         // UI 업데이트 이벤트 발생 (화살 선택 UI 등에서 사용)
         OnArrowTypeChanged?.Invoke(CurrentArrowType);
     }
@@ -149,14 +160,10 @@ public class ArrowManager : MonoBehaviour
     /// <param name="arrowType">해금할 화살 타입</param>
     /// <returns>해금 성공 여부</returns>
     public bool UnlockArrow(ProjectileData.ProjectileType arrowType)
-    {
-        Debug.Log($"화살 해금 시도: {arrowType}");
-        Debug.Log($"현재 잠금 해제된 화살 목록: {string.Join(", ", unlockedArrows)}");
-        
+    {   
         // 이미 해금된 화살인지 확인
         if (arrowUnlocked[arrowType])
         {
-            Debug.Log($"이미 해금된 화살입니다: {arrowType}");
             return false;
         }
         
@@ -165,9 +172,6 @@ public class ArrowManager : MonoBehaviour
         arrowLevels[arrowType] = 1;        // 초기 레벨 1
         unlockedArrows.Add(arrowType);     // 사용 가능한 화살 목록에 추가
         
-        Debug.Log($"화살 해금 성공: {arrowType}");
-        Debug.Log($"현재 잠금 해제된 화살 목록 (해금 후): {string.Join(", ", unlockedArrows)}");
-        Debug.Log($"현재 잠금 해제된 화살 수: {unlockedArrows.Count}");
         return true;
     }
     
@@ -179,20 +183,17 @@ public class ArrowManager : MonoBehaviour
         // 사용 가능한 화살이 1개 이하면 무시
         if (unlockedArrows.Count <= 1) 
         {
-            Debug.Log("사용 가능한 화살이 1개 이하입니다.");
             return;
         }
         
         // 현재 화살의 인덱스 찾기
         int currentIndex = unlockedArrows.IndexOf(CurrentArrowType);
-        Debug.Log($"현재 화살 인덱스: {currentIndex}, 잠금 해제된 화살 수: {unlockedArrows.Count}");
         
         // 다음 화살로 인덱스 이동 (마지막 화살이면 처음으로 순환)
         int nextIndex = (currentIndex + 1) % unlockedArrows.Count;
         
         // 다음 화살로 전환
         SwitchArrowType(unlockedArrows[nextIndex]);
-        Debug.Log($"다음 화살로 변경: {unlockedArrows[nextIndex]}");
     }
     
     /// <summary>
