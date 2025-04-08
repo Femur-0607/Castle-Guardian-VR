@@ -7,7 +7,7 @@ using UnityEngine.Pool;
 
 public class Enemy : LivingEntity
 {
-    public enum EnemyState
+    private enum EnemyState
     {
         Idle,      // 초기 상태. NavMeshAgent가 활성화되기 전에는 아무 행동도 하지 않음.
         Chasing, // 추적
@@ -125,6 +125,30 @@ public class Enemy : LivingEntity
         
         // 다이얼로그 중이면 행동 중지
         if (isDialogueActive) return;
+        
+        // 타겟을 향해 y축 회전만 적용
+        if (target != null)
+        {
+            // 타겟 방향 계산
+            Vector3 direction = target.position - transform.position;
+            direction.y = 0; // y축 성분 제거 (수직 회전 방지)
+            
+            // 현재 오일러 각도 유지
+            Vector3 currentRotation = transform.eulerAngles;
+        
+            // 타겟 방향으로 부드럽게 회전
+            if (direction != Vector3.zero)
+            {
+                // 타겟 방향에 대한 Y축 각도만 계산
+                float targetYRotation = Quaternion.LookRotation(direction).eulerAngles.y;
+            
+                // Y축만 부드럽게 회전
+                float newYRotation = Mathf.LerpAngle(currentRotation.y, targetYRotation, Time.deltaTime * 5f);
+            
+                // 새 회전 적용 (X, Z는 유지)
+                transform.eulerAngles = new Vector3(currentRotation.x, newYRotation, currentRotation.z);
+            }
+        }
 
         // FSM 구현
         switch (currentState)
@@ -143,7 +167,7 @@ public class Enemy : LivingEntity
         }
     }
 
-    public override void TakeDamage(float damage)
+        public override void TakeDamage(float damage)
     {
         if (!isAlive) return;
 
@@ -151,12 +175,11 @@ public class Enemy : LivingEntity
 
         if (currentHealth <= 0)
         {
-            return; // 체력이 0이하면 히트 모션 재생 안함
+            return;
         }
         else
         {
-            // 50% 확률로 히트 모션 재생 (과도한 히트 모션 방지)
-            if (Random.value > 0.5f) animator.SetTrigger("hit");
+            animator.SetTrigger("hit");
         }
     }
 
@@ -205,7 +228,7 @@ public class Enemy : LivingEntity
     /// 적의 추적을 시작하는 메서드
     /// NavMeshAgent가 활성화되고 유효한 NavMesh 위에 배치되었음을 전제로 함.
     /// </summary>
-    public void BeginChase()
+    private void BeginChase()
     {
         if (target != null && agent.isOnNavMesh)
         {
@@ -289,26 +312,15 @@ public class Enemy : LivingEntity
                 animator.SetTrigger("attack");
 
                 // 데미지 적용
-                Debug.Log($"공격 시도: target={target.name}, attackDamage={enemyData.attackDamage}");
                 IDamageable castle = target.GetComponent<IDamageable>();
                 if (castle != null)
                 {
-                    Debug.Log("Castle 컴포넌트를 찾았습니다. 데미지를 가합니다.");
                     castle.TakeDamage(enemyData.attackDamage);
-                }
-                else
-                {
-                    Debug.LogError("Castle 컴포넌트를 찾을 수 없습니다!");
                 }
 
                 // 현재 시간을 할당
                 lastAttackTime = Time.time;
             }
-        }
-        else
-        {
-            if (target == null) Debug.LogError("target이 null입니다!");
-            if (animator == null) Debug.LogError("animator가 null입니다!");
         }
     }
 
@@ -328,6 +340,9 @@ public class Enemy : LivingEntity
 
         currentState = EnemyState.Dead;
 
+        agent.isStopped = true;
+        agent.enabled = false;
+
         // 사망 시 게임매니저에게 골드 전달 (프로퍼티 사용을 위해 AddMoney 메서드 호출)
         GameManager.Instance.AddMoney((int)enemyData.goldDropAmount);
 
@@ -344,12 +359,8 @@ public class Enemy : LivingEntity
 
         // 파티클 효과 생성
         Vector3 particlePosition = transform.position + Vector3.up * 0.5f; // 바닥보다 약간 위에서 생성
-
-        // 1. 일시적인 파티클 효과 (Loot_Poof)
-        ParticlePoolManager.Instance.GetParticle(DEATH_POOF_KEY, particlePosition, Quaternion.identity);
-
-        // 2. 지속적인 파티클 효과 (LootBeam)
-        ParticlePoolManager.Instance.GetParticle(SOUL_BEAM_KEY, particlePosition, Quaternion.identity, true);
+        
+        ParticlePoolManager.Instance.SpawnSoulParticle(particlePosition);
 
         // 오브젝트 풀에 반환 (비활성화)
         pool?.Release(this);

@@ -1,5 +1,5 @@
-using UnityEngine;
 using System;
+using UnityEngine;
 using PixelCrushers.DialogueSystem;
 using System.Collections;
 
@@ -14,7 +14,6 @@ public class GameManager : MonoBehaviour
 
     [Header("참조")]
     [SerializeField] private CameraController cameraController;
-
     // 게임 머니(골드) 프로퍼티로 변경
     private int _gameMoney = 200;
     public int gameMoney 
@@ -128,7 +127,7 @@ public class GameManager : MonoBehaviour
     private IEnumerator TrySubscribeToDialogueManager()
     {
         // DialogueManager가 초기화될 때까지 대기
-        yield return new WaitForSeconds(2.0f);
+        yield return new WaitForSeconds(2f);
         
         if (DialogueManager.instance != null)
         {
@@ -159,7 +158,12 @@ public class GameManager : MonoBehaviour
     /// <summary>
     /// 게임 시작 처리 메서드 (다이얼로그 종료 후 호출)
     /// </summary>
-    public void StartGame()
+    private void OnPostRender()
+    {
+        throw new NotImplementedException();
+    }
+
+    private void StartGame()
     {
         if (!gameStarted)
         {
@@ -174,21 +178,7 @@ public class GameManager : MonoBehaviour
             // 다이얼로그 종료 후 활성화됨
         }
     }
-
-    /// <summary>
-    /// 인트로 대화 시작 메서드 - 시작 버튼에 할당
-    /// </summary>
-    public void StartIntroDialogue()
-    {
-        // 다이얼로그 시작 이벤트 발생 (인트로 타입)
-        EventManager.Instance.DialogueStartedEvent(EventManager.DialogueType.Intro);
-        
-        // Intro 대화 시작 (ID는 DSU 에디터에서 설정한 값에 맞게 조정)
-        DialogueManager.StartConversation("Intro");
-        
-        // 참고: 게임 시작 처리는 대화 종료 후 HandleConversationEnded에서 처리됨
-    }
-
+    
     /// <summary>
     /// 게임 종료 메서드
     /// </summary>
@@ -272,7 +262,7 @@ public class GameManager : MonoBehaviour
     /// <summary>
     /// 지연 후 튜토리얼 대화 시작 코루틴
     /// </summary>
-    private System.Collections.IEnumerator StartTutorialDialogueDelayed()
+    private IEnumerator StartTutorialDialogueDelayed()
     {
         // 1초 대기
         yield return new WaitForSeconds(1f);
@@ -295,11 +285,38 @@ public class GameManager : MonoBehaviour
         // 웨이브 종료 시 플레이어 컨트롤 비활성화
         DisablePlayerControls();
         
-        if (waveNumber == 10)
+        // 첫 번째 웨이브가 끝났을 때만 상점 튜토리얼 표시
+        if (waveNumber == 1)
         {
-            // 10웨이브 종료 시 게임 종료
-            EndGame(true);
+            // 약간의 지연 후 상점 튜토리얼 표시
+            StartCoroutine(StartShopTutorialDelayed());
         }
+        
+        if (waveNumber == 9)
+        {
+            // 9웨이브 종료 시 게임 종료
+            // 승리 다이얼로그 표시
+            StartCoroutine(StartVictoryDialogueDelayed());
+        }
+    }
+    
+    // 지연 후 상점 튜토리얼 시작 코루틴
+    private IEnumerator StartShopTutorialDelayed()
+    {
+        // 상점 UI가 표시될 때까지 잠시 대기
+        yield return new WaitForSeconds(0.5f);
+    
+        // 상점 튜토리얼 대화 시작
+        DialogueManager.StartConversation("ShopTutorial");
+    }
+    
+    private IEnumerator StartVictoryDialogueDelayed()
+    {
+        // 약간의 지연
+        yield return new WaitForSeconds(1f);
+    
+        // Victory 대화 시작
+        DialogueManager.StartConversation("Victory");
     }
     
     #endregion
@@ -334,6 +351,20 @@ public class GameManager : MonoBehaviour
 
     #region 대화 시스템 이벤트 핸들러
     
+    /// <summary>
+    /// 인트로 대화 시작 메서드 - 시작 버튼에 할당
+    /// </summary>
+    public void StartIntroDialogue()
+    {
+        // 다이얼로그 시작 이벤트 발생 (인트로 타입)
+        EventManager.Instance.DialogueStartedEvent(EventManager.DialogueType.Intro);
+        
+        // Intro 대화 시작 (ID는 DSU 에디터에서 설정한 값에 맞게 조정)
+        DialogueManager.StartConversation("Intro");
+        
+        // 참고: 게임 시작 처리는 대화 종료 후 HandleConversationEnded에서 처리됨
+    }
+    
     // 대화 종료 시 호출될 메서드
     private void HandleConversationEnded(Transform actor)
     {   
@@ -343,7 +374,7 @@ public class GameManager : MonoBehaviour
             // 다이얼로그 종료 이벤트 발생 (인트로 타입)
             EventManager.Instance.DialogueEndedEvent(EventManager.DialogueType.Intro);
             
-            // 비동기로 0.3초 후에 처리
+            // 비동기로 1초 후에 처리
             StartCoroutine(HandleConversationEndedDelayed());
         }
         // 조작법 튜토리얼 대화가 끝났을 때
@@ -355,22 +386,16 @@ public class GameManager : MonoBehaviour
             // 지연 후 플레이어 컨트롤 활성화 (1초 후)
             StartCoroutine(DelayedEnablePlayerControls());
         }
-    }
-    
-    /// <summary>
-    /// 지연 후 플레이어 컨트롤 활성화 코루틴
-    /// </summary>
-    private System.Collections.IEnumerator DelayedEnablePlayerControls()
-    {
-        // 1초 대기
-        yield return new WaitForSeconds(1f);
-        
-        // 대화가 끝나면 플레이어 컨트롤 활성화
-        EnablePlayerControls();
+        // Victory 대화가 끝났을 때
+        else if (DialogueManager.lastConversationID == 3) // 승리 대화 ID
+        {
+            // 게임 클리어 처리
+            EndGame(true);
+        }
     }
     
     // 대화 종료 후 지연 처리를 위한 코루틴
-    private System.Collections.IEnumerator HandleConversationEndedDelayed()
+    private IEnumerator HandleConversationEndedDelayed()
     {
         // 1초 대기
         yield return new WaitForSeconds(1f);
@@ -388,6 +413,18 @@ public class GameManager : MonoBehaviour
             // 게임 시작 처리
             StartGame();
         }
+    }
+    
+    /// <summary>
+    /// 지연 후 플레이어 컨트롤 활성화 코루틴
+    /// </summary>
+    private IEnumerator DelayedEnablePlayerControls()
+    {
+        // 1초 대기
+        yield return new WaitForSeconds(1f);
+        
+        // 대화가 끝나면 플레이어 컨트롤 활성화
+        EnablePlayerControls();
     }
     
     #endregion

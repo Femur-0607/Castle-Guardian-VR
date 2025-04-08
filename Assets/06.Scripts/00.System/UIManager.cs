@@ -1,8 +1,6 @@
-using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.EventSystems;
 using System.Collections;
 using DG.Tweening;
 
@@ -20,8 +18,9 @@ public class UIManager : MonoBehaviour
     [Header("타이틀 및 게임 관련 UI")]
     public GameObject startUIPanel;
     public GameObject gameOverUIPanel;
+    public GameObject gameVictoryUIPanel;
     public TextMeshProUGUI goldAmountTMP;
-    [SerializeField] private Button startButton; // 시작 버튼 참조 추가
+    [SerializeField] private Button startButton;
 
     [Header("상점 UI")]
     public GameObject shopUIPanel;
@@ -51,7 +50,7 @@ public class UIManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI levelText;
     [SerializeField] private TextMeshProUGUI damageText;
     [SerializeField] private TextMeshProUGUI attackSpeedText;
-    [SerializeField] private float levelUpPanelDuration = 2f;
+    [SerializeField] private float levelUpPanelDuration = 4f;
 
     #endregion
 
@@ -159,7 +158,7 @@ public class UIManager : MonoBehaviour
         else
         {
             waveUIPanel.SetActive(false);
-            gameOverUIPanel.SetActive(false);
+            gameVictoryUIPanel.SetActive(true);
         }
     }
 
@@ -190,6 +189,7 @@ public class UIManager : MonoBehaviour
     // 상점 UI 표시 메서드
     public void ShowShopUI() 
     {
+        waveUIPanel.SetActive(false);
         shopUIPanel.SetActive(true);
         
         // 상점이 열릴 때마다 첫 번째 탭(Arrow)으로 초기화
@@ -221,7 +221,7 @@ public class UIManager : MonoBehaviour
     /// 탭 전환 메서드
     /// </summary>
     /// <param name="tabIndex">선택한 탭 인덱스 (0: Arrow, 1: Tower, 2: Soldier)</param>
-    public void SwitchTab(int tabIndex)
+    private void SwitchTab(int tabIndex)
     {
         // 색상 정의
         Color selectedColor;
@@ -479,14 +479,7 @@ public class UIManager : MonoBehaviour
     
     #endregion
 
-    // 성문 체력 UI 업데이트 메서드
-    private void UpdateCastleHealthUI(float currentHealth)
-    {
-        if (castleHealthSlider != null)
-        {
-            castleHealthSlider.value = currentHealth / castleHealthSlider.maxValue;
-        }
-    }
+    #region 성문 체력 관리 UI 함수
 
     // 성문 체력 UI 초기화 메서드
     private void InitializeCastleHealthUI(Castle castle)
@@ -497,4 +490,15 @@ public class UIManager : MonoBehaviour
             castleHealthSlider.value = castle.currentHealth;
         }
     }
+    
+    // 성문 체력 UI 업데이트 메서드
+    private void UpdateCastleHealthUI(float currentHealth)
+    {
+        if (castleHealthSlider != null)
+        {
+            castleHealthSlider.value = currentHealth;
+        }
+    }
+
+    #endregion
 }

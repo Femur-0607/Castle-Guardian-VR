@@ -295,7 +295,7 @@ public class BuildManager : MonoBehaviour
     #endregion
 
     // 건설 모드 토글
-    public void ToggleBuildMode(bool enable)
+    private void ToggleBuildMode(bool enable)
     {
         isBuilding = enable;
     }

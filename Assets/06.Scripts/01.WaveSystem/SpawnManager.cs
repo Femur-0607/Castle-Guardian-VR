@@ -47,7 +47,7 @@ public class SpawnManager : MonoBehaviour
 
         // 적 스폰
         Enemy e = enemyPool.GetEnemy(position, Quaternion.identity);
-        e.target = targets[UnityEngine.Random.Range(0, targets.Length)];
+        e.target = targets[Random.Range(0, targets.Length)];
         e.spawnManager = this;
         e.enemyData = data; // 적 데이터 설정
         e.formationManager = formationManager;

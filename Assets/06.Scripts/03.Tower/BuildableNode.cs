@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.EventSystems; // UI 클릭 감지용
 
 /// <summary>
 /// BuildableNode는 씬 내 타워 건설 위치를 관리합니다.
@@ -76,7 +75,7 @@ public class BuildableNode : MonoBehaviour
     /// <summary>
     /// 이 Node에 타워를 건설할 수 있으면 true를 반환합니다.
     /// </summary>
-    public bool CanPlaceTower()
+    private bool CanPlaceTower()
     {
         return towerLevel == 0;
     }
@@ -132,7 +131,7 @@ public class BuildableNode : MonoBehaviour
         ActivateArcherTower();
     }
 
-    public void ActivateArcherTower()
+    private void ActivateArcherTower()
     {
         // 이전 타워 비활성화
         DeactivateAllTowers();

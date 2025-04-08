@@ -12,7 +12,7 @@ public class WaveManager : MonoBehaviour
     [SerializeField] private SpawnManager[] spawnManagers;  // 활성 SpawnManager들의 리스트 (인스펙터나 초기화 시 등록)
 
     private int currentWaveIndex = -1; // 현재 웨이브 인덱스
-    public int CurrentWave => currentWaveIndex + 1; // 현재 웨이브 번호
+    private int CurrentWave => currentWaveIndex + 1; // 현재 웨이브 번호
     public int enemyCountInWave { get; private set; } // 현재 웨이브 적 수
     [SerializeField] private bool isWaveActive;  // 웨이브 진행 여부
     private bool isDialogueActive = false;       // 다이얼로그 표시 중인지 여부
@@ -68,7 +68,7 @@ public class WaveManager : MonoBehaviour
     #region 웨이브 관리
 
     // 게임 시작 시 호출되는 메서드
-    public void OnWaveStart()
+    private void OnWaveStart()
     {
         currentWaveIndex = 0;
         StartWave(currentWaveIndex);
@@ -141,7 +141,7 @@ public class WaveManager : MonoBehaviour
 
     // 웨이브 종료 시 발동하는 메서드
     // (스폰 매니저에서 적이 모두 소멸했을 때 호출)
-    public void WaveEndEvent()
+    private void WaveEndEvent()
     {
         isWaveActive = false;
 
@@ -149,11 +149,6 @@ public class WaveManager : MonoBehaviour
         if (currentWaveIndex < waveData.waves.Count)
         {
             GameManager.Instance.AddMoney(waveData.waves[currentWaveIndex].clearReward);
-        }
-
-        if (CurrentWave >= 10) // 10웨이브가 마지막
-        {
-            GameManager.Instance.EndGame(true);
         }
 
         // 영혼 수집 후 1초 대기 후 웨이브 종료 이벤트 호출
@@ -233,8 +228,8 @@ public class WaveManager : MonoBehaviour
             yield return new WaitForSeconds(pattern.spawnInterval);
         }
     }
-    
-    public void ForceKillAllEnemies()
+
+    private void ForceKillAllEnemies()
     {
         foreach (var spawnManager in spawnManagers)
         {

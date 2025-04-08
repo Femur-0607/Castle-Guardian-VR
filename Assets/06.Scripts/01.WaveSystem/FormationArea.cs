@@ -42,7 +42,7 @@ public class FormationArea : MonoBehaviour
         }
     }
 
-    public Vector3 GetGridPosition(int row, int col)
+    private Vector3 GetGridPosition(int row, int col)
     {
         // 한 줄에 5개 유닛, 중앙 기준 좌우 +-3.5 범위
         float startX = -(maxUnitsPerRow - 1) * unitSpacing / 2f;

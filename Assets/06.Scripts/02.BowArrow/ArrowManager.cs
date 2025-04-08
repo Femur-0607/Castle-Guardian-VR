@@ -47,7 +47,7 @@ public class ArrowManager : MonoBehaviour
     [SerializeField] private ArrowShooter arrowShooter;  // 화살 발사기 참조
     
     // 현재 장착된 화살 타입 (읽기 전용 속성)
-    public ProjectileData.ProjectileType CurrentArrowType { get; private set; } = ProjectileData.ProjectileType.Normal;
+    private ProjectileData.ProjectileType CurrentArrowType { get; set; } = ProjectileData.ProjectileType.Normal;
     
     // 잠금 해제된 화살 목록
     private List<ProjectileData.ProjectileType> unlockedArrows = new List<ProjectileData.ProjectileType>();
@@ -204,20 +204,17 @@ public class ArrowManager : MonoBehaviour
         // 사용 가능한 화살이 1개 이하면 무시
         if (unlockedArrows.Count <= 1) 
         {
-            Debug.Log("사용 가능한 화살이 1개 이하입니다.");
             return;
         }
         
         // 현재 화살의 인덱스 찾기
         int currentIndex = unlockedArrows.IndexOf(CurrentArrowType);
-        Debug.Log($"현재 화살 인덱스: {currentIndex}, 잠금 해제된 화살 수: {unlockedArrows.Count}");
         
         // 이전 화살로 인덱스 이동 (첫 번째 화살이면 마지막으로 순환)
         int previousIndex = (currentIndex - 1 + unlockedArrows.Count) % unlockedArrows.Count;
         
         // 이전 화살로 전환
         SwitchArrowType(unlockedArrows[previousIndex]);
-        Debug.Log($"이전 화살로 변경: {unlockedArrows[previousIndex]}");
     }
     
     /// <summary>

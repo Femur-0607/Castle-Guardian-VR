@@ -116,10 +116,12 @@ public class InputManager : MonoBehaviour
     /// </summary>
     private void HandleArrowSwitch()
     {
-        float rightStickX = OVRInput.Get(OVRInput.Axis2D.SecondaryThumbstick, OVRInput.Controller.RTouch).x;
+        float rightStickX = OVRInput.Get(OVRInput.Axis2D.PrimaryThumbstick, OVRInput.Controller.RTouch).x;
+        Debug.Log($"오른쪽 스틱 X값: {rightStickX}, 임계값: {STICK_THRESHOLD}");
 
         bool isNeutral = Mathf.Abs(rightStickX) < STICK_THRESHOLD;
         // Mathf.Abs()로 절대값 계산, 이 값이 STICK_THRESHOLD(0.5)보다 작으면 중립 상태(isNeutral = true)
+        Debug.Log($"중립 상태: {isNeutral}, 이전 중립 상태: {rightStickWasNeutral}");
 
         // 중립에서 벗어난 순간에만 신호 전송
         if (!isNeutral && rightStickWasNeutral)

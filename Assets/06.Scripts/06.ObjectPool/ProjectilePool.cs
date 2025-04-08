@@ -61,7 +61,6 @@ public class ProjectilePool : MonoBehaviour
         // 해당 타입의 프리팹이 없으면 기본 타입으로 폴백
         if (!prefabDictionary.ContainsKey(arrowType))
         {
-            Debug.LogWarning($"화살 타입 {arrowType}에 대한 프리팹이 없습니다. 기본 화살로 대체합니다.");
             arrowType = ProjectileData.ProjectileType.Normal;
         }
 
@@ -103,7 +102,6 @@ public class ProjectilePool : MonoBehaviour
         // 등록된 타입인지 확인
         if (!projectilePools.ContainsKey(arrowType))
         {
-            Debug.LogWarning($"화살 타입 {arrowType}에 대한 풀이 없습니다. 기본 화살로 대체합니다.");
             currentArrowType = ProjectileData.ProjectileType.Normal;
         }
         else
@@ -120,7 +118,6 @@ public class ProjectilePool : MonoBehaviour
         // 현재 타입의 풀이 없으면 기본 화살 풀 사용
         if (!projectilePools.ContainsKey(currentArrowType))
         {
-            Debug.LogWarning($"화살 타입 {currentArrowType}에 대한 풀이 없습니다. 기본 화살로 대체합니다.");
             currentArrowType = ProjectileData.ProjectileType.Normal;
         }
 
@@ -131,12 +128,11 @@ public class ProjectilePool : MonoBehaviour
     /// 지정된 화살 타입의 화살을 풀에서 꺼내옵니다.
     /// </summary>
     /// <param name="arrowType">화살 타입</param>
-    public Projectile GetProjectile(ProjectileData.ProjectileType arrowType)
+    private Projectile GetProjectile(ProjectileData.ProjectileType arrowType)
     {
         // 요청한 타입의 풀이 없으면 기본 화살 풀 사용
         if (!projectilePools.ContainsKey(arrowType))
         {
-            Debug.LogWarning($"화살 타입 {arrowType}에 대한 풀이 없습니다. 기본 화살로 대체합니다.");
             arrowType = ProjectileData.ProjectileType.Normal;
         }
 

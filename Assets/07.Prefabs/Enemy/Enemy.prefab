@@ -112,6 +112,7 @@ MonoBehaviour:
   tankerModel: {fileID: 3481596274704863132}
   currentState: 0
   formationManager: {fileID: 0}
+  deathDelay: 2
 --- !u!195 &5260164754226645346
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -1265,6 +1266,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 95937921189647870, guid: e2ce315c37e32fd4b9d2fd8f2d56a7d0, type: 3}
+      propertyPath: m_Controller
+      value: 
+      objectReference: {fileID: 22100000, guid: bc5c6786f0a4a1140946f7ce65d03353, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -1588,6 +1593,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 95848811368337272, guid: 3e08eaa99fbf41647adc835cdda0472a, type: 3}
+      propertyPath: m_Controller
+      value: 
+      objectReference: {fileID: 22100000, guid: 2c5504f7e54a2bc4b8add4da484e9bec, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -1887,6 +1896,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 95570523499675550, guid: ebf2cc118768d314988702254deb07a7, type: 3}
+      propertyPath: m_Controller
+      value: 
+      objectReference: {fileID: 9100000, guid: 8f5bd6bb00513574ca91896335461878, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

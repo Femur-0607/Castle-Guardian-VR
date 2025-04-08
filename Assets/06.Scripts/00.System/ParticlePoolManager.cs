@@ -59,61 +59,6 @@ public class ParticlePoolManager : MonoBehaviour
         return newObject;
     }
 
-    public GameObject GetParticle(string key, Vector3 position, Quaternion rotation, bool trackAsSoul = false)
-    {
-        if (!particlePools.ContainsKey(key))
-        {
-            return null;
-        }
-
-        Queue<GameObject> pool = particlePools[key];
-        GameObject particleObj = null;
-
-        if (pool.Count == 0)
-        {
-            ParticlePoolItem config = particleTypes.Find(x => x.key == key);
-            if (config.autoExpand)
-            {
-                particleObj = CreateNewPoolItem(key);
-            }
-            else
-            {
-                return null;
-            }
-        }
-        else
-        {
-            particleObj = pool.Dequeue();
-        }
-
-        particleObj.transform.position = position;
-        particleObj.transform.rotation = rotation;
-        particleObj.SetActive(true);
-
-        // 지속적으로 필드에 남아있는 파티클인 경우 추적 목록에 추가
-        if (trackAsSoul)
-        {
-            activeFieldSouls.Add(particleObj);
-        }
-        else
-        {
-            // 일시적인 파티클의 경우 자동 반환 처리
-            ParticleSystem ps = particleObj.GetComponent<ParticleSystem>();
-            if (ps != null)
-            {
-                StartCoroutine(ReturnToPoolAfterPlay(particleObj, key, ps.main.duration + ps.main.startLifetime.constantMax));
-            }
-        }
-
-        return particleObj;
-    }
-
-    private IEnumerator ReturnToPoolAfterPlay(GameObject obj, string poolKey, float delay)
-    {
-        yield return new WaitForSeconds(delay);
-        ReturnToPool(obj, poolKey);
-    }
-
     public void ReturnToPool(GameObject obj, string poolKey)
     {
         if (!particlePools.ContainsKey(poolKey)) return;
@@ -140,15 +85,8 @@ public class ParticlePoolManager : MonoBehaviour
         int soulCount = activeFieldSouls.Count;
         int collectedCount = 0;
 
-        // 순차적으로 영혼을 수집하기 위한 리스트 복사 및 셔플
+        // 리스트 복사
         var soulsToCollect = new List<GameObject>(activeFieldSouls);
-        for (int i = 0; i < soulsToCollect.Count; i++)
-        {
-            int randomIndex = Random.Range(i, soulsToCollect.Count);
-            var temp = soulsToCollect[i];
-            soulsToCollect[i] = soulsToCollect[randomIndex];
-            soulsToCollect[randomIndex] = temp;
-        }
 
         // 각 영혼마다 약간의 시간 간격을 두고 순차적으로 수집
         for (int i = 0; i < soulsToCollect.Count; i++)
@@ -156,7 +94,7 @@ public class ParticlePoolManager : MonoBehaviour
             var soul = soulsToCollect[i];
             
             // 잠시 후에 영혼 이동 시작 (순차적 효과)
-            float staggerDelay = i * 0.1f;  // 각 영혼마다 0.1초 간격
+            float staggerDelay = i * 0.3f;  // 각 영혼마다 0.3초 간격
             
             StartCoroutine(DelayedSoulCollection(soul, target, duration, staggerDelay, () => {
                 collectedCount++;
@@ -182,67 +120,21 @@ public class ParticlePoolManager : MonoBehaviour
 
     private void MoveSoulToPlayer(GameObject soul, Transform target, float duration, System.Action onSoulCollected = null)
     {
-        // 시작 위치 (현재 LootBeam 위치)
-        Vector3 startPos = soul.transform.position;
-        
-        // 1. LootBeam 파티클 비활성화 및 풀로 반환
-        ReturnToPool(soul, "LootBeam_Generic_Epic_Variant");
-        
-        // 2. 트레일 파티클 생성
-        GameObject trailParticle = GetParticle("VFX_Trail_Void_Variant", startPos, Quaternion.identity);
-        if (trailParticle == null)
-        {
-            onSoulCollected?.Invoke();
-            return;
-        }
-        
-        // 3. 중간 지점 (아치형을 만들기 위한 높이)
-        Vector3 controlPoint = (startPos + target.position) / 2 + Vector3.up * Random.Range(2f, 4f);
-        
-        // 4. 경로 포인트 배열 생성
-        Vector3[] path = new Vector3[3] { 
-            startPos, 
-            controlPoint, 
-            target.position 
-        };
-        
-        // 5. 작은 랜덤 지연 추가로 모든 영혼이 동시에 움직이지 않도록 함
-        float randomDelay = Random.Range(0f, 0.3f);
-        
-        // 6. 크기 효과
-        trailParticle.transform.DOScale(trailParticle.transform.localScale * 1.2f, 0.3f)
-            .SetDelay(randomDelay)
-            .SetEase(Ease.OutBack);
-        
-        // 7. 경로를 따라 이동 애니메이션
-        trailParticle.transform.DOPath(path, duration, PathType.CatmullRom)
-            .SetDelay(randomDelay)
-            .SetEase(Ease.InOutQuad)
-            .OnUpdate(() => {
-                // 이동 중 트레일이 플레이어를 향하도록 회전
-                trailParticle.transform.LookAt(target);
-                
-                // 이동 중 약간의 크기 변화를 줘서 맥동 효과
-                float pulseScale = 1f + 0.1f * Mathf.Sin(Time.time * 8f);
-                trailParticle.transform.localScale = Vector3.one * pulseScale;
-            })
+        // 영혼 파티클을 직접 플레이어 방향으로 이동
+        soul.transform.DOMove(target.position, duration)
+            .SetEase(Ease.InQuad)
             .OnComplete(() => {
-                // 도착 시 효과 (임팩트 효과)
-                trailParticle.transform.DOScale(Vector3.zero, 0.2f)
-                    .SetEase(Ease.InBack)
-                    .OnComplete(() => {
-                        // 플레이어 경험치 증가
-                        if (PlayerExperienceSystem.Instance != null)
-                        {
-                            PlayerExperienceSystem.Instance.AddExperience(20);
-                        }
-                        
-                        // 트레일 파티클 비활성화 및 풀로 반환
-                        ReturnToPool(trailParticle, "VFX_Trail_Void_Variant");
-                        
-                        // 개별 영혼 수집 콜백 실행
-                        onSoulCollected?.Invoke();
-                    });
+                // 플레이어 경험치 증가
+                if (PlayerExperienceSystem.Instance != null)
+                {
+                    PlayerExperienceSystem.Instance.AddExperience(1);
+                }
+            
+                // 영혼 파티클 비활성화 및 풀로 반환
+                ReturnToPool(soul, "LootBeam_Generic_Epic_Variant");
+            
+                // 콜백 실행
+                onSoulCollected?.Invoke();
             });
     }
 

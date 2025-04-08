@@ -15,7 +15,7 @@ public class ShopManager : MonoBehaviour
     [SerializeField] private Button poisonArrowButton;
 
     [Header("타워 버튼")]
-    [SerializeField] private Button nomalTowerButton;
+    [SerializeField] private Button normalTowerButton;
     [SerializeField] private Button explosiveUpgradeButton;
     [SerializeField] private Button slowUpgradeButton;
 
@@ -32,7 +32,7 @@ public class ShopManager : MonoBehaviour
     private void Start()
     {
         // 타워 버튼 리스너
-        nomalTowerButton.onClick.AddListener(OnTowerSelected);
+        normalTowerButton.onClick.AddListener(OnTowerSelected);
         explosiveUpgradeButton.onClick.AddListener(() => UpgradeTower(TowerType.Explosive));
         slowUpgradeButton.onClick.AddListener(() => UpgradeTower(TowerType.Slow));
 
@@ -75,7 +75,7 @@ public class ShopManager : MonoBehaviour
         }
     }
 
-    public void UpgradeTower(TowerType upgradeType)
+    private void UpgradeTower(TowerType upgradeType)
     {
         int cost = upgradeType == TowerType.Explosive ? explosiveUpgradeCost : slowUpgradeCost;
 
@@ -100,7 +100,7 @@ public class ShopManager : MonoBehaviour
     #region 화살 관련 메소드
 
     // 활 업그레이드 (모든 화살에 적용)
-    public void UpgradeBow()
+    private void UpgradeBow()
     {
         // 돈 확인
         if (GameManager.Instance.HasEnoughMoney(bowUpgradeCost))
@@ -127,8 +127,9 @@ public class ShopManager : MonoBehaviour
     }
 
     // 폭발 화살 해금
-    public void UnlockExplosiveArrow()
+    private void UnlockExplosiveArrow()
     {
+        Debug.Log("눌림");
         // 해금되지 않은 경우 해금 - 돈 확인
         if (GameManager.Instance.HasEnoughMoney(explosiveArrowCost))
         {
@@ -153,7 +154,7 @@ public class ShopManager : MonoBehaviour
     }
 
     // 독 화살 해금
-    public void UnlockPoisonArrow()
+    private void UnlockPoisonArrow()
     {
         // 해금되지 않은 경우 해금 - 돈 확인
         if (GameManager.Instance.HasEnoughMoney(poisonArrowCost))

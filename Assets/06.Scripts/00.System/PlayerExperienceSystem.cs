@@ -1,8 +1,4 @@
 using UnityEngine;
-using UnityEngine.UI;
-using TMPro;
-using System;
-using DG.Tweening;
 
 public class PlayerExperienceSystem : MonoBehaviour
 {

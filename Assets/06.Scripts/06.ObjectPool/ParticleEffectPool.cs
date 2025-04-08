@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Pool;
 
 /// <summary>
 /// 파티클 이펙트 재사용을 위한 오브젝트 풀 관리 클래스
