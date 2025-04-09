@@ -23,7 +23,6 @@ public class EventManager : MonoBehaviour
     public event Action OnFireStart;                    // 조준 시작 시 발동할 이벤트
     public event Action OnFireCharging;                 // 조준 중 발동할 이벤트
     public event Action OnFireRelease;                  // 조준 해제 시 발동할 이벤트
-    public event Action<Vector2> OnLookChanged;         // 시야 회전 시 발동할 이벤트
     public event Action<int> OnWaveStart;               // 웨이브 시작 시 발동할 이벤트
     public event Action<int> OnWaveEnd;                 // 웨이브 종료 시 발동할 이벤트
     public event Action OnGameStart;                    // 게임 시작 시 발동할 이벤트
@@ -61,7 +60,6 @@ public class EventManager : MonoBehaviour
     public void FireStartEvent() => OnFireStart?.Invoke();
     public void FireReleaseEvent() => OnFireRelease?.Invoke();
     public void FireChargingEvent() => OnFireCharging?.Invoke();
-    public void LookChangedEvent(Vector2 lookDelta) => OnLookChanged?.Invoke(lookDelta);
     public void WaveStartEvent(int waveNumber) => OnWaveStart?.Invoke(waveNumber);
     public void WaveEndEvent(int waveNumber) => OnWaveEnd?.Invoke(waveNumber);
     public void GameStartEvent() => OnGameStart?.Invoke();

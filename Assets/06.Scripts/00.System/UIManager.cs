@@ -51,6 +51,14 @@ public class UIManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI damageText;
     [SerializeField] private TextMeshProUGUI attackSpeedText;
     [SerializeField] private float levelUpPanelDuration = 4f;
+    
+    [Header("사운드 UI")]
+    [SerializeField] private Slider bgmSlider;
+    [SerializeField] private Slider sfxSlider;
+    [SerializeField] private TextMeshProUGUI bgmValueText;
+    [SerializeField] private TextMeshProUGUI sfxValueText;
+    private static float bgmVolume = 1f;
+    private static float sfxVolume = 1f;
 
     #endregion
 
@@ -58,13 +66,14 @@ public class UIManager : MonoBehaviour
 
     private void Start()
     {
-        waveUIPanel.SetActive(false);
+        
         HideShopUI();
         gameOverUIPanel.SetActive(false);
         startUIPanel.SetActive(true);
         leftArrow.SetActive(false);
         rightArrow.SetActive(false);
         CameraIndicatorUIPanel.SetActive(false);
+        waveUIPanel.SetActive(false);
 
         // 다이얼로그 UI 초기화
         HideAllDialogueImages();
@@ -86,6 +95,9 @@ public class UIManager : MonoBehaviour
         {
             cooldownImageObject.SetActive(false);
         }
+        
+        // 사운드 UI 볼륨 초기화
+        InitializeSound();
     }
     
     // 상점 탭 초기화 메서드 (기존 코드 분리)
@@ -108,6 +120,25 @@ public class UIManager : MonoBehaviour
         
         // 초기 탭 설정
         SwitchTab(0);
+    }
+
+    private void InitializeSound()
+    {
+        // 정적 변수에서 값 로드
+        bgmSlider.value = bgmVolume;
+        sfxSlider.value = sfxVolume;
+        
+        // 텍스트 초기화 (0-10 범위로 변환)
+        UpdateVolumeText(bgmValueText, bgmVolume);
+        UpdateVolumeText(sfxValueText, sfxVolume);
+        
+        // 사운드 매니저에 현재 값 적용
+        SetBGMVolume(bgmVolume);
+        SetSFXVolume(sfxVolume);
+        
+        // 슬라이더 이벤트 리스너 등록
+        bgmSlider.onValueChanged.AddListener(SetBGMVolume);
+        sfxSlider.onValueChanged.AddListener(SetSFXVolume);
     }
 
     // 웨이브 이벤트 구독
@@ -173,6 +204,7 @@ public class UIManager : MonoBehaviour
         {
             // 웨이브 시작 시 카메라 인디케이터 패널 켜기
             CameraIndicatorUIPanel.SetActive(true);
+            waveUIPanel.SetActive(true);
         }
     }
 
@@ -195,8 +227,11 @@ public class UIManager : MonoBehaviour
         // 상점이 열릴 때마다 첫 번째 탭(Arrow)으로 초기화
         SwitchTab(0);
     }
-    
-    public void HideShopUI() => shopUIPanel.SetActive(false);
+
+    public void HideShopUI()
+    {
+        shopUIPanel.SetActive(false);
+    }
 
     // 골드 UI 업데이트 메서드
     private void UpdateGoldUI(int amount)
@@ -498,6 +533,34 @@ public class UIManager : MonoBehaviour
         {
             castleHealthSlider.value = currentHealth;
         }
+    }
+
+    #endregion
+
+    #region 사운드 UI 함수
+    
+    // 볼륨 텍스트 업데이트 (0-1 값을 0-10 정수로 변환)
+    private void UpdateVolumeText(TextMeshProUGUI text, float volume)
+    {
+        if (text != null)
+        {
+            int displayValue = Mathf.RoundToInt(volume * 10); // 0-1 값을 0-10 정수로 변환
+            text.text = displayValue.ToString();
+        }
+    }
+
+    private void SetBGMVolume(float volume)
+    {
+        bgmVolume = volume; // 정적 변수에 저장
+        SoundManager.Instance.SetBGMVolume(volume);
+        UpdateVolumeText(bgmValueText, volume);
+    }
+    
+    private void SetSFXVolume(float volume)
+    {
+        sfxVolume = volume; // 정적 변수에 저장
+        SoundManager.Instance.SetSFXVolume(volume);
+        UpdateVolumeText(sfxValueText, volume);
     }
 
     #endregion

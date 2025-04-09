@@ -43,6 +43,8 @@ public class SoundManager : MonoBehaviour
     // 내부용 Dictionary: soundID → SoundData
     private Dictionary<string, SoundData> soundDict;
 
+    public GameObject oVRCamera;
+
     #endregion
 
     private void Awake()
@@ -154,7 +156,7 @@ public class SoundManager : MonoBehaviour
                 if (audioSourcePool != null)
                 {
                     // 카메라 위치에서 사운드 재생 (3D 효과)
-                    audioSourcePool.PlaySound(data.clip, Camera.main.transform.position, data.volume);
+                    audioSourcePool.PlaySound(data.clip, oVRCamera.transform.position, data.volume);
                 }
                 else
                 {
@@ -175,6 +177,11 @@ public class SoundManager : MonoBehaviour
     // 새로운 메서드 추가 - 특정 위치에서 3D 사운드 재생
     public void PlaySound3D(string soundID, Vector3 position, Transform parent = null)
     {
+        Debug.Log($"PlaySound3D({soundID}, {position})");
+        
+        float distanceToCamera = Vector3.Distance(oVRCamera.transform.position, position);
+        Debug.Log($"카메라와의 거리: {distanceToCamera}유닛 (최대 들림 거리: 20유닛)");
+        
         if (soundDict == null || audioSourcePool == null)
         {
             Debug.LogWarning("SoundDictionary 또는 AudioSourcePool이 초기화되지 않았습니다.");

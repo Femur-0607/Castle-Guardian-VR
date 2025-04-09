@@ -74,17 +74,17 @@ public class InputManager : MonoBehaviour
     private void HandleLeftButtons()
     {
         // X 버튼 - 고스트 스폰
-        if (OVRInput.GetDown(OVRInput.Button.One, OVRInput.Controller.LTouch))
-        {
-            EventManager.Instance.GhostSpawnEvent();
-        }
+        // if (OVRInput.GetDown(OVRInput.Button.One, OVRInput.Controller.LTouch))
+        // {
+        //     EventManager.Instance.GhostSpawnEvent();
+        // }
 
         // Y 버튼 - 고스트/적 제거
-        if (OVRInput.GetDown(OVRInput.Button.Two, OVRInput.Controller.LTouch))
-        {
-            EventManager.Instance.GhostDestroyEvent();
-            EventManager.Instance.EnemyForceKillEvent();
-        }
+        // if (OVRInput.GetDown(OVRInput.Button.Two, OVRInput.Controller.LTouch))
+        // {
+        //     EventManager.Instance.GhostDestroyEvent();
+        //     EventManager.Instance.EnemyForceKillEvent();
+        // }
     }
 
     /// <summary>
@@ -117,11 +117,9 @@ public class InputManager : MonoBehaviour
     private void HandleArrowSwitch()
     {
         float rightStickX = OVRInput.Get(OVRInput.Axis2D.PrimaryThumbstick, OVRInput.Controller.RTouch).x;
-        Debug.Log($"오른쪽 스틱 X값: {rightStickX}, 임계값: {STICK_THRESHOLD}");
 
         bool isNeutral = Mathf.Abs(rightStickX) < STICK_THRESHOLD;
         // Mathf.Abs()로 절대값 계산, 이 값이 STICK_THRESHOLD(0.5)보다 작으면 중립 상태(isNeutral = true)
-        Debug.Log($"중립 상태: {isNeutral}, 이전 중립 상태: {rightStickWasNeutral}");
 
         // 중립에서 벗어난 순간에만 신호 전송
         if (!isNeutral && rightStickWasNeutral)

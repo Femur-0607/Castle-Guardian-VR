@@ -1,5 +1,4 @@
 using UnityEngine;
-using System;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -86,7 +85,6 @@ public class WaveManager : MonoBehaviour
     {
         if (waveIndex >= waveData.waves.Count)
         {
-            GameManager.Instance.EndGame(true);
             return;
         }
 

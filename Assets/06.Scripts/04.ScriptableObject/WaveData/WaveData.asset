@@ -26,7 +26,7 @@ MonoBehaviour:
     spawnPatterns:
     - spawnPointIndex: 0
       enemyType: 0
-      count: 5
+      count: 3
       spawnInterval: 1
     - spawnPointIndex: 0
       enemyType: 1
@@ -38,7 +38,7 @@ MonoBehaviour:
     spawnPatterns:
     - spawnPointIndex: 0
       enemyType: 0
-      count: 5
+      count: 3
       spawnInterval: 1
     - spawnPointIndex: 0
       enemyType: 1
@@ -50,11 +50,11 @@ MonoBehaviour:
       spawnInterval: 1
     clearReward: 100
   - waveName: "4\uC6E8\uC774\uBE0C"
-    activeSpawnPoints: 2
+    activeSpawnPoints: 1
     spawnPatterns:
     - spawnPointIndex: 0
       enemyType: 0
-      count: 5
+      count: 3
       spawnInterval: 1
     - spawnPointIndex: 0
       enemyType: 1
@@ -69,16 +69,52 @@ MonoBehaviour:
       count: 2
       spawnInterval: 1
     clearReward: 100
+  - waveName: "5\uC6E8\uC774\uBE0C"
+    activeSpawnPoints: 2
+    spawnPatterns:
+    - spawnPointIndex: 0
+      enemyType: 0
+      count: 3
+      spawnInterval: 1
+    - spawnPointIndex: 0
+      enemyType: 1
+      count: 3
+      spawnInterval: 1
+    - spawnPointIndex: 0
+      enemyType: 2
+      count: 2
+      spawnInterval: 1
+    - spawnPointIndex: 0
+      enemyType: 3
+      count: 2
+      spawnInterval: 1
+    - spawnPointIndex: 1
+      enemyType: 0
+      count: 2
+      spawnInterval: 1
+    - spawnPointIndex: 1
+      enemyType: 1
+      count: 1
+      spawnInterval: 1
+    - spawnPointIndex: 1
+      enemyType: 2
+      count: 1
+      spawnInterval: 1
+    - spawnPointIndex: 1
+      enemyType: 3
+      count: 1
+      spawnInterval: 1
+    clearReward: 100
   - waveName: "6\uC6E8\uC774\uBE0C"
     activeSpawnPoints: 2
     spawnPatterns:
     - spawnPointIndex: 0
       enemyType: 0
-      count: 2
+      count: 3
       spawnInterval: 1
     - spawnPointIndex: 0
       enemyType: 1
-      count: 2
+      count: 3
       spawnInterval: 1
     - spawnPointIndex: 0
       enemyType: 2
@@ -88,8 +124,12 @@ MonoBehaviour:
       enemyType: 3
       count: 2
       spawnInterval: 1
-    - spawnPointIndex: 0
+    - spawnPointIndex: 1
       enemyType: 0
+      count: 2
+      spawnInterval: 1
+    - spawnPointIndex: 1
+      enemyType: 1
       count: 2
       spawnInterval: 1
     - spawnPointIndex: 1
@@ -98,10 +138,6 @@ MonoBehaviour:
       spawnInterval: 1
     - spawnPointIndex: 1
       enemyType: 3
-      count: 2
-      spawnInterval: 1
-    - spawnPointIndex: 1
-      enemyType: 0
       count: 2
       spawnInterval: 1
     clearReward: 100
@@ -110,11 +146,11 @@ MonoBehaviour:
     spawnPatterns:
     - spawnPointIndex: 0
       enemyType: 0
-      count: 2
+      count: 3
       spawnInterval: 1
     - spawnPointIndex: 0
       enemyType: 1
-      count: 2
+      count: 3
       spawnInterval: 1
     - spawnPointIndex: 0
       enemyType: 2
@@ -124,8 +160,12 @@ MonoBehaviour:
       enemyType: 3
       count: 2
       spawnInterval: 1
-    - spawnPointIndex: 0
+    - spawnPointIndex: 1
       enemyType: 0
+      count: 2
+      spawnInterval: 1
+    - spawnPointIndex: 1
+      enemyType: 1
       count: 2
       spawnInterval: 1
     - spawnPointIndex: 1
@@ -136,23 +176,19 @@ MonoBehaviour:
       enemyType: 3
       count: 2
       spawnInterval: 1
-    - spawnPointIndex: 1
+    - spawnPointIndex: 2
       enemyType: 0
       count: 2
       spawnInterval: 1
-    - spawnPointIndex: 1
-      enemyType: 0
-      count: 1
-      spawnInterval: 1
-    - spawnPointIndex: 1
+    - spawnPointIndex: 2
       enemyType: 1
       count: 1
       spawnInterval: 1
-    - spawnPointIndex: 1
+    - spawnPointIndex: 2
       enemyType: 2
       count: 1
       spawnInterval: 1
-    - spawnPointIndex: 1
+    - spawnPointIndex: 2
       enemyType: 3
       count: 1
       spawnInterval: 1
@@ -162,11 +198,11 @@ MonoBehaviour:
     spawnPatterns:
     - spawnPointIndex: 0
       enemyType: 0
-      count: 2
+      count: 3
       spawnInterval: 1
     - spawnPointIndex: 0
       enemyType: 1
-      count: 2
+      count: 3
       spawnInterval: 1
     - spawnPointIndex: 0
       enemyType: 2
@@ -174,22 +210,6 @@ MonoBehaviour:
       spawnInterval: 1
     - spawnPointIndex: 0
       enemyType: 3
-      count: 2
-      spawnInterval: 1
-    - spawnPointIndex: 0
-      enemyType: 0
-      count: 2
-      spawnInterval: 1
-    - spawnPointIndex: 1
-      enemyType: 2
-      count: 2
-      spawnInterval: 1
-    - spawnPointIndex: 1
-      enemyType: 3
-      count: 2
-      spawnInterval: 1
-    - spawnPointIndex: 1
-      enemyType: 0
       count: 2
       spawnInterval: 1
     - spawnPointIndex: 1
@@ -205,6 +225,22 @@ MonoBehaviour:
       count: 2
       spawnInterval: 1
     - spawnPointIndex: 1
+      enemyType: 3
+      count: 2
+      spawnInterval: 1
+    - spawnPointIndex: 2
+      enemyType: 0
+      count: 2
+      spawnInterval: 1
+    - spawnPointIndex: 2
+      enemyType: 1
+      count: 2
+      spawnInterval: 1
+    - spawnPointIndex: 2
+      enemyType: 2
+      count: 2
+      spawnInterval: 1
+    - spawnPointIndex: 2
       enemyType: 3
       count: 2
       spawnInterval: 1
@@ -228,22 +264,6 @@ MonoBehaviour:
       enemyType: 3
       count: 3
       spawnInterval: 1
-    - spawnPointIndex: 0
-      enemyType: 0
-      count: 3
-      spawnInterval: 1
-    - spawnPointIndex: 1
-      enemyType: 2
-      count: 3
-      spawnInterval: 1
-    - spawnPointIndex: 1
-      enemyType: 3
-      count: 3
-      spawnInterval: 1
-    - spawnPointIndex: 1
-      enemyType: 0
-      count: 3
-      spawnInterval: 1
     - spawnPointIndex: 1
       enemyType: 0
       count: 3
@@ -257,6 +277,22 @@ MonoBehaviour:
       count: 3
       spawnInterval: 1
     - spawnPointIndex: 1
+      enemyType: 3
+      count: 3
+      spawnInterval: 1
+    - spawnPointIndex: 2
+      enemyType: 0
+      count: 3
+      spawnInterval: 1
+    - spawnPointIndex: 2
+      enemyType: 1
+      count: 3
+      spawnInterval: 1
+    - spawnPointIndex: 2
+      enemyType: 2
+      count: 3
+      spawnInterval: 1
+    - spawnPointIndex: 2
       enemyType: 3
       count: 3
       spawnInterval: 1

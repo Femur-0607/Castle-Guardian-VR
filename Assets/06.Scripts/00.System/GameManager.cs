@@ -2,6 +2,7 @@ using System;
 using UnityEngine;
 using PixelCrushers.DialogueSystem;
 using System.Collections;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
@@ -195,24 +196,7 @@ public class GameManager : MonoBehaviour
     /// </summary>
     public void RestartGame()
     {
-        // 게임 상태 초기화
-        gameStarted = false;
-        
-        // 돈 초기화
-        _gameMoney = 200;
-        EventManager.Instance.MoneyChangedEvent(_gameMoney);
-        
-        // 플레이어 컨트롤 비활성화
-        DisablePlayerControls();
-        
-        // 타이틀 음악 재생
-        SoundManager.Instance.PlaySound("TitleBGM");
-        
-        // 게임 재시작 이벤트 발생 (필요하다면 EventManager에 추가)
-        // EventManager.Instance.GameRestartEvent();
-        
-        // 웨이브 매니저 초기화 등 필요한 다른 시스템 초기화
-        // 여기에 추가 초기화 코드 작성
+        SceneManager.LoadScene("MainScene 1");
     }
 
     #endregion
@@ -387,7 +371,7 @@ public class GameManager : MonoBehaviour
             StartCoroutine(DelayedEnablePlayerControls());
         }
         // Victory 대화가 끝났을 때
-        else if (DialogueManager.lastConversationID == 3) // 승리 대화 ID
+        else if (DialogueManager.lastConversationID == 4) // 승리 대화 ID
         {
             // 게임 클리어 처리
             EndGame(true);
