@@ -12,7 +12,8 @@ public class EventManager : MonoBehaviour
     public enum DialogueType
     {
         Intro,
-        Tutorial
+        Tutorial,
+        SpawnPointAdded
     }
 
     // 초기화 순서가 중요한 경우 사용

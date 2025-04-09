@@ -29,7 +29,7 @@ public class WaveManager : MonoBehaviour
         // 시작 시 추가 스폰 포인트 비활성화
         for (int i = 1; i < spawnManagers.Length; i++)
         {
-            spawnManagers[i].gameObject.SetActive(false);
+            // spawnManagers[i].gameObject.SetActive(false);
         }
     }
 
@@ -103,7 +103,7 @@ public class WaveManager : MonoBehaviour
         // 스폰 포인트 활성화
         for (int i = 0; i < spawnManagers.Length; i++)
         {
-            spawnManagers[i].gameObject.SetActive(i < currentWave.activeSpawnPoints);
+            // spawnManagers[i].gameObject.SetActive(i < currentWave.activeSpawnPoints);
         }
 
         SoundManager.Instance.PlaySound("BattleBGM");

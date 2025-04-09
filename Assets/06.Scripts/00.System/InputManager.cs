@@ -80,11 +80,11 @@ public class InputManager : MonoBehaviour
         // }
 
         // Y 버튼 - 고스트/적 제거
-        // if (OVRInput.GetDown(OVRInput.Button.Two, OVRInput.Controller.LTouch))
-        // {
-        //     EventManager.Instance.GhostDestroyEvent();
-        //     EventManager.Instance.EnemyForceKillEvent();
-        // }
+        if (OVRInput.GetDown(OVRInput.Button.Two, OVRInput.Controller.LTouch))
+        {
+            EventManager.Instance.GhostDestroyEvent();
+            EventManager.Instance.EnemyForceKillEvent();
+        }
     }
 
     /// <summary>

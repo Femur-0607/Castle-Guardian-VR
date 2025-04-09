@@ -275,6 +275,20 @@ public class GameManager : MonoBehaviour
             // 약간의 지연 후 상점 튜토리얼 표시
             StartCoroutine(StartShopTutorialDelayed());
         }
+
+        // 네 번째 웨이브 종료 후 스폰포인트 추가 표시
+        if (waveNumber == 4)
+        {
+            // 약간의 지연 후 상점 튜토리얼 표시
+            StartCoroutine(StartSpawnPointAddedDelayed());
+        }
+
+        // 네 번째 웨이브 종료 후 스폰포인트 추가 표시
+        if (waveNumber == 6)
+        {
+            // 약간의 지연 후 상점 튜토리얼 표시
+            StartCoroutine(StartSpawnPointAddedDelayed());
+        }
         
         if (waveNumber == 9)
         {
@@ -288,17 +302,26 @@ public class GameManager : MonoBehaviour
     private IEnumerator StartShopTutorialDelayed()
     {
         // 상점 UI가 표시될 때까지 잠시 대기
-        yield return new WaitForSeconds(0.5f);
+        yield return new WaitForSeconds(1f);
     
         // 상점 튜토리얼 대화 시작
         DialogueManager.StartConversation("ShopTutorial");
+    }
+
+    private IEnumerator StartSpawnPointAddedDelayed()
+    {
+        yield return new WaitForSeconds(1f);
+
+        DialogueManager.StartConversation("SpawnPointAdded");
+
+        EventManager.Instance.DialogueStartedEvent(EventManager.DialogueType.SpawnPointAdded);
     }
     
     private IEnumerator StartVictoryDialogueDelayed()
     {
         // 약간의 지연
         yield return new WaitForSeconds(1f);
-    
+
         // Victory 대화 시작
         DialogueManager.StartConversation("Victory");
     }
@@ -348,16 +371,16 @@ public class GameManager : MonoBehaviour
         
         // 참고: 게임 시작 처리는 대화 종료 후 HandleConversationEnded에서 처리됨
     }
-    
+
     // 대화 종료 시 호출될 메서드
     private void HandleConversationEnded(Transform actor)
-    {   
+    {
         // 튜토리얼 인트로 대화가 끝났을 때
         if (DialogueManager.lastConversationID == 1)
         {
             // 다이얼로그 종료 이벤트 발생 (인트로 타입)
             EventManager.Instance.DialogueEndedEvent(EventManager.DialogueType.Intro);
-            
+
             // 비동기로 1초 후에 처리
             StartCoroutine(HandleConversationEndedDelayed());
         }
@@ -366,7 +389,7 @@ public class GameManager : MonoBehaviour
         {
             // 다이얼로그 종료 이벤트 발생 (튜토리얼 타입)
             EventManager.Instance.DialogueEndedEvent(EventManager.DialogueType.Tutorial);
-            
+
             // 지연 후 플레이어 컨트롤 활성화 (1초 후)
             StartCoroutine(DelayedEnablePlayerControls());
         }
@@ -375,6 +398,11 @@ public class GameManager : MonoBehaviour
         {
             // 게임 클리어 처리
             EndGame(true);
+        }
+        // 스폰 포인트 대화가 끝났을 때
+        else if (DialogueManager.lastConversationID == 5)
+        {
+            EventManager.Instance.DialogueEndedEvent(EventManager.DialogueType.SpawnPointAdded); // 패널, 카메라 끄기
         }
     }
     
