@@ -235,6 +235,17 @@ public class GameManager : MonoBehaviour
                 // 잠시 지연 후 대화 시작 (UI가 제대로 설정될 수 있도록)
                 StartCoroutine(StartTutorialDialogueDelayed());
             }
+            else if (waveNumber == 5)
+            {
+                // 잠시 지연 후 스폰 포인트 추가 대화 시작
+                StartCoroutine(StartSpawnPointAddedDelayed());
+            }
+            // 7번째 웨이브 시작 시 두 번째 스폰 포인트 설명
+            else if (waveNumber == 7)
+            {
+                // 잠시 지연 후 스폰 포인트 추가 대화 시작
+                StartCoroutine(StartSpawnPointAddedDelayed());
+            }
             else
             {
                 // 첫 번째 웨이브가 아닌 경우 바로 플레이어 컨트롤 활성화
@@ -260,6 +271,15 @@ public class GameManager : MonoBehaviour
         // 대화 중에는 플레이어 컨트롤 비활성화 상태 유지
         // 대화가 끝나면 HandleConversationEnded에서 플레이어 컨트롤 활성화됨
     }
+    
+    private IEnumerator StartSpawnPointAddedDelayed()
+    {
+        yield return new WaitForSeconds(1f);
+        
+        EventManager.Instance.DialogueStartedEvent(EventManager.DialogueType.SpawnPointAdded);
+
+        DialogueManager.StartConversation("SpawnPointAdded");
+    }
 
     /// <summary>
     /// 웨이브 종료 시 호출될 핸들러
@@ -274,20 +294,6 @@ public class GameManager : MonoBehaviour
         {
             // 약간의 지연 후 상점 튜토리얼 표시
             StartCoroutine(StartShopTutorialDelayed());
-        }
-
-        // 네 번째 웨이브 종료 후 스폰포인트 추가 표시
-        if (waveNumber == 4)
-        {
-            // 약간의 지연 후 상점 튜토리얼 표시
-            StartCoroutine(StartSpawnPointAddedDelayed());
-        }
-
-        // 네 번째 웨이브 종료 후 스폰포인트 추가 표시
-        if (waveNumber == 6)
-        {
-            // 약간의 지연 후 상점 튜토리얼 표시
-            StartCoroutine(StartSpawnPointAddedDelayed());
         }
         
         if (waveNumber == 9)
@@ -306,15 +312,6 @@ public class GameManager : MonoBehaviour
     
         // 상점 튜토리얼 대화 시작
         DialogueManager.StartConversation("ShopTutorial");
-    }
-
-    private IEnumerator StartSpawnPointAddedDelayed()
-    {
-        yield return new WaitForSeconds(1f);
-
-        DialogueManager.StartConversation("SpawnPointAdded");
-
-        EventManager.Instance.DialogueStartedEvent(EventManager.DialogueType.SpawnPointAdded);
     }
     
     private IEnumerator StartVictoryDialogueDelayed()

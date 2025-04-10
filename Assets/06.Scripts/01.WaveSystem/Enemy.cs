@@ -31,9 +31,10 @@ public class Enemy : LivingEntity
     [SerializeField] private GameObject scoutModel;
     [SerializeField] private GameObject tankerModel;
 
-    private float lastAttackTime;
-    [SerializeField] private EnemyState currentState;    // 현재 상태 알려주는 이넘 변수
-    private bool isDialogueActive = false;  // 다이얼로그 표시 중인지 여부
+    private float lastAttackTime;                       // 공격 쿨타임 변수
+    private float originalStoppingDistance;             // 공격 범위 저장용 변수
+    [SerializeField] private EnemyState currentState;   // 현재 상태 알려주는 이넘 변수
+    private bool isDialogueActive = false;              // 다이얼로그 표시 중인지 여부
 
     public FormationManager formationManager;
     private Vector3? assignedPosition;
@@ -41,12 +42,7 @@ public class Enemy : LivingEntity
     private bool isInPosition = false;  // 포지션에 도달했는지 체크하는 변수 추가
 
     [SerializeField] private float deathDelay = 2.0f;
-
-    // 죽었을 때 생성할 파티클 키
-    private const string DEATH_POOF_KEY = "Loot_Poof_Variant";
-    private const string SOUL_BEAM_KEY = "LootBeam_Generic_Epic_Variant";
-
-
+    
     #endregion
 
     #region 유니티 이벤트 함수 및 상속 관련
@@ -64,6 +60,7 @@ public class Enemy : LivingEntity
             startingHealth = enemyData.startingHealth;
             agent.speed = enemyData.moveSpeed;
             agent.stoppingDistance = enemyData.attackRange;
+            originalStoppingDistance = enemyData.attackRange;  // 원래 값 저장
         }
 
         base.Start();   // 초기화 진행
@@ -75,48 +72,14 @@ public class Enemy : LivingEntity
     {
         EventManager.Instance.OnDialogueStarted += HandleDialogueStarted;
         EventManager.Instance.OnDialogueEnded += HandleDialogueEnded;
+        EventManager.Instance.OnWaveStart += UpdateEnemyHealthForWave;
     }
 
     private void OnDisable()
     {
         EventManager.Instance.OnDialogueStarted -= HandleDialogueStarted;
         EventManager.Instance.OnDialogueEnded -= HandleDialogueEnded;
-    }
-
-    // 다이얼로그 시작 시 호출
-    private void HandleDialogueStarted(EventManager.DialogueType type)
-    {
-        if (type == EventManager.DialogueType.Tutorial)
-        {
-            isDialogueActive = true;
-            
-            // 네비게이션 일시 중지
-            if (agent != null && agent.enabled)
-            {
-                agent.isStopped = true;
-            }
-            
-            // 애니메이션 중지 (Idle 상태로)
-            if (animator != null)
-            {
-                animator.SetBool("isChasing", false);
-            }
-        }
-    }
-
-    // 다이얼로그 종료 시 호출
-    private void HandleDialogueEnded(EventManager.DialogueType type)
-    {
-        if (type == EventManager.DialogueType.Tutorial)
-        {
-                isDialogueActive = false;
-                
-            // 네비게이션 재개
-            if (agent != null && agent.enabled && currentState == EnemyState.Chasing)
-            {
-                agent.isStopped = false;
-            }
-        }
+        EventManager.Instance.OnWaveStart -= UpdateEnemyHealthForWave;
     }
 
     void Update()
@@ -185,6 +148,57 @@ public class Enemy : LivingEntity
 
     #endregion
 
+    #region 이벤트핸들러
+
+    // 다이얼로그 시작 시 호출
+    private void HandleDialogueStarted(EventManager.DialogueType type)
+    {
+        if (type == EventManager.DialogueType.Tutorial  || type == EventManager.DialogueType.SpawnPointAdded)
+        {
+            isDialogueActive = true;
+            
+            // 네비게이션 일시 중지
+            if (agent != null && agent.enabled)
+            {
+                agent.isStopped = true;
+            }
+            
+            // 애니메이션 중지 (Idle 상태로)
+            if (animator != null)
+            {
+                animator.SetBool("isChasing", false);
+            }
+        }
+    }
+
+    // 다이얼로그 종료 시 호출
+    private void HandleDialogueEnded(EventManager.DialogueType type)
+    {
+        if (type == EventManager.DialogueType.Tutorial  || type == EventManager.DialogueType.SpawnPointAdded)
+        {
+            isDialogueActive = false;
+                
+            // 네비게이션 재개
+            if (agent != null && agent.enabled && currentState == EnemyState.Chasing)
+            {
+                agent.isStopped = false;
+            }
+        }
+    }
+    
+    // 웨이브 시작 시 체력 갱신 메서드
+    private void UpdateEnemyHealthForWave(int waveNumber)
+    {
+        if (enemyData != null)
+        {
+            // 현재 웨이브에 맞는 체력으로 갱신
+            startingHealth = enemyData.CalculateHealthForWave(waveNumber);
+            currentHealth = startingHealth;
+        }
+    }
+
+    #endregion
+
     #region 오브젝트 풀 관련
 
     public void SetPoolReference(IObjectPool<Enemy> poolRef)
@@ -212,12 +226,35 @@ public class Enemy : LivingEntity
     private IEnumerator DelayedAgentActivation(float delay)
     {
         agent.enabled = false;
-
         yield return new WaitForSeconds(delay);
-
+    
+        // NavMeshAgent 활성화
         agent.enabled = true;
-
-        BeginChase();
+    
+        // NavMesh 위에 있는지 확인
+        if (agent.isOnNavMesh)
+        {
+            Debug.Log($"Enemy {gameObject.name}: Successfully activated on NavMesh");
+            BeginChase();
+        }
+        else
+        {
+            Debug.LogWarning($"Enemy {gameObject.name}: Failed to activate on NavMesh, trying to find valid position");
+        
+            // NavMesh 위치 찾기 시도
+            NavMeshHit hit;
+            if (NavMesh.SamplePosition(transform.position, out hit, 5.0f, NavMesh.AllAreas))
+            {
+                transform.position = hit.position;
+                agent.Warp(hit.position);
+                BeginChase();
+                Debug.Log($"Enemy {gameObject.name}: Repositioned to NavMesh at {hit.position}");
+            }
+            else
+            {
+                Debug.LogError($"Enemy {gameObject.name}: Could not find nearby NavMesh position");
+            }
+        }
     }
 
     #endregion
@@ -230,10 +267,17 @@ public class Enemy : LivingEntity
     /// </summary>
     private void BeginChase()
     {
-        if (target != null && agent.isOnNavMesh)
+        if (target == null) return;
+    
+        if (agent.isActiveAndEnabled && agent.isOnNavMesh)
         {
             currentState = EnemyState.Chasing;
             agent.isStopped = false;
+        }
+        else
+        {
+            Debug.LogWarning($"Enemy {gameObject.name}: Cannot begin chase, NavMeshAgent not ready");
+            StartCoroutine(RecoverNavMeshAgent());
         }
     }
 
@@ -241,35 +285,52 @@ public class Enemy : LivingEntity
     /// 추적 상태
     /// </summary>
     void Chase()
+{
+    if (target == null || animator == null) return;
+    
+    // NavMeshAgent 유효성 검사를 먼저 수행
+    if (!agent.isActiveAndEnabled || !agent.isOnNavMesh)
     {
-        if (target == null || animator == null) return;
+        Debug.LogWarning($"Enemy {gameObject.name}: NavMeshAgent is not active or not on NavMesh. Trying to recover...");
+        StartCoroutine(RecoverNavMeshAgent());
+        return; // 복구 시도 중에는 다른 로직 실행 중지
+    }
 
-        float distanceToTarget = Vector3.Distance(transform.position, target.position);
-        
-        // 아직 포메이션 포지션이 없고, 성문 근처에 왔을 때
-        if (!hasFormationPosition && distanceToTarget <= agent.stoppingDistance * 2f)
+    float distanceToTarget = Vector3.Distance(transform.position, target.position);
+    
+    // 아직 포메이션 포지션이 없고, 성문과의 거리가 정지 거리의 4배 이내일 때
+    if (!hasFormationPosition && distanceToTarget <= originalStoppingDistance * 4f)
+    {
+        assignedPosition = formationManager.GetFormationPosition(this, target);
+        if (assignedPosition.HasValue)
         {
-            assignedPosition = formationManager.GetFormationPosition(this, target);
-            if (assignedPosition.HasValue)
-            {
-                hasFormationPosition = true;
-                agent.stoppingDistance = 0.1f;
-            }
+            hasFormationPosition = true;
+            agent.stoppingDistance = 0.5f;
         }
+    }
 
-        // 포메이션 포지션이 할당된 경우
+    // 목적지 설정 (안전하게)
+    try
+    {
         if (hasFormationPosition && assignedPosition.HasValue)
         {
-            // 할당된 포지션으로 이동
             agent.SetDestination(assignedPosition.Value);
             
             // 포지션에 도달했는지 체크
             float distanceToPosition = Vector3.Distance(transform.position, assignedPosition.Value);
-            if (distanceToPosition < 0.2f && !isInPosition)
+            
+            // 주기적으로만 로그 출력
+            if (Time.frameCount % 60 == 0)
+            {
+                Debug.Log($"Enemy {gameObject.name}: distToPos={distanceToPosition:F2}, velocity={agent.velocity.magnitude:F2}");
+            }
+            
+            // 포지션에 도달하면 공격 시작
+            if (distanceToPosition < 1.5f && !isInPosition)
             {
                 isInPosition = true;
                 currentState = EnemyState.Attacking;
-                agent.isStopped = true;
+                SafeStopAgent();
                 transform.LookAt(target);
                 animator.SetBool("isChasing", false);
                 
@@ -280,20 +341,79 @@ public class Enemy : LivingEntity
         }
         else
         {
-            // 포지션이 없는 경우 기본 추적
+            // 포메이션 포지션이 없는 경우
+            agent.stoppingDistance = originalStoppingDistance;
             agent.SetDestination(target.position);
             
-            // 기존 공격 범위 체크
+            // 공격 범위 도달 체크
             if (!agent.pathPending && agent.remainingDistance <= agent.stoppingDistance)
             {
                 currentState = EnemyState.Attacking;
-                agent.isStopped = true;
+                SafeStopAgent();
                 animator.SetBool("isChasing", false);
                 return;
             }
         }
+    }
+    catch (System.Exception e)
+    {
+        Debug.LogError($"Enemy {gameObject.name}: Error in Chase: {e.Message}");
+        // 에러 발생 시 NavMeshAgent 복구 시도
+        StartCoroutine(RecoverNavMeshAgent());
+        return;
+    }
 
-        animator.SetBool("isChasing", true);
+    animator.SetBool("isChasing", true);
+}
+
+// NavMeshAgent 안전하게 정지
+    private void SafeStopAgent()
+    {
+        if (agent.isActiveAndEnabled && agent.isOnNavMesh)
+        {
+            agent.isStopped = true;
+        }
+    }
+
+// NavMeshAgent 복구 코루틴
+    private IEnumerator RecoverNavMeshAgent()
+    {
+        // 현재 위치 저장
+        Vector3 currentPosition = transform.position;
+    
+        // 에이전트 비활성화
+        agent.enabled = false;
+        yield return new WaitForSeconds(0.2f);
+    
+        // 에이전트 재활성화
+        agent.enabled = true;
+        yield return new WaitForSeconds(0.1f);
+    
+        // NavMesh 위치 찾기
+        NavMeshHit hit;
+        if (NavMesh.SamplePosition(currentPosition, out hit, 3.0f, NavMesh.AllAreas))
+        {
+            // NavMesh 위치로 이동
+            transform.position = hit.position;
+            agent.Warp(hit.position);
+            Debug.Log($"Enemy {gameObject.name}: Recovered to NavMesh at {hit.position}");
+        
+            // 상태 업데이트
+            if (currentState == EnemyState.Dead)
+            {
+                agent.isStopped = true;
+                agent.enabled = false;
+            }
+            else
+            {
+                currentState = EnemyState.Chasing;
+                agent.isStopped = false;
+            }
+        }
+        else
+        {
+            Debug.LogError($"Enemy {gameObject.name}: Failed to find NavMesh position nearby");
+        }
     }
 
     /// <summary>
@@ -444,4 +564,93 @@ public class Enemy : LivingEntity
     }
 
     #endregion
+    
+    private void OnDrawGizmos()
+{
+    // 플레이 모드가 아닐 때는 최소한의 정보만 표시
+    if (!Application.isPlaying)
+    {
+        if (target != null)
+        {
+            // 타겟(성문)과의 연결선
+            Gizmos.color = Color.gray;
+            Gizmos.DrawLine(transform.position, target.position);
+        }
+        return;
+    }
+    
+    // 타겟이 없으면 표시하지 않음
+    if (target == null) return;
+    
+    // 에너미와 타겟(성문) 사이의 거리 표시
+    Gizmos.color = Color.red;
+    Gizmos.DrawLine(transform.position, target.position);
+    
+    // 텍스트 정보 표시 위치 계산
+    Vector3 textPos = transform.position + Vector3.up * 2f;
+    
+    // 거리 및 상태 정보 표시
+    float distToTarget = Vector3.Distance(transform.position, target.position);
+    #if UNITY_EDITOR
+    UnityEditor.Handles.BeginGUI();
+    UnityEditor.Handles.Label(textPos, 
+        $"State: {currentState}\n" +
+        $"ToTarget: {distToTarget:F1}");
+    #endif
+    
+    // 포메이션 포지션이 할당된 경우 추가 정보 표시
+    if (hasFormationPosition && assignedPosition.HasValue)
+    {
+        // 할당된 포지션 표시
+        Gizmos.color = isInPosition ? Color.green : Color.yellow;
+        Gizmos.DrawSphere(assignedPosition.Value, 0.5f);
+        
+        // 에너미와 할당된 포지션 사이의 연결선
+        Gizmos.DrawLine(transform.position, assignedPosition.Value);
+        
+        // 포지션까지의 거리 표시
+        float distToPos = Vector3.Distance(transform.position, assignedPosition.Value);
+        
+        #if UNITY_EDITOR
+        UnityEditor.Handles.Label(textPos + Vector3.up * 0.5f, 
+            $"HasPosition: {hasFormationPosition}\n" +
+            $"InPosition: {isInPosition}\n" +
+            $"ToPos: {distToPos:F1}");
+        #endif
+        
+        // 도달 범위 표시 (1.5f 원)
+        Gizmos.color = new Color(1f, 1f, 0f, 0.2f); // 반투명 노란색
+        Gizmos.DrawWireSphere(assignedPosition.Value, 1.5f); // 도달 판정 거리
+    }
+    else
+    {
+        #if UNITY_EDITOR
+        UnityEditor.Handles.Label(textPos + Vector3.up * 0.5f, 
+            $"HasPosition: {hasFormationPosition}\n" +
+            $"StopDist: {agent.stoppingDistance:F1}");
+        #endif
+    }
+    
+    // NavMeshAgent 경로 표시
+    if (agent != null && agent.hasPath)
+    {
+        Gizmos.color = Color.blue;
+        Vector3[] corners = agent.path.corners;
+        
+        for (int i = 0; i < corners.Length - 1; i++)
+        {
+            Gizmos.DrawLine(corners[i], corners[i + 1]);
+            Gizmos.DrawSphere(corners[i], 0.2f);
+        }
+        
+        if (corners.Length > 0)
+        {
+            Gizmos.DrawSphere(corners[corners.Length - 1], 0.2f);
+        }
+    }
+    
+    #if UNITY_EDITOR
+    UnityEditor.Handles.EndGUI();
+    #endif
+}
 }

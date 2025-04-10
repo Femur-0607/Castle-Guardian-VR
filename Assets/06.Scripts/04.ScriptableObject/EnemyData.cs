@@ -22,4 +22,14 @@ public class EnemyData : ScriptableObject
     // 추가: 적 타입 설정
     [Header("적 유형")]
     public EnemyType enemyType = EnemyType.Normal;
+    
+    [Header("웨이브 체력 증가")]
+    public float healthIncreasePerWave = 10f;  // 웨이브마다 10씩 증가
+
+    // 웨이브 번호에 따른 체력 계산 메서드
+    public float CalculateHealthForWave(int waveNumber)
+    {
+        // 기본 체력 + (웨이브 번호 - 1) * 증가량
+        return startingHealth + (waveNumber - 1) * healthIncreasePerWave;
+    }
 }

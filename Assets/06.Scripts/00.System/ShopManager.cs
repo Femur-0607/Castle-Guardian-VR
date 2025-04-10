@@ -3,6 +3,8 @@ using UnityEngine.UI;
 
 public class ShopManager : MonoBehaviour
 {
+    #region 필드변수
+    
     [Header("참조")]
     [SerializeField] private BuildManager buildManager;
     [SerializeField] private WaveManager waveManager;
@@ -28,7 +30,11 @@ public class ShopManager : MonoBehaviour
     public int bowUpgradeCost = 75; // 활 업그레이드 비용 (모든 화살 공통 적용)
     public int explosiveArrowCost = 150; // 폭발 화살 해금 비용
     public int poisonArrowCost = 150; // 독 화살 해금 비용
+    
+    #endregion
 
+    #region 유니티 이벤트 함수
+    
     private void Start()
     {
         // 타워 버튼 리스너
@@ -44,7 +50,7 @@ public class ShopManager : MonoBehaviour
         // ArrowManager의 화살 상태에 따라 버튼 활성화/비활성화 초기 설정
         UpdateArrowButtonInteractable();
     }
-
+    
     // 화살 버튼 상태 업데이트
     private void UpdateArrowButtonInteractable()
     {
@@ -62,6 +68,8 @@ public class ShopManager : MonoBehaviour
             poisonArrowButton.interactable = !isUnlocked; // 해금되면 버튼 비활성화
         }
     }
+    
+    #endregion
 
     #region 타워 관련 메소드
     public void OnTowerSelected()
@@ -110,19 +118,12 @@ public class ShopManager : MonoBehaviour
 
             // 모든 화살 공통 업그레이드
             bool success = arrowManager.UpgradeAllArrows();
-
-            // 성공 시 효과음 재생 또는 UI 업데이트 등 추가 가능
+            
             if (success)
             {
-                // 효과음 재생
-                // SoundManager.Instance.PlaySound("Upgrade");
-                // UI 업데이트 메소드 호출 (필요시)
-                // uiManager.UpdateArrowUI();
+                // 업그레이드 UI 표시
+                uiManager.ShowArrowUpgradePopup();
             }
-        }
-        else
-        {
-            // SoundManager.Instance.PlaySound("Error");
         }
     }
 
@@ -141,15 +142,10 @@ public class ShopManager : MonoBehaviour
 
             if (success)
             {
-                // SoundManager.Instance.PlaySound("Unlock");
                 // 버튼 상태 업데이트
                 UpdateArrowButtonInteractable();
                 // UI 업데이트
             }
-        }
-        else
-        {
-            // SoundManager.Instance.PlaySound("Error");
         }
     }
 
@@ -167,15 +163,10 @@ public class ShopManager : MonoBehaviour
 
             if (success)
             {
-                // SoundManager.Instance.PlaySound("Unlock");
                 // 버튼 상태 업데이트
                 UpdateArrowButtonInteractable();
                 // UI 업데이트
             }
-        }
-        else
-        {
-            // SoundManager.Instance.PlaySound("Error");
         }
     }
     

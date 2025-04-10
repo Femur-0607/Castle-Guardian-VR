@@ -12,19 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 267cc83aad1af8a4b9f0e2db78944e29, type: 3}
   m_Name: ArcherEnemyData
   m_EditorClassIdentifier: 
-  startingHealth: 100
+  startingHealth: 75
   moveSpeed: 5
-  attackRange: 10
-  attackDamage: 10
+  attackRange: 20
+  attackDamage: 7
   attackCooldown: 2
-  goldDropAmount: 50
+  goldDropAmount: 10
   enemyType: 1
-  projectileSpeed: 15
-  preferredAttackDistance: 8
-  projectilePrefab: {fileID: 0}
-  burstSpeedMultiplier: 1.5
-  burstCooldown: 8
-  armorValue: 0.3
-  buffRadius: 8
-  phaseInDuration: 1.5
-  playerStunDuration: 3
+  healthIncreasePerWave: 10

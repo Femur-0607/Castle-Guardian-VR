@@ -94,7 +94,7 @@ public class ArrowManager : MonoBehaviour
 
     #endregion
 
-    #region 능력치 상승
+    #region 능력치 상승 함수
     
     /// <summary>
     /// 레벨업 시 화살 데미지 증가
@@ -107,7 +107,15 @@ public class ArrowManager : MonoBehaviour
         poisonArrowData.baseDamage += poisonArrowData.damageIncreasePerLevel;
     }
     
+    // 외부에서 노말 화살 데이터에 접근할 수 있도록
+    public ProjectileData GetNormalArrowData()
+    {
+        return normalArrowData;
+    }
+    
     #endregion
+
+    #region 화살 관련 함수
     
     /// <summary>
     /// 화살 타입 전환 - 다른 종류의 화살로 바꾸는 기능
@@ -248,4 +256,6 @@ public class ArrowManager : MonoBehaviour
         
         return true;
     }
+    
+    #endregion
 }

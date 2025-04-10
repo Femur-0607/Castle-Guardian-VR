@@ -50,7 +50,13 @@ public class UIManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI levelText;
     [SerializeField] private TextMeshProUGUI damageText;
     [SerializeField] private TextMeshProUGUI attackSpeedText;
-    [SerializeField] private float levelUpPanelDuration = 4f;
+    [SerializeField] private float levelUpPanelDuration = 3f;
+    
+    [Header("화살 업그레이드 UI")]
+    [SerializeField] private GameObject arrowUpgradePopup;
+    [SerializeField] private TextMeshProUGUI beforeDamageText;
+    [SerializeField] private TextMeshProUGUI afterDamageText;
+    [SerializeField] private TextMeshProUGUI multiplierText;
     
     [Header("사운드 UI")]
     [SerializeField] private Slider bgmSlider;
@@ -61,7 +67,7 @@ public class UIManager : MonoBehaviour
     private static float sfxVolume = 1f;
 
     #endregion
-
+    
     #region 유니티 이벤트 함수
 
     private void Start()
@@ -313,6 +319,38 @@ public class UIManager : MonoBehaviour
         levelUpPanel.transform.DOScale(Vector3.zero, 0.3f).SetEase(Ease.InBack)
             .OnComplete(() => levelUpPanel.SetActive(false));
     }
+    
+    public void ShowArrowUpgradePopup()
+    {
+        // ArrowManager에서 현재 화살 데이터 가져오기
+        ProjectileData normalArrow = ArrowManager.Instance.GetNormalArrowData();
+    
+        // 업그레이드 전후 데이터 계산
+        float beforeDamage = normalArrow.baseDamage - normalArrow.damageIncreasePerLevel;
+        float afterDamage = normalArrow.baseDamage;
+        float multiplier = normalArrow.baseMultiplier;
+
+        // UI 텍스트 업데이트
+        beforeDamageText.text = $"이전 데미지: {beforeDamage:F1}";
+        afterDamageText.text = $"현재 데미지: {afterDamage:F1}";
+        multiplierText.text = $"데미지 증폭: {multiplier:F2}x";
+
+        // 애니메이션과 함께 팝업 표시
+        arrowUpgradePopup.transform.localScale = Vector3.zero;
+        arrowUpgradePopup.SetActive(true);
+        arrowUpgradePopup.transform.DOScale(Vector3.one, 0.3f).SetEase(Ease.OutBack);
+
+        // 일정 시간 후 자동 숨김
+        StartCoroutine(HideArrowUpgradePopup());
+    }
+
+    private IEnumerator HideArrowUpgradePopup()
+    {
+        yield return new WaitForSeconds(1f);
+    
+        arrowUpgradePopup.transform.DOScale(Vector3.zero, 0.3f).SetEase(Ease.InBack)
+            .OnComplete(() => arrowUpgradePopup.SetActive(false));
+    }
 
 
     #endregion
@@ -378,6 +416,10 @@ public class UIManager : MonoBehaviour
                 break;
                 
             case EventManager.DialogueType.Tutorial:
+                ShowTutorialDialogueImages();
+                break;
+            
+            case EventManager.DialogueType.SpawnPointAdded:
                 ShowTutorialDialogueImages();
                 break;
         }

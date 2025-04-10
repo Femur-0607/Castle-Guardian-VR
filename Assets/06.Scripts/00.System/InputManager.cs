@@ -73,16 +73,9 @@ public class InputManager : MonoBehaviour
     /// </summary>
     private void HandleLeftButtons()
     {
-        // X 버튼 - 고스트 스폰
-        // if (OVRInput.GetDown(OVRInput.Button.One, OVRInput.Controller.LTouch))
-        // {
-        //     EventManager.Instance.GhostSpawnEvent();
-        // }
-
-        // Y 버튼 - 고스트/적 제거
+        // Y 버튼 - 적 제거
         if (OVRInput.GetDown(OVRInput.Button.Two, OVRInput.Controller.LTouch))
         {
-            EventManager.Instance.GhostDestroyEvent();
             EventManager.Instance.EnemyForceKillEvent();
         }
     }

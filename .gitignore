@@ -70,3 +70,15 @@ crashlytics-build.properties
 # Temporary auto-generated Android Assets
 /[Aa]ssets/[Ss]treamingAssets/aa.meta
 /[Aa]ssets/[Ss]treamingAssets/aa/*
+
+# MainScene 1의 라이팅 데이터 무시
+/Assets/08.Scenes/MainScene 1/LightingData.asset
+/Assets/08.Scenes/MainScene 1/Lightmap-*.exr
+/Assets/08.Scenes/MainScene 1/Lightmap-*.png
+/Assets/08.Scenes/MainScene 1/ReflectionProbe-*.exr
+
+# 메타 파일도 함께 무시 (선택 사항)
+/Assets/08.Scenes/MainScene 1/LightingData.asset.meta
+/Assets/08.Scenes/MainScene 1/Lightmap-*.exr.meta
+/Assets/08.Scenes/MainScene 1/Lightmap-*.png.meta
+/Assets/08.Scenes/MainScene 1/ReflectionProbe-*.exr.meta

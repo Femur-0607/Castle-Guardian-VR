@@ -29,10 +29,9 @@ public class WaveManager : MonoBehaviour
         // 시작 시 추가 스폰 포인트 비활성화
         for (int i = 1; i < spawnManagers.Length; i++)
         {
-            // spawnManagers[i].gameObject.SetActive(false);
+            spawnManagers[i].gameObject.SetActive(false);
         }
     }
-
     private void OnEnable()
     {
         EventManager.Instance.OnGameStart += OnWaveStart;
@@ -103,7 +102,7 @@ public class WaveManager : MonoBehaviour
         // 스폰 포인트 활성화
         for (int i = 0; i < spawnManagers.Length; i++)
         {
-            // spawnManagers[i].gameObject.SetActive(i < currentWave.activeSpawnPoints);
+            spawnManagers[i].gameObject.SetActive(i < currentWave.activeSpawnPoints);
         }
 
         SoundManager.Instance.PlaySound("BattleBGM");
@@ -193,7 +192,7 @@ public class WaveManager : MonoBehaviour
     // 다이얼로그 시작 시 호출
     private void HandleDialogueStarted(EventManager.DialogueType type)
     {
-        if (type == EventManager.DialogueType.Tutorial)
+        if (type == EventManager.DialogueType.Tutorial || type == EventManager.DialogueType.SpawnPointAdded)
         {
             isDialogueActive = true;
         }
@@ -202,7 +201,7 @@ public class WaveManager : MonoBehaviour
     // 다이얼로그 종료 시 호출
     private void HandleDialogueEnded(EventManager.DialogueType type)
     {
-        if (type == EventManager.DialogueType.Tutorial)
+        if (type == EventManager.DialogueType.Tutorial || type == EventManager.DialogueType.SpawnPointAdded)
         {
             isDialogueActive = false;
         }

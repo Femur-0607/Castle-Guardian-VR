@@ -62,32 +62,4 @@ public class PlayerExperienceSystem : MonoBehaviour
             EventManager.Instance.LevelUpEvent(currentLevel);
         }
     }
-
-    /// <summary>
-    /// 현재 레벨을 반환합니다.
-    /// </summary>
-    public int GetCurrentLevel()
-    {
-        return currentLevel;
-    }
-
-    /// <summary>
-    /// 현재 경험치를 반환합니다.
-    /// </summary>
-    public int GetCurrentExp()
-    {
-        return currentExp;
-    }
-
-    /// <summary>
-    /// 다음 레벨까지 필요한 경험치를 반환합니다.
-    /// </summary>
-    public int GetRequiredExp()
-    {
-        if (currentLevel <= expRequiredPerLevel.Length)
-        {
-            return expRequiredPerLevel[currentLevel - 1];
-        }
-        return 0;
-    }
 }
