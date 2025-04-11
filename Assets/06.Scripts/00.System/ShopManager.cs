@@ -130,7 +130,6 @@ public class ShopManager : MonoBehaviour
     // 폭발 화살 해금
     private void UnlockExplosiveArrow()
     {
-        Debug.Log("눌림");
         // 해금되지 않은 경우 해금 - 돈 확인
         if (GameManager.Instance.HasEnoughMoney(explosiveArrowCost))
         {

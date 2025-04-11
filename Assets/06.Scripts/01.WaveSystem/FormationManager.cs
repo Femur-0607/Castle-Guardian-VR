@@ -111,31 +111,6 @@ public class FormationManager : MonoBehaviour
     }
 
     /// <summary>
-    /// 특정 포지션이 사용 가능한지 확인
-    /// </summary>
-    public bool IsPositionAvailable(Vector3 position, FormationArea area)
-    {
-        if (!areaPositionToEnemy.ContainsKey(area)) return false;
-        return !areaPositionToEnemy[area].ContainsKey(position);
-    }
-
-    /// <summary>
-    /// 특정 적 유닛이 할당된 포지션을 가지고 있는지 확인
-    /// </summary>
-    public bool HasAssignedPosition(Enemy enemy)
-    {
-        return enemyToAreaPosition.ContainsKey(enemy);
-    }
-
-    /// <summary>
-    /// 모든 포지션 초기화
-    /// </summary>
-    public void ResetFormation()
-    {
-        InitializeAllAreas();
-    }
-
-    /// <summary>
     /// 특정 타겟(성문)에 대한 FormationArea 반환
     /// </summary>
     private FormationArea GetFormationAreaForTarget(Transform target)

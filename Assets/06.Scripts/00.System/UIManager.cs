@@ -7,18 +7,12 @@ using DG.Tweening;
 public class UIManager : MonoBehaviour
 {
     #region 필드 변수
-
+    
     [Header("참조")]
     [SerializeField] private WaveManager waveManager;
-    
-    [Header("웨이브 UI")]
-    public GameObject waveUIPanel;
-    public TextMeshProUGUI currentWaveTMP;
 
     [Header("타이틀 및 게임 관련 UI")]
     public GameObject startUIPanel;
-    public GameObject gameOverUIPanel;
-    public GameObject gameVictoryUIPanel;
     public TextMeshProUGUI goldAmountTMP;
     [SerializeField] private Button startButton;
 
@@ -29,35 +23,16 @@ public class UIManager : MonoBehaviour
     private TextMeshProUGUI[] tabTexts;
     public GameObject[] shopPanels;
 
-    [Header("성문 UI")]
-    [SerializeField] private Slider castleHealthSlider;
-
-    [Header("카메라 UI")]
-    [SerializeField] private GameObject CameraIndicatorUIPanel;
-    [SerializeField] private GameObject leftArrow;  // 좌측 카메라 전환 화살표
-    [SerializeField] private GameObject rightArrow; // 우측 카메라 전환 화살표
-
     [Header("다이얼로그 UI")]
     [SerializeField] private GameObject dialoguePanel;
     [SerializeField] private GameObject[] dialogueImages; // 0, 1: 인트로용, 2: 튜토리얼용
 
-    [Header("화살 쿨타임 UI")]
-    [SerializeField] private GameObject cooldownImageObject; // 쿨타임 이미지 오브젝트
-    
-    
-    [Header("레벨업 UI")]
-    [SerializeField] private GameObject levelUpPanel;
-    [SerializeField] private TextMeshProUGUI levelText;
-    [SerializeField] private TextMeshProUGUI damageText;
-    [SerializeField] private TextMeshProUGUI attackSpeedText;
-    [SerializeField] private float levelUpPanelDuration = 3f;
-    
     [Header("화살 업그레이드 UI")]
     [SerializeField] private GameObject arrowUpgradePopup;
     [SerializeField] private TextMeshProUGUI beforeDamageText;
     [SerializeField] private TextMeshProUGUI afterDamageText;
     [SerializeField] private TextMeshProUGUI multiplierText;
-    
+
     [Header("사운드 UI")]
     [SerializeField] private Slider bgmSlider;
     [SerializeField] private Slider sfxSlider;
@@ -67,19 +42,13 @@ public class UIManager : MonoBehaviour
     private static float sfxVolume = 1f;
 
     #endregion
-    
+
     #region 유니티 이벤트 함수
 
     private void Start()
     {
-        
         HideShopUI();
-        gameOverUIPanel.SetActive(false);
         startUIPanel.SetActive(true);
-        leftArrow.SetActive(false);
-        rightArrow.SetActive(false);
-        CameraIndicatorUIPanel.SetActive(false);
-        waveUIPanel.SetActive(false);
 
         // 다이얼로그 UI 초기화
         HideAllDialogueImages();
@@ -93,19 +62,10 @@ public class UIManager : MonoBehaviour
         // 상점 탭 초기화
         InitializeShopTabs();
 
-        // 화살표 초기 상태 (기본: 중앙 카메라 = 양쪽 화살표 모두 표시)
-        UpdateCameraArrows(CameraController.CameraPosition.Center);
-
-        // 쿨타임 UI 초기화
-        if (cooldownImageObject != null)
-        {
-            cooldownImageObject.SetActive(false);
-        }
-        
         // 사운드 UI 볼륨 초기화
         InitializeSound();
     }
-    
+
     // 상점 탭 초기화 메서드 (기존 코드 분리)
     private void InitializeShopTabs()
     {
@@ -117,13 +77,14 @@ public class UIManager : MonoBehaviour
             lineFocusImages[i] = tabButtons[i].transform.GetChild(0).GetComponent<Image>();
             tabTexts[i] = tabButtons[i].GetComponent<TextMeshProUGUI>();
         }
+
         // 탭 버튼 이벤트 설정
         for (int i = 0; i < tabButtons.Length; i++)
         {
             int tabIndex = i; // 클로저 문제 방지
             tabButtons[i].onClick.AddListener(() => SwitchTab(tabIndex));
         }
-        
+
         // 초기 탭 설정
         SwitchTab(0);
     }
@@ -133,103 +94,53 @@ public class UIManager : MonoBehaviour
         // 정적 변수에서 값 로드
         bgmSlider.value = bgmVolume;
         sfxSlider.value = sfxVolume;
-        
+
         // 텍스트 초기화 (0-10 범위로 변환)
         UpdateVolumeText(bgmValueText, bgmVolume);
         UpdateVolumeText(sfxValueText, sfxVolume);
-        
+
         // 사운드 매니저에 현재 값 적용
         SetBGMVolume(bgmVolume);
         SetSFXVolume(sfxVolume);
-        
+
         // 슬라이더 이벤트 리스너 등록
         bgmSlider.onValueChanged.AddListener(SetBGMVolume);
         sfxSlider.onValueChanged.AddListener(SetSFXVolume);
     }
 
-    // 웨이브 이벤트 구독
+    // 이벤트 구독
     private void OnEnable()
     {
         EventManager.Instance.OnDialogueEnded += HandleDialogueEnded;
         EventManager.Instance.OnDialogueStarted += HandleDialogueStarted;
-        EventManager.Instance.OnGameEnd += HandleGameEndUI;
-        EventManager.Instance.OnWaveStart += HandleWaveStartUI;
         EventManager.Instance.OnWaveEnd += HandleWaveEndUI;
         EventManager.Instance.OnMoneyChanged += UpdateGoldUI;
-        EventManager.Instance.OnCameraChanged += HandleCameraChanged;
-        EventManager.Instance.OnArrowCooldownStart += HandleArrowCooldownStart;
-        EventManager.Instance.OnArrowCooldownEnd += HandleArrowCooldownEnd;
-        EventManager.Instance.OnCastleHealthChanged += UpdateCastleHealthUI;
-        EventManager.Instance.OnCastleInitialized += InitializeCastleHealthUI;
-        EventManager.Instance.OnLevelUp += HandleLevelUp;
     }
 
     private void OnDisable()
     {
         EventManager.Instance.OnDialogueEnded -= HandleDialogueEnded;
         EventManager.Instance.OnDialogueStarted -= HandleDialogueStarted;
-        EventManager.Instance.OnGameEnd -= HandleGameEndUI;
-        EventManager.Instance.OnWaveStart -= HandleWaveStartUI;
         EventManager.Instance.OnWaveEnd -= HandleWaveEndUI;
         EventManager.Instance.OnMoneyChanged -= UpdateGoldUI;
-        EventManager.Instance.OnCameraChanged -= HandleCameraChanged;
-        EventManager.Instance.OnArrowCooldownStart -= HandleArrowCooldownStart;
-        EventManager.Instance.OnArrowCooldownEnd -= HandleArrowCooldownEnd;
-        EventManager.Instance.OnCastleHealthChanged -= UpdateCastleHealthUI;
-        EventManager.Instance.OnCastleInitialized -= InitializeCastleHealthUI;
-        EventManager.Instance.OnLevelUp -= HandleLevelUp;
     }
 
     #endregion
 
     #region UI 업데이트 함수
 
-    // 게임 종료 시 UI 처리
-    private void HandleGameEndUI(bool isVictory)
-    {
-        if (!isVictory)
-        {
-            waveUIPanel.SetActive(false);
-            gameOverUIPanel.SetActive(true);
-        }
-        else
-        {
-            waveUIPanel.SetActive(false);
-            gameVictoryUIPanel.SetActive(true);
-        }
-    }
-
-    // 현재 웨이브 시작 시 작동되는 메서드
-    private void HandleWaveStartUI(int waveNumber)
-    {
-        currentWaveTMP.text = $"Wave : {waveNumber}"; // UI 텍스트 갱신
-        HideShopUI();
-        
-        // 웨이브 1은 다이얼로그로 인해 DelayedGameStartUI에서 처리됨
-        if (waveNumber > 1)
-        {
-            // 웨이브 시작 시 카메라 인디케이터 패널 켜기
-            CameraIndicatorUIPanel.SetActive(true);
-            waveUIPanel.SetActive(true);
-        }
-    }
-
     // 현재 웨이브 종료 시 작동되는 메서드
     private void HandleWaveEndUI(int waveNumber)
     {
-        // 웨이브 종료 시 카메라 인디케이터 패널 끄기
-        CameraIndicatorUIPanel.SetActive(false);
-        
         // 상점 UI 표시
         ShowShopUI();
     }
 
     // 상점 UI 표시 메서드
-    public void ShowShopUI() 
+    public void ShowShopUI()
     {
-        waveUIPanel.SetActive(false);
         shopUIPanel.SetActive(true);
-        
+
         // 상점이 열릴 때마다 첫 번째 탭(Arrow)으로 초기화
         SwitchTab(0);
     }
@@ -257,7 +168,7 @@ public class UIManager : MonoBehaviour
         // WaveManager에게 다음 웨이브 시작을 요청
         waveManager.StartNextWaveEvent();
     }
-    
+
     /// <summary>
     /// 탭 전환 메서드
     /// </summary>
@@ -282,49 +193,16 @@ public class UIManager : MonoBehaviour
         {
             panel.SetActive(false);
         }
-        
+
         // 선택한 탭에 해당하는 상점 패널만 활성화
         shopPanels[tabIndex].SetActive(true);
     }
-    
-    /// <summary>
-    /// 레벨업 UI 표시
-    /// </summary>
-    private void HandleLevelUp(int newLevel)
-    {
-        // 레벨업 UI 업데이트
-        levelText.text = $"Level {newLevel}";
-        damageText.text = $"Damage: {PlayerExperienceSystem.Instance.CurrentDamage:F1}";
-        attackSpeedText.text = $"Attack Speed: {PlayerExperienceSystem.Instance.CurrentAttackSpeed:F1}";
 
-        // 레벨업 UI 표시
-        levelUpPanel.SetActive(true);
-        
-        // 애니메이션 효과
-        levelUpPanel.transform.localScale = Vector3.zero;
-        levelUpPanel.transform.DOScale(Vector3.one, 0.3f).SetEase(Ease.OutBack);
-
-        // 일정 시간 후 자동으로 숨김
-        StartCoroutine(HideLevelUpPanel());
-    }
-
-    /// <summary>
-    /// 레벨업 UI 자동 숨김
-    /// </summary>
-    private IEnumerator HideLevelUpPanel()
-    {
-        yield return new WaitForSeconds(levelUpPanelDuration);
-        
-        // 애니메이션 효과
-        levelUpPanel.transform.DOScale(Vector3.zero, 0.3f).SetEase(Ease.InBack)
-            .OnComplete(() => levelUpPanel.SetActive(false));
-    }
-    
     public void ShowArrowUpgradePopup()
     {
         // ArrowManager에서 현재 화살 데이터 가져오기
         ProjectileData normalArrow = ArrowManager.Instance.GetNormalArrowData();
-    
+
         // 업그레이드 전후 데이터 계산
         float beforeDamage = normalArrow.baseDamage - normalArrow.damageIncreasePerLevel;
         float afterDamage = normalArrow.baseDamage;
@@ -347,54 +225,11 @@ public class UIManager : MonoBehaviour
     private IEnumerator HideArrowUpgradePopup()
     {
         yield return new WaitForSeconds(1f);
-    
+
         arrowUpgradePopup.transform.DOScale(Vector3.zero, 0.3f).SetEase(Ease.InBack)
             .OnComplete(() => arrowUpgradePopup.SetActive(false));
     }
 
-
-    #endregion
-
-    #region 카메라 UI 함수
-
-    /// <summary>
-    /// 카메라 변경 이벤트 처리
-    /// </summary>
-    private void HandleCameraChanged(CameraController.CameraPosition position)
-    {
-        // 위치에 따라 화살표 UI 업데이트
-        UpdateCameraArrows(position);
-    }
-    
-    /// <summary>
-    /// 카메라 위치에 따라 화살표 업데이트
-    /// </summary>
-    private void UpdateCameraArrows(CameraController.CameraPosition position)
-    {
-        if (leftArrow == null || rightArrow == null) return;
-        
-        switch (position)
-        {
-            case CameraController.CameraPosition.Left:
-                // 왼쪽 카메라일 때는 오른쪽(중앙으로 이동) 화살표만 활성화
-                leftArrow.SetActive(true);
-                rightArrow.SetActive(false);
-                break;
-                
-            case CameraController.CameraPosition.Center:
-                // 중앙 카메라일 때는 양쪽 화살표 모두 활성화
-                leftArrow.SetActive(true);
-                rightArrow.SetActive(true);
-                break;
-                
-            case CameraController.CameraPosition.Right:
-                // 오른쪽 카메라일 때는 왼쪽(중앙으로 이동) 화살표만 활성화
-                leftArrow.SetActive(false);
-                rightArrow.SetActive(true);
-                break;
-        }
-    }
-    
     #endregion
 
     #region 다이얼로그 UI 함수
@@ -407,18 +242,18 @@ public class UIManager : MonoBehaviour
         {
             startUIPanel.SetActive(false);
         }
-        
+
         // 다이얼로그 타입에 따라 적절한 이미지 표시
         switch (type)
         {
             case EventManager.DialogueType.Intro:
                 ShowIntroDialogueImages();
                 break;
-                
+
             case EventManager.DialogueType.Tutorial:
                 ShowTutorialDialogueImages();
                 break;
-            
+
             case EventManager.DialogueType.SpawnPointAdded:
                 ShowTutorialDialogueImages();
                 break;
@@ -430,7 +265,7 @@ public class UIManager : MonoBehaviour
     {
         // 다이얼로그 이미지 숨기기
         HideAllDialogueImages();
-        
+
         // 필요한 경우 추가 UI 처리
         if (type == EventManager.DialogueType.Intro)
         {
@@ -444,11 +279,9 @@ public class UIManager : MonoBehaviour
     {
         // 1초 대기
         yield return new WaitForSeconds(1.0f);
-        
+
         // UI 업데이트
         startUIPanel.SetActive(false);
-        waveUIPanel.SetActive(true);
-        CameraIndicatorUIPanel.SetActive(true);
     }
 
     // 모든 다이얼로그 이미지 숨기기
@@ -458,7 +291,7 @@ public class UIManager : MonoBehaviour
         {
             dialoguePanel.SetActive(false);
         }
-        
+
         if (dialogueImages != null)
         {
             foreach (GameObject image in dialogueImages)
@@ -485,13 +318,13 @@ public class UIManager : MonoBehaviour
                 }
             }
         }
-        
+
         // 패널 활성화
         if (dialoguePanel != null)
         {
             dialoguePanel.SetActive(true);
         }
-        
+
         // 0번, 1번 이미지만 활성화
         if (dialogueImages != null && dialogueImages.Length > 0)
         {
@@ -514,73 +347,24 @@ public class UIManager : MonoBehaviour
                 }
             }
         }
-        
+
         // 패널 활성화
         if (dialoguePanel != null)
         {
             dialoguePanel.SetActive(true);
         }
-        
+
         // 2번 이미지만 활성화
         if (dialogueImages != null && dialogueImages.Length > 2 && dialogueImages[2] != null)
         {
             dialogueImages[2].SetActive(true);
         }
     }
-    
-    #endregion
-
-    #region 화살 쿨타임 UI 함수
-    
-    /// <summary>
-    /// 화살 쿨타임 시작 시 처리
-    /// </summary>
-    private void HandleArrowCooldownStart()
-    {
-        if (cooldownImageObject != null)
-        {
-            cooldownImageObject.SetActive(true);
-        }
-    }
-    
-    /// <summary>
-    /// 화살 쿨타임 종료 시 처리
-    /// </summary>
-    private void HandleArrowCooldownEnd()
-    {
-        if (cooldownImageObject != null)
-        {
-            cooldownImageObject.SetActive(false);
-        }
-    }
-    
-    #endregion
-
-    #region 성문 체력 관리 UI 함수
-
-    // 성문 체력 UI 초기화 메서드
-    private void InitializeCastleHealthUI(Castle castle)
-    {
-        if (castleHealthSlider != null && castle != null)
-        {
-            castleHealthSlider.maxValue = castle.MaxHealth;
-            castleHealthSlider.value = castle.currentHealth;
-        }
-    }
-    
-    // 성문 체력 UI 업데이트 메서드
-    private void UpdateCastleHealthUI(float currentHealth)
-    {
-        if (castleHealthSlider != null)
-        {
-            castleHealthSlider.value = currentHealth;
-        }
-    }
 
     #endregion
 
     #region 사운드 UI 함수
-    
+
     // 볼륨 텍스트 업데이트 (0-1 값을 0-10 정수로 변환)
     private void UpdateVolumeText(TextMeshProUGUI text, float volume)
     {
@@ -597,7 +381,7 @@ public class UIManager : MonoBehaviour
         SoundManager.Instance.SetBGMVolume(volume);
         UpdateVolumeText(bgmValueText, volume);
     }
-    
+
     private void SetSFXVolume(float volume)
     {
         sfxVolume = volume; // 정적 변수에 저장
