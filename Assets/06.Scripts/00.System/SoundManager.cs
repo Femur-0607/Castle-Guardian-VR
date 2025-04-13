@@ -56,7 +56,7 @@ public class SoundManager : MonoBehaviour
             return;
         }
         _instance = this;
-
+        
         // ScriptableObject에서 사운드 정보 빌드
         BuildSoundDictionary();
     }
@@ -67,7 +67,6 @@ public class SoundManager : MonoBehaviour
 
         if (soundDatabase == null || soundDatabase.soundList == null)
         {
-            Debug.LogWarning("SoundDatabase가 비어있습니다.");
             return;
         }
 
@@ -76,10 +75,6 @@ public class SoundManager : MonoBehaviour
             if (!soundDict.ContainsKey(data.soundID))
             {
                 soundDict.Add(data.soundID, data);
-            }
-            else
-            {
-                Debug.LogWarning($"SoundID 중복 발견: {data.soundID}. 먼저 등록된 데이터로 유지됩니다.");
             }
         }
     }
@@ -129,13 +124,11 @@ public class SoundManager : MonoBehaviour
     {
         if (soundDict == null)
         {
-            Debug.LogWarning("SoundDictionary가 생성되지 않았습니다.");
             return;
         }
 
         if (!soundDict.TryGetValue(soundID, out SoundData data))
         {
-            Debug.LogWarning($"해당 SoundID({soundID})가 SoundDatabase에 없습니다.");
             return;
         }
 
@@ -177,26 +170,25 @@ public class SoundManager : MonoBehaviour
     // 새로운 메서드 추가 - 특정 위치에서 3D 사운드 재생
     public void PlaySound3D(string soundID, Vector3 position, Transform parent = null)
     {
-        Debug.Log($"PlaySound3D({soundID}, {position})");
-        
         float distanceToCamera = Vector3.Distance(oVRCamera.transform.position, position);
-        Debug.Log($"카메라와의 거리: {distanceToCamera}유닛 (최대 들림 거리: 20유닛)");
         
-        if (soundDict == null || audioSourcePool == null)
+        if (soundDict == null)
         {
-            Debug.LogWarning("SoundDictionary 또는 AudioSourcePool이 초기화되지 않았습니다.");
+            return;
+        }
+
+        if (audioSourcePool == null)
+        {
             return;
         }
 
         if (!soundDict.TryGetValue(soundID, out SoundData data))
         {
-            Debug.LogWarning($"해당 SoundID({soundID})가 SoundDatabase에 없습니다.");
             return;
         }
 
         if (data.category != SoundCategory.SFX)
         {
-            Debug.LogWarning($"SoundID({soundID})는 SFX 카테고리가 아닙니다. 3D 사운드는 SFX 카테고리만 지원합니다.");
             return;
         }
 

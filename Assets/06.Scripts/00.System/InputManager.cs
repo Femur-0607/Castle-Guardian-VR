@@ -78,6 +78,12 @@ public class InputManager : MonoBehaviour
         {
             EventManager.Instance.EnemyForceKillEvent();
         }
+
+        // X 버튼 - 보스전 바로 시작
+    if (OVRInput.GetDown(OVRInput.Button.One, OVRInput.Controller.LTouch))
+    {
+        // EventManager.Instance.StartBossFightEvent();
+    }
     }
 
     /// <summary>

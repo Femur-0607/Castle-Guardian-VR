@@ -16,31 +16,59 @@ public class EventManager : MonoBehaviour
         SpawnPointAdded
     }
 
-    // 초기화 순서가 중요한 경우 사용
-    // - Instance가 먼저 설정되지 않으면 다른 스크립트에서 접근할 때 NullReferenceException 발생 가능
-    // - 하지만 필요할 경우 다른 인스턴스로 교체할 수도 있음
     public static EventManager Instance { get; private set; }
 
+    #endregion
+
+    #region 플레이어 액션 이벤트
+    
     public event Action OnFireStart;                    // 조준 시작 시 발동할 이벤트
     public event Action OnFireCharging;                 // 조준 중 발동할 이벤트
     public event Action OnFireRelease;                  // 조준 해제 시 발동할 이벤트
-    public event Action<int> OnWaveStart;               // 웨이브 시작 시 발동할 이벤트
-    public event Action<int> OnWaveEnd;                 // 웨이브 종료 시 발동할 이벤트
+    public event Action OnArrowCooldownStart;           // 화살 쿨타임 시작 시 발동할 이벤트
+    public event Action OnArrowCooldownEnd;             // 화살 쿨타임 종료 시 발동할 이벤트
+    public event Action<ProjectileData.ProjectileType> OnArrowTypeChanged;  // 화살 타입 변경 이벤트
+    public event Action OnBuildNodeHit;                 // 노드 건설/업그레이드 이벤트
+    
+    #endregion
+
+    #region 게임 진행 이벤트
+    
     public event Action OnGameStart;                    // 게임 시작 시 발동할 이벤트
     public event Action<bool> OnGameEnd;                // 게임 종료 시 발동할 이벤트 (승리 여부 포함)
+    public event Action<int> OnWaveStart;               // 웨이브 시작 시 발동할 이벤트
+    public event Action<int> OnWaveEnd;                 // 웨이브 종료 시 발동할 이벤트
     public event Action<int> OnMoneyChanged;            // 골드 변경 시 발동할 이벤트
+    public event Action<int> OnLevelUp;                 // 레벨업 이벤트
+    
+    #endregion
+
+    #region 성/방어 관련 이벤트
+    
     public event Action<Castle> OnCastleInitialized;    // 성문 초기화 시 발동할 이벤트
     public event Action<float> OnCastleHealthChanged;   // 성문 체력 변경 시 발동할 이벤트
+    
+    #endregion
+
+    #region 카메라 이벤트
+    
     public event Action<float> OnCameraSwitch;          // 카메라 전환 시 발동할 이벤트 (방향값)
     public event Action<CameraController.CameraPosition> OnCameraChanged;   // 카메라가 실제로 변경되었을 때 발동할 이벤트 (위치)
+    
+    #endregion
+
+    #region UI/다이얼로그 이벤트
+    
     public event Action<DialogueType> OnDialogueStarted;   // 다이얼로그 시작 시 발동할 이벤트 (다이얼로그 타입 포함)
     public event Action<DialogueType> OnDialogueEnded;     // 다이얼로그 종료 시 발동할 이벤트 (다이얼로그 타입 포함)
-    public event Action OnArrowCooldownStart;             // 화살 쿨타임 시작 시 발동할 이벤트
-    public event Action OnArrowCooldownEnd;               // 화살 쿨타임 종료 시 발동할 이벤트
-    public event Action OnEnemyForceKill;          // 적 강제 제거 이벤트
-    public event Action OnBuildNodeHit;  // 노드 건설/업그레이드 이벤트
-    public event Action<int> OnLevelUp;            // 레벨업 이벤트
+    
+    #endregion
 
+    #region 적/보스 관련 이벤트
+    
+    public event Action OnEnemyForceKill;               // 적 강제 제거 이벤트
+    public event Action<float> OnBossHealthChanged;     // 보스 체력 변경 이벤트
+    
     #endregion
 
     private void Awake()
@@ -53,28 +81,55 @@ public class EventManager : MonoBehaviour
         Instance = this;
     }
 
-    #region 이벤트 발송 메서드
-
+    #region 플레이어 액션 이벤트 발송 메서드
+    
     // 람다식을 사용해서 이벤트 송신 간소화
     public void FireStartEvent() => OnFireStart?.Invoke();
-    public void FireReleaseEvent() => OnFireRelease?.Invoke();
     public void FireChargingEvent() => OnFireCharging?.Invoke();
-    public void WaveStartEvent(int waveNumber) => OnWaveStart?.Invoke(waveNumber);
-    public void WaveEndEvent(int waveNumber) => OnWaveEnd?.Invoke(waveNumber);
-    public void GameStartEvent() => OnGameStart?.Invoke();
-    public void GameEndEvent(bool isVictory) => OnGameEnd?.Invoke(isVictory);
-    public void MoneyChangedEvent(int currentMoney) => OnMoneyChanged?.Invoke(currentMoney);
-    public void TriggerOnCastleInitialized(Castle castle) => OnCastleInitialized?.Invoke(castle);
-    public void TriggerOnCastleHealthChanged(float currentHealth) => OnCastleHealthChanged?.Invoke(currentHealth);
-    public void CameraSwitchEvent(float direction) => OnCameraSwitch?.Invoke(direction);
-    public void CameraChangedEvent(CameraController.CameraPosition position) => OnCameraChanged?.Invoke(position);
-    public void DialogueStartedEvent(DialogueType type) => OnDialogueStarted?.Invoke(type);
-    public void DialogueEndedEvent(DialogueType type) => OnDialogueEnded?.Invoke(type);
+    public void FireReleaseEvent() => OnFireRelease?.Invoke();
     public void ArrowCooldownStartEvent() => OnArrowCooldownStart?.Invoke();
     public void ArrowCooldownEndEvent() => OnArrowCooldownEnd?.Invoke();
-    public void EnemyForceKillEvent() => OnEnemyForceKill?.Invoke();
+    public void ArrowTypeChangedEvent(ProjectileData.ProjectileType newType) => OnArrowTypeChanged?.Invoke(newType);
     public void BuildNodeHitEvent() => OnBuildNodeHit?.Invoke();
+    
+    #endregion
+
+    #region 게임 진행 이벤트 발송 메서드
+    
+    public void GameStartEvent() => OnGameStart?.Invoke();
+    public void GameEndEvent(bool isVictory) => OnGameEnd?.Invoke(isVictory);
+    public void WaveStartEvent(int waveNumber) => OnWaveStart?.Invoke(waveNumber);
+    public void WaveEndEvent(int waveNumber) => OnWaveEnd?.Invoke(waveNumber);
+    public void MoneyChangedEvent(int currentMoney) => OnMoneyChanged?.Invoke(currentMoney);
     public void LevelUpEvent(int newLevel) => OnLevelUp?.Invoke(newLevel);
+    
+    #endregion
+
+    #region 성/방어 관련 이벤트 발송 메서드
+    
+    public void TriggerOnCastleInitialized(Castle castle) => OnCastleInitialized?.Invoke(castle);
+    public void TriggerOnCastleHealthChanged(float currentHealth) => OnCastleHealthChanged?.Invoke(currentHealth);
+    
+    #endregion
+
+    #region 카메라 이벤트 발송 메서드
+    
+    public void CameraSwitchEvent(float direction) => OnCameraSwitch?.Invoke(direction);
+    public void CameraChangedEvent(CameraController.CameraPosition position) => OnCameraChanged?.Invoke(position);
+    
+    #endregion
+
+    #region UI/다이얼로그 이벤트 발송 메서드
+    
+    public void DialogueStartedEvent(DialogueType type) => OnDialogueStarted?.Invoke(type);
+    public void DialogueEndedEvent(DialogueType type) => OnDialogueEnded?.Invoke(type);
+    
+    #endregion
+
+    #region 적/보스 관련 이벤트 발송 메서드
+    
+    public void EnemyForceKillEvent() => OnEnemyForceKill?.Invoke();
+    public void BossHealthChangedEvent(float healthPercent) => OnBossHealthChanged?.Invoke(healthPercent);
     
     #endregion
 }

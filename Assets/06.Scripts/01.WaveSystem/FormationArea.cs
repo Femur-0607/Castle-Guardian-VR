@@ -8,12 +8,6 @@ public class FormationArea : MonoBehaviour
     [SerializeField] private int maxRows = 5; // 최대 줄 수
     [SerializeField] private float unitSpacing = 3.5f; // 유닛 간 간격
 
-    [Header("Debug")]
-    [SerializeField] private bool showUnitPositions = true;
-    [SerializeField] private float unitRadius = 1f;
-
-    public Vector2 AreaSize => areaSize;
-
     private Vector3 GetGridPosition(int row, int col)
     {
         // 한 줄에 5개 유닛, 중앙 기준 좌우 +-3.5 범위

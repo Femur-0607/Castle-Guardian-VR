@@ -9,7 +9,7 @@ public class WaveData : ScriptableObject
     {
         [Header("웨이브 기본 정보")]
         public string waveName;  // 예: "약한 적 무리", "궁수 혼합", "탱커 웨이브" 등
-        
+
         [Header("웨이브 구성")]
         [Tooltip("이 웨이브에서 사용할 스폰 포인트 개수 (1-3)")]
         [Range(1, 3)] public int activeSpawnPoints = 1;
@@ -36,4 +36,21 @@ public class WaveData : ScriptableObject
         [Tooltip("스폰 간격 (초)")]
         public float spawnInterval = 1f;
     }
+    
+    [System.Serializable]
+    public class BossWave
+    {
+        [Header("보스 웨이브 정보")]
+        public string waveName = "최종 보스";
+        
+        [Header("보스 설정")]
+        public int bossHealth = 1000;
+        public float bossAttackRate = 3f;
+        
+        [Header("보상")]
+        public int clearReward = 500;
+    }
+
+    // WaveData 클래스 내에 추가
+    public BossWave bossWave;
 }

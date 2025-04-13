@@ -12,11 +12,11 @@ public class WaveArrowController : MonoBehaviour
     [SerializeField] private float fadeOutDuration = 0.5f; // 페이드 아웃 지속 시간
 
     [Header("Wave Settings")]
-    [SerializeField] private int secondArrowStartWave = 5; // 두 번째 화살표 활성화 웨이브
-    [SerializeField] private int thirdArrowStartWave = 7; // 세 번째 화살표 활성화 웨이브
+    private int firstArrowStartWave = 1;
+    private int secondArrowStartWave = 5; // 두 번째 화살표 활성화 웨이브
+    private int thirdArrowStartWave = 7; // 세 번째 화살표 활성화 웨이브
+    private bool isFirstSpawnPointAddedCompleted = false;   // SpawnPointAdded가 이전에 실행되었는지 체크하는 불리언 변수
 
-    private EventManager eventManager;
-    private bool isFirstWaveShown = false;
     private Coroutine[] rotationCoroutines;
     private Coroutine[] fadeOutCoroutines;
 
@@ -34,43 +34,16 @@ public class WaveArrowController : MonoBehaviour
         }
     }
 
-    private void Start()
+    private void OnEnable()
     {
-        // 이벤트 매니저 참조 가져오기
-        eventManager = EventManager.Instance;
-        
-        if (eventManager != null)
-        {
-            // 웨이브 시작 이벤트 구독
-            eventManager.OnWaveStart += HandleWaveStart;
-            
-            // 다이얼로그 종료 이벤트 구독 (웨이브 1의 다이얼로그용)
-            eventManager.OnDialogueEnded += HandleDialogueEnded;
-        }
-        else
-        {
-            Debug.LogError("EventManager instance not found!");
-        }
+        EventManager.Instance.OnWaveStart += HandleWaveStart;
+        EventManager.Instance.OnDialogueEnded += HandleDialogueEnded;
     }
 
-    private void OnDestroy()
+    private void OnDisable()
     {
-        // 이벤트 구독 해제
-        if (eventManager != null)
-        {
-            eventManager.OnWaveStart -= HandleWaveStart;
-            eventManager.OnDialogueEnded -= HandleDialogueEnded;
-        }
-        
-        // 실행 중인 모든 코루틴 종료
-        StopAllCoroutines();
-        
-        // 모든 화살표 비활성화
-        foreach (var arrow in arrowObjects)
-        {
-            if (arrow != null)
-                arrow.SetActive(false);
-        }
+        EventManager.Instance.OnWaveStart -= HandleWaveStart;
+        EventManager.Instance.OnDialogueEnded -= HandleDialogueEnded;
     }
 
     private void HandleWaveStart(int waveNumber)
@@ -78,8 +51,8 @@ public class WaveArrowController : MonoBehaviour
         // 모든 코루틴 중지
         StopAllArrowCoroutines();
         
-        // 웨이브 1은 다이얼로그 종료 후 처리하므로 제외
-        if (waveNumber == 1)
+        // 웨이브 1,5,7은 다이얼로그 종료 후 처리하므로 제외
+        if (waveNumber == firstArrowStartWave || waveNumber == secondArrowStartWave || waveNumber == thirdArrowStartWave)
         {
             return;
         }
@@ -91,10 +64,15 @@ public class WaveArrowController : MonoBehaviour
     private void HandleDialogueEnded(EventManager.DialogueType dialogueType)
     {
         // 다이얼로그 종료 후 웨이브 화살표 표시 (1초 지연)
-        if ((dialogueType == EventManager.DialogueType.Tutorial || dialogueType == EventManager.DialogueType.SpawnPointAdded) && !isFirstWaveShown)
+        if (dialogueType == EventManager.DialogueType.Tutorial)
         {
-            isFirstWaveShown = true;
-            StartCoroutine(DelayedShowArrows(1));
+            StartCoroutine(DelayedShowArrows(firstArrowStartWave));
+        }
+        else if (dialogueType == EventManager.DialogueType.SpawnPointAdded)
+        {
+            StartCoroutine(DelayedShowArrows(isFirstSpawnPointAddedCompleted ? thirdArrowStartWave : secondArrowStartWave));
+
+            isFirstSpawnPointAddedCompleted = true;
         }
     }
     
@@ -109,6 +87,11 @@ public class WaveArrowController : MonoBehaviour
 
     private void ShowArrowsByWave(int waveNumber)
     {
+        if (waveNumber == 10)
+        {
+            return;
+        }
+        
         // 활성화할 화살표 개수 결정
         int arrowsToShow = 1; // 기본적으로 첫 번째 화살표는 항상 보임
         

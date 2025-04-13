@@ -412,6 +412,10 @@ public class Enemy : LivingEntity
         agent.isStopped = true;
         agent.enabled = false;
 
+        // 추가해야 할 코드: 물리 시뮬레이션 비활성화
+        Rigidbody rb = GetComponent<Rigidbody>();
+        rb.isKinematic = true; // 이 한 줄이 핵심입니다!
+
         // 사망 시 게임매니저에게 골드 전달 (프로퍼티 사용을 위해 AddMoney 메서드 호출)
         GameManager.Instance.AddMoney((int)enemyData.goldDropAmount);
 

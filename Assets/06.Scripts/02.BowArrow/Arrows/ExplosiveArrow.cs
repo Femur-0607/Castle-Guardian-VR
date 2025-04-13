@@ -44,9 +44,6 @@ public class ExplosiveArrow : Projectile
             }
         }
         
-        // 디버그용 폭발 범위 시각화 (빨간색 수직선으로 폭발 지점 표시, Scene 뷰에서만 보임)
-        Debug.DrawRay(transform.position, Vector3.up * 5f, Color.red, 1f);
-        
         // 화살 풀에 반환 (재사용을 위함)
         ReturnToPool();
     }
@@ -65,15 +62,5 @@ public class ExplosiveArrow : Projectile
         {
             explosionRadius = data.impactRadius;
         }
-    }
-    
-    /// <summary>
-    /// 에디터에서 기즈모(시각적 도우미)로 폭발 범위 표시 (디버그용)
-    /// </summary>
-    private void OnDrawGizmos()
-    {
-        // 빨간색 투명 구체로 폭발 범위 시각화
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position, explosionRadius);
     }
 }

@@ -1,0 +1,314 @@
+using UnityEngine;
+using System.Collections;
+using UnityEngine.AI;
+
+public class BossController : LivingEntity
+{
+    #region 필드 변수
+
+    [Header("보스 설정")]
+    [SerializeField] private int maxHealth = 1000;
+    [SerializeField] private int attackDamage = 20;  // 공격 데미지
+
+    [Header("공격 패턴")]
+    // [SerializeField] private GameObject projectilePrefab;
+    // [SerializeField] private float attackRate = 3f;
+    // [SerializeField] private int projectileCount = 5;
+    // [SerializeField] private float spreadAngle = 30f;
+
+    [Header("참조")]
+    // [SerializeField] private Transform projectileSpawnPoint;
+    [SerializeField] private Animator animator;
+    [SerializeField] private Transform targetBattlePosition;
+    [SerializeField] private Castle targetCastle;  // 공격 대상 성
+
+    [Header("보스 애니메이션 관련")]
+    private const int ANIM_IDLE = 1;
+    private const int ANIM_MOVE = 2;
+    private const int ANIM_ATTACK = 3;
+    private const int ANIM_DAMAGE = 4;
+    private const int ANIM_DIE = 5;
+
+    [Header("출현 효과")]
+    [SerializeField] private float initialAlpha = 0.0f;  // 초기 알파값
+    [SerializeField] private float alphaChangePerWave = 0.1f;  // 웨이브당 알파값 증가량
+
+    private NavMeshAgent navAgent;  // 네비게이션 에이전트
+    private bool isInBattleMode = false;
+    private bool isMovingToBattlePosition = false;
+    private Material[] bossMaterials;  // 보스의 모든 머티리얼
+    private float currentAlpha;  // 현재 알파값
+
+    #endregion
+
+    #region 유니티 이벤트
+
+    private void Awake()
+    {
+        // NavMeshAgent 컴포넌트 가져오기 (없으면 추가)
+        navAgent = GetComponent<NavMeshAgent>();
+        if (navAgent == null)
+        {
+            navAgent = gameObject.AddComponent<NavMeshAgent>();
+            navAgent.speed = 5.0f;
+            navAgent.angularSpeed = 120.0f;
+            navAgent.acceleration = 8.0f;
+            navAgent.stoppingDistance = 2.0f;
+        }
+
+        // 초기에는 비활성화
+        navAgent.enabled = false;
+
+        // 모든 렌더러에서 머티리얼 가져오기
+        CollectAllMaterials();
+
+        // 초기 알파값 설정
+        currentAlpha = initialAlpha;
+        SetAlpha(currentAlpha);
+    }
+
+    private void OnEnable()
+    {
+        EventManager.Instance.OnWaveStart += HandleWaveStart;
+    }
+
+    private void OnDisable()
+    {
+        EventManager.Instance.OnWaveStart -= HandleWaveStart;
+    }
+
+    protected override void Start()
+    {
+        startingHealth = maxHealth; // 부모 클래스의 startingHealth 설정
+        base.Start(); // LivingEntity의 Start 호출하여 초기화 진행
+    }
+
+    #endregion
+
+    #region 이벤트 핸들러
+
+    // 웨이브 시작 핸들러
+    private void HandleWaveStart(int waveNumber)
+    {
+        // 10웨이브 시작 시 전투 모드 시작
+        if (waveNumber == 10)
+        {
+            StartBattle();
+        }
+        // 1-9웨이브는 알파값만 조정
+        else if (waveNumber >= 1 && waveNumber <= 9)
+        {
+            // 웨이브에 따라 알파값 증가
+            currentAlpha = initialAlpha + (waveNumber * alphaChangePerWave);
+            SetAlpha(currentAlpha);
+        }
+    }
+
+    #endregion
+
+    #region 보스 관련
+
+    // 초기화 메서드
+    public void Initialize(bool battleMode)
+    {
+        isInBattleMode = battleMode;
+
+        // 비전투 모드인 경우 애니메이션 설정
+        if (!battleMode && animator != null)
+        {
+            animator.SetInteger("animation", ANIM_IDLE);  // 대기 상태
+        }
+    }
+
+    // 전투 시작
+    public void StartBattle()
+    {
+        // 완전히 불투명하게 설정
+        SetAlpha(1.0f);
+        
+        // 네비게이션 활성화 및 목표 위치로 이동 시작
+        if (targetBattlePosition != null)
+        {
+            navAgent.enabled = true;
+            navAgent.SetDestination(targetBattlePosition.position);
+            isMovingToBattlePosition = true;
+            
+            // 이동 애니메이션 설정
+            if (animator != null)
+            {
+                animator.SetInteger("animation", ANIM_MOVE);  // 이동 상태
+            }
+            
+            // 목적지 도착 체크 코루틴 시작
+            StartCoroutine(CheckDestinationReached());
+        }
+        else
+        {
+            // 목표 위치가 없으면 바로 전투 시작
+            EnterBattleMode();
+        }
+    }
+
+    // 목적지 도착 체크 코루틴
+    private IEnumerator CheckDestinationReached()
+    {
+        while (isMovingToBattlePosition)
+        {
+            // 목적지에 도착했거나 경로 계산이 끝났는지 확인
+            if (!navAgent.pathPending && navAgent.remainingDistance <= navAgent.stoppingDistance)
+            {
+                isMovingToBattlePosition = false;
+                
+                // 이동 애니메이션 종료
+                if (animator != null)
+                {
+                    animator.SetInteger("animation", ANIM_IDLE);
+                }
+                
+                // 전투 모드 진입
+                EnterBattleMode();
+            }
+            
+            yield return null;
+        }
+    }
+
+    // 전투 모드 진입
+    private void EnterBattleMode()
+    {
+        isInBattleMode = true;
+        
+        // 네비게이션 비활성화
+        navAgent.enabled = false;
+        
+        if (animator != null)
+        {
+            animator.SetInteger("animation", ANIM_IDLE);
+        }
+        
+        // 공격 코루틴 시작
+        StartCoroutine(AttackPattern());
+    }
+
+    // LivingEntity의 TakeDamage 메서드 오버라이드
+    public override void TakeDamage(float damage)
+    {
+        if (!isAlive || !isInBattleMode) return;
+
+        // 기본 데미지 처리는 부모 클래스에 위임
+        base.TakeDamage(damage);
+
+        // 체력 변경 이벤트 발생 (UI 업데이트용)
+        float healthPercent = currentHealth / startingHealth;
+        EventManager.Instance.BossHealthChangedEvent(healthPercent);
+    }
+
+    // LivingEntity의 Die 메서드 오버라이드
+    public override void Die()
+    {
+        if (!isAlive) return;
+
+        // 부모 클래스의 Die 호출
+        base.Die();
+
+        // 사망 애니메이션
+        if (animator != null)
+        {
+            animator.SetInteger("animation", ANIM_DIE);
+        }
+
+        // 보스전 종료 이벤트 발송 (승리)
+        EventManager.Instance.WaveEndEvent(10);  // 10웨이브 종료 이벤트
+
+        // 각종 컴포넌트 비활성화
+        Collider[] colliders = GetComponentsInChildren<Collider>();
+        foreach (var col in colliders)
+        {
+            col.enabled = false;
+        }
+
+        // 3초 후 오브젝트 제거
+        Destroy(gameObject, 3f);
+    }
+
+    // 공격 애니메이션 이벤트에서 호출되는 메서드
+    public void OnAttackAnimationEvent()
+    {
+        if (targetCastle != null)
+        {
+            targetCastle.TakeDamage(attackDamage);
+            // 공격 사운드 재생
+            SoundManager.Instance.PlaySound("BossAttack");
+        }
+    }
+
+    // 공격 패턴 코루틴 수정
+    private IEnumerator AttackPattern()
+    {
+        while (isInBattleMode && isAlive)
+        {
+            // 기본 공격 주기
+            yield return new WaitForSeconds(3f);
+
+            // 공격 애니메이션 실행
+            if (animator != null)
+            {
+                animator.SetInteger("animation", ANIM_ATTACK);
+            }
+
+            // 애니메이션 종료 대기
+            yield return new WaitForSeconds(1f);
+
+            // 다시 대기 상태로
+            if (animator != null)
+            {
+                animator.SetInteger("animation", ANIM_IDLE);
+            }
+        }
+    }
+    
+    #endregion
+
+    #region 보스 시각 효과
+
+    // 모든 머티리얼 수집
+    private void CollectAllMaterials()
+    {
+        // 모든 렌더러 컴포넌트 가져오기
+        Renderer[] renderers = GetComponentsInChildren<Renderer>();
+
+        // 모든 머티리얼 수집
+        System.Collections.Generic.List<Material> materialsList = new System.Collections.Generic.List<Material>();
+        foreach (Renderer renderer in renderers)
+        {
+            materialsList.AddRange(renderer.materials);
+        }
+        bossMaterials = materialsList.ToArray();
+    }
+    
+    // 알파값 설정 메서드
+    public void SetAlpha(float alpha)
+    {
+        alpha = Mathf.Clamp01(alpha);  // 0-1 사이 값으로 제한
+        
+        foreach (Material material in bossMaterials)
+        {
+            // 렌더 모드를 Transparent로 변경
+            material.SetFloat("_Mode", 2);
+            material.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
+            material.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+            material.SetInt("_ZWrite", 0);
+            material.DisableKeyword("_ALPHATEST_ON");
+            material.EnableKeyword("_ALPHABLEND_ON");
+            material.DisableKeyword("_ALPHAPREMULTIPLY_ON");
+            material.renderQueue = 3000;
+            
+            // 알파값 설정
+            Color color = material.color;
+            color.a = alpha;
+            material.color = color;
+        }
+    }
+    
+    #endregion
+}

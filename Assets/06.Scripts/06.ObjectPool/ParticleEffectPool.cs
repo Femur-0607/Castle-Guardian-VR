@@ -128,7 +128,6 @@ public class ParticleEffectPool : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning($"존재하지 않는 풀에 파티클 반환 시도: {key}");
             Destroy(effect);
         }
     }

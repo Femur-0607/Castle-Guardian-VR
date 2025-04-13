@@ -296,9 +296,9 @@ public class GameManager : MonoBehaviour
             StartCoroutine(StartShopTutorialDelayed());
         }
         
-        if (waveNumber == 9)
+        // 10 웨이브 종료 시 게임 종료
+        if (waveNumber == 10)
         {
-            // 9웨이브 종료 시 게임 종료
             // 승리 다이얼로그 표시
             StartCoroutine(StartVictoryDialogueDelayed());
         }

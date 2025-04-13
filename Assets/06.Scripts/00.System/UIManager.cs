@@ -10,6 +10,7 @@ public class UIManager : MonoBehaviour
     
     [Header("참조")]
     [SerializeField] private WaveManager waveManager;
+    [SerializeField] private MultiImageHoverManager hoverManager;
 
     [Header("타이틀 및 게임 관련 UI")]
     public GameObject startUIPanel;
@@ -162,6 +163,12 @@ public class UIManager : MonoBehaviour
     /// </summary>
     public void StartNextWave()
     {
+        // 호버 효과 초기화
+        if (hoverManager != null)
+        {
+            hoverManager.ResetAllHoverEffects();
+        }
+
         // 상점 패널 먼저 닫기
         HideShopUI();
 

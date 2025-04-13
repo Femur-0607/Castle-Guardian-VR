@@ -137,7 +137,7 @@ public class AudioSourcePool : MonoBehaviour
         source.spatialBlend = 1.0f;  // 완전한 3D 사운드
         source.rolloffMode = AudioRolloffMode.Linear;  // 거리에 따른 감쇠 모드
         source.minDistance = 1f;  // 최소 거리 (이 거리 내에서는 볼륨 최대)
-        source.maxDistance = 20f;  // 최대 거리 (이 거리 이상에서는 들리지 않음)
+        source.maxDistance = 150f;  // 최대 거리 (이 거리 이상에서는 들리지 않음)
         
         // VR 최적화 설정 (선택 사항)
         source.spatialize = true;  // 공간화 활성화 (VR/AR 오디오용)

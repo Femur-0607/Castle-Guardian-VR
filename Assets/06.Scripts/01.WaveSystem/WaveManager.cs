@@ -16,9 +16,12 @@ public class WaveManager : MonoBehaviour
     [SerializeField] private bool isWaveActive;  // 웨이브 진행 여부
     private bool isDialogueActive = false;       // 다이얼로그 표시 중인지 여부
 
+    [Header("웨이브 종료 시 시각 효과 변수")]
     [SerializeField] private float soulMoveDuration = 3.0f; // 영혼 수집 시간
+    [SerializeField] private Transform soulCollectionPoint;
 
-   public Transform cameraRig;
+    [Header("보스 설정")]
+    [SerializeField] private BossController bossController;  // 씬에 배치된 보스 참조
 
     #endregion
 
@@ -52,11 +55,14 @@ public class WaveManager : MonoBehaviour
     {
         if (isWaveActive)
         {
-            int enemyCount = GetTotalLiveEnemyCount();
-
-            if (enemyCount <= 0)
+            // 보스전이 아닌 경우에만 적 카운트 체크
+            if (currentWaveIndex < 9)
             {
-                WaveEndEvent();
+                int enemyCount = GetTotalLiveEnemyCount();
+                if (enemyCount <= 0)
+                {
+                    WaveEndEvent();
+                }
             }
         }
     }
@@ -82,6 +88,13 @@ public class WaveManager : MonoBehaviour
     // 웨이브 시작 시 호출되는 메서드
     private void StartWave(int waveIndex)
     {
+        // 10웨이브에 도달하면 보스전 시작
+        if (waveIndex >= 9)  // 0-based index이므로 9는 10번째 웨이브
+        {
+            StartBossFight();
+            return;
+        }
+
         if (waveIndex >= waveData.waves.Count)
         {
             return;
@@ -148,19 +161,20 @@ public class WaveManager : MonoBehaviour
             GameManager.Instance.AddMoney(waveData.waves[currentWaveIndex].clearReward);
         }
 
-        // 영혼 수집 후 1초 대기 후 웨이브 종료 이벤트 호출
+        // 영혼 수집 후 1초 대기 후 웨이브 종료 이벤트 발생
         CollectSoulsToPlayer();
     }
 
     private void CollectSoulsToPlayer()
     {
-        if (cameraRig == null)
+        if (soulCollectionPoint == null)
         {
             return;
         }
-        
+
         // 모든 남아있는 영혼을 플레이어에게 이동
-        ParticlePoolManager.Instance.CollectAllSouls(cameraRig, soulMoveDuration, () => {
+        ParticlePoolManager.Instance.CollectAllSouls(soulCollectionPoint, soulMoveDuration, () =>
+        {
             // 경험치 증가 애니메이션이 끝나고 1초 후에 웨이브 종료 이벤트 발생
             StartCoroutine(DelayedWaveEndEvent());
         });
@@ -172,7 +186,7 @@ public class WaveManager : MonoBehaviour
         yield return new WaitForSeconds(1f);
 
         SoundManager.Instance.PlaySound("MainBGM");
-        
+
         // 웨이브 종료 이벤트 발생
         EventManager.Instance.WaveEndEvent(CurrentWave);
     }
@@ -188,7 +202,7 @@ public class WaveManager : MonoBehaviour
         }
         return total;
     }
-    
+
     // 다이얼로그 시작 시 호출
     private void HandleDialogueStarted(EventManager.DialogueType type)
     {
@@ -219,7 +233,7 @@ public class WaveManager : MonoBehaviour
             {
                 yield return null; // 다이얼로그가 끝날 때까지 대기
             }
-            
+
             // 스폰 진행
             targetSpawnManager.SpawnEnemy(pattern.enemyType);
             yield return new WaitForSeconds(pattern.spawnInterval);
@@ -236,6 +250,28 @@ public class WaveManager : MonoBehaviour
             }
         }
     }
-    
+
+    #endregion
+
+    #region 보스 관련 메서드
+
+    // 보스전 시작 메서드
+    private void StartBossFight()
+    {
+        isWaveActive = true;
+
+        // 보스 UI 표시, 사운드 변경 등
+        SoundManager.Instance.PlaySound("BossBattleBGM");
+
+        // 보스 전투 활성화
+        if (bossController != null)
+        {
+            bossController.StartBattle();
+        }
+
+        // 웨이브 시작 이벤트 발생 (10웨이브)
+        EventManager.Instance.WaveStartEvent(CurrentWave);
+    }  
+
     #endregion
 }

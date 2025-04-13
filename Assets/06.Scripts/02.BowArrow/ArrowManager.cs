@@ -89,7 +89,7 @@ public class ArrowManager : MonoBehaviour
         arrowUnlocked[ProjectileData.ProjectileType.Poison] = false;
         
         // 시작 시 기본 화살 장착
-        SwitchArrowType(ProjectileData.ProjectileType.Normal);
+        SwitchArrowType(ProjectileData.ProjectileType.Normal, false);
     }
 
     #endregion
@@ -121,7 +121,7 @@ public class ArrowManager : MonoBehaviour
     /// 화살 타입 전환 - 다른 종류의 화살로 바꾸는 기능
     /// </summary>
     /// <param name="arrowType">전환할 화살 타입</param>
-    public void SwitchArrowType(ProjectileData.ProjectileType arrowType)
+    public void SwitchArrowType(ProjectileData.ProjectileType arrowType, bool triggerEvent = true)
     {
         // 잠금 해제된 화살인지 확인
         if (!arrowUnlocked[arrowType])
@@ -149,7 +149,10 @@ public class ArrowManager : MonoBehaviour
         }
 
         // UI 업데이트 이벤트 발생 (화살 선택 UI 등에서 사용)
-        OnArrowTypeChanged?.Invoke(CurrentArrowType);
+        if (triggerEvent)
+        {
+            EventManager.Instance.ArrowTypeChangedEvent(CurrentArrowType);
+        }
     }
     
     /// <summary>
@@ -201,7 +204,7 @@ public class ArrowManager : MonoBehaviour
         int nextIndex = (currentIndex + 1) % unlockedArrows.Count;
         
         // 다음 화살로 전환
-        SwitchArrowType(unlockedArrows[nextIndex]);
+        SwitchArrowType(unlockedArrows[nextIndex], true);
     }
     
     /// <summary>
@@ -222,14 +225,8 @@ public class ArrowManager : MonoBehaviour
         int previousIndex = (currentIndex - 1 + unlockedArrows.Count) % unlockedArrows.Count;
         
         // 이전 화살로 전환
-        SwitchArrowType(unlockedArrows[previousIndex]);
+        SwitchArrowType(unlockedArrows[previousIndex], true);
     }
-    
-    /// <summary>
-    /// 화살 타입 변경 이벤트 - UI 등에서 구독하여 화살 변경 시 알림 받음
-    /// </summary>
-    public delegate void ArrowTypeChangedHandler(ProjectileData.ProjectileType newType);
-    public event ArrowTypeChangedHandler OnArrowTypeChanged;
 
     /// <summary>
     /// 활 업그레이드 - 모든 화살의 공통 성능 향상 
@@ -250,9 +247,6 @@ public class ArrowManager : MonoBehaviour
         {
             poisonArrowData.baseMultiplier = normalArrowData.baseMultiplier;
         }
-        
-        // 현재 장착된 화살 UI 갱신
-        SwitchArrowType(CurrentArrowType);
         
         return true;
     }

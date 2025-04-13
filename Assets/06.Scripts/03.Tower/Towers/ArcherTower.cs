@@ -12,8 +12,11 @@ public class ArcherTower : Tower
     {
         if (target == null) return;
 
+        Debug.Log($"[ArcherTower] 공격 시작 - 타겟: {target.name}, 위치: {target.transform.position}");
+        
         // 화살 발사 사운드를 3D로 재생 (타워의 위치에서)
         SoundManager.Instance.PlaySound3D("ArrowTowerShoot", firePoint.position);
+        Debug.Log($"[ArcherTower] 사운드 재생 시도 - 위치: {firePoint.position}");
 
         // 화살이 적에게 도달하는 시간 계산
         float distance = Vector3.Distance(firePoint.position, target.transform.position);

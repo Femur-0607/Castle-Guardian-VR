@@ -27,12 +27,12 @@ MonoBehaviour:
     category: 1
     clip: {fileID: 8300000, guid: af66162561d2eed40ad49268cab318bb, type: 3}
     volume: 1
-    loop: 1
+    loop: 0
   - soundID: SlowTowerShoot
     category: 1
     clip: {fileID: 8300000, guid: a245ee5d75348c84a89ffb7992f1dc82, type: 3}
     volume: 1
-    loop: 1
+    loop: 0
   - soundID: TitleBGM
     category: 0
     clip: {fileID: 8300000, guid: cc477da07a0e95340a4e0638d3853865, type: 3}
@@ -48,3 +48,13 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: 6cb789d8e3becef4599adbb2a8389601, type: 3}
     volume: 1
     loop: 1
+  - soundID: BossBattleBGM
+    category: 0
+    clip: {fileID: 8300000, guid: 6b08b491834f57344be0e280d63735e9, type: 3}
+    volume: 1
+    loop: 1
+  - soundID: BossWarning
+    category: 1
+    clip: {fileID: 8300000, guid: d272dcc6845f66548a1ecb80070312bf, type: 3}
+    volume: 1
+    loop: 0
