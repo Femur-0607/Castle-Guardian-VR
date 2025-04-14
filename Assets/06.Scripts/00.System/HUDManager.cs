@@ -702,12 +702,6 @@ namespace Assets.SimpleSpinner
         // 보스 경고 UI 표시 메서드
         public void ShowBossWarningUI()
         {
-            // 이미 실행 중인 코루틴이 있다면 중지
-            if (bossWarningCoroutine != null)
-            {
-                StopCoroutine(bossWarningCoroutine);
-            }
-
             // 경고 패널 활성화 (기존 ShowUIPanel 메서드는 재사용하지 않음 - 경고 스트립 애니메이션이 필요하므로)
             if (bossWarningPanel != null)
             {

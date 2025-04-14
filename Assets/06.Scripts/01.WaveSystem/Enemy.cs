@@ -409,12 +409,23 @@ public class Enemy : LivingEntity
 
         currentState = EnemyState.Dead;
 
-        agent.isStopped = true;
-        agent.enabled = false;
+        // 에이전트가 활성화되고 NavMesh 위에 있는지 확인
+        if (agent != null && agent.isActiveAndEnabled && agent.isOnNavMesh)
+        {
+            agent.isStopped = true;
+            agent.enabled = false;
+        }
+        else
+        {
+            // 이미 비활성화되어 있거나 NavMesh에 없는 경우 바로 비활성화
+            if (agent != null && agent.isActiveAndEnabled)
+            {
+                agent.enabled = false;
+            }
+        }
 
-        // 추가해야 할 코드: 물리 시뮬레이션 비활성화
         Rigidbody rb = GetComponent<Rigidbody>();
-        rb.isKinematic = true; // 이 한 줄이 핵심입니다!
+        rb.isKinematic = true;
 
         // 사망 시 게임매니저에게 골드 전달 (프로퍼티 사용을 위해 AddMoney 메서드 호출)
         GameManager.Instance.AddMoney((int)enemyData.goldDropAmount);

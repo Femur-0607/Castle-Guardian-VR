@@ -1,0 +1,2 @@
+C:\Users\USER\Documents\Unity\Castle-Guardian-VR\Library\Bee\Android\Prj\IL2CPP\Gradle\unityLibrary\src\main\cpp\CMakeLists.txt
+C:\Users\USER\Documents\Unity\Castle-Guardian-VR\Library\Bee\Android\Prj\IL2CPP\Gradle\unityLibrary\src\main\cpp\GameActivity\CMakeLists.txt

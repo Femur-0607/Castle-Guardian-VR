@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections;
 
 // 인풋값을 관리하는 스크립트
 // 추후 VR관련도 추가하기
@@ -10,6 +11,8 @@ public class InputManager : MonoBehaviour
     private const float STICK_THRESHOLD = 0.5f; // 조이스틱 감도 임계값
     private bool leftStickWasNeutral = true;  // 이전 프레임에서 왼쪽 스틱이 중립이었는지 여부
     private bool rightStickWasNeutral = true;  // 이전 프레임에서 오른쪽 스틱이 중립이었는지 여부
+
+    public CameraController cameraController;
 
     #endregion
 
@@ -80,10 +83,28 @@ public class InputManager : MonoBehaviour
         }
 
         // X 버튼 - 보스전 바로 시작
-    if (OVRInput.GetDown(OVRInput.Button.One, OVRInput.Controller.LTouch))
-    {
-        // EventManager.Instance.StartBossFightEvent();
+        if (OVRInput.GetDown(OVRInput.Button.One, OVRInput.Controller.LTouch))
+        {
+            // 먼저 카메라를 중앙으로 전환
+            if (cameraController != null)
+            {
+                cameraController.SwitchCamera(CameraController.CameraPosition.Center);
+                // 카메라 전환이 완료될 때까지 약간의 딜레이 후 웨이브 시작
+                StartCoroutine(StartBossWaveWithDelay());
+            }
+            else
+            {
+                Debug.LogError("CameraController reference is missing in InputManager!");
+            }
+        }
     }
+
+    private IEnumerator StartBossWaveWithDelay()
+    {
+        // 카메라 전환을 위한 짧은 대기
+        yield return new WaitForSeconds(0.1f);
+        // 웨이브 10 시작
+        EventManager.Instance.WaveStartEvent(10);
     }
 
     /// <summary>

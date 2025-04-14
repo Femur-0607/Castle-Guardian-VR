@@ -1,0 +1,10 @@
+# ninja log v5
+20	1597	7663207440634288	GameActivity/CMakeFiles/game.dir/UGAInputKeyEvent.cpp.o	382e9d7360090608
+27	1631	7663207440993683	GameActivity/CMakeFiles/game.dir/UGAEntry.cpp.o	850feeff1d1e0f12
+42	1639	7663207441156008	GameActivity/CMakeFiles/game.dir/UGAInputMotionEvent.cpp.o	45a790c7b1ddb0e4
+14	1664	7663207441405382	GameActivity/CMakeFiles/game.dir/UGAConfiguration.cpp.o	2bbea25e65504710
+50	1810	7663207442978297	GameActivity/CMakeFiles/game.dir/UGASoftKeyboard.cpp.o	e616bfb370fbec2c
+0	1867	7663207443607679	GameActivity/CMakeFiles/game.dir/UGADebug.cpp.o	aa42675c56037a3e
+34	2065	7663207445565231	GameActivity/CMakeFiles/game.dir/UGAInput.cpp.o	fdf6c0d7c850a52b
+7	2294	7663207447750485	GameActivity/CMakeFiles/game.dir/UGAApplication.cpp.o	1c8747e8b15372d4
+2294	2529	7663207450079305	C:/Users/USER/Documents/Unity/Castle-Guardian-VR/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/build/intermediates/cxx/RelWithDebInfo/l3j6v2um/obj/arm64-v8a/libgame.so	599a6ae42759f579

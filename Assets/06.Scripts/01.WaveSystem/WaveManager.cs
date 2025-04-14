@@ -17,7 +17,7 @@ public class WaveManager : MonoBehaviour
     private bool isDialogueActive = false;       // 다이얼로그 표시 중인지 여부
 
     [Header("웨이브 종료 시 시각 효과 변수")]
-    [SerializeField] private float soulMoveDuration = 3.0f; // 영혼 수집 시간
+    [SerializeField] private float soulMoveDuration = 1.5f; // 영혼 수집 시간
     [SerializeField] private Transform soulCollectionPoint;
 
     [Header("보스 설정")]

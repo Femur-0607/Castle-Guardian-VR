@@ -94,7 +94,7 @@ public class ParticlePoolManager : MonoBehaviour
             var soul = soulsToCollect[i];
             
             // 잠시 후에 영혼 이동 시작 (순차적 효과)
-            float staggerDelay = i * 0.3f;  // 각 영혼마다 0.3초 간격
+            float staggerDelay = i * 0.2f;  // 각 영혼마다 0.2초 간격
             
             StartCoroutine(DelayedSoulCollection(soul, target, duration, staggerDelay, () => {
                 collectedCount++;
