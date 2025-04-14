@@ -20,7 +20,6 @@ public class ProjectileData : ScriptableObject
 
     [Header("기본 속성")]
     public ProjectileType projectileType = ProjectileType.Normal;  // 화살 타입 (기본, 폭발, 독 등)
-    public string projectileName = "기본 화살";                   // 화살 이름 (UI 표시용)
     public float baseDamage = 50f;                                // 기본 데미지 (업그레이드 전)
     public float lifeTime = 5f;                                  // 화살 생존 시간 (초 단위)
     

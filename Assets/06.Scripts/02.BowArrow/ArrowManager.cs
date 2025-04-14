@@ -52,8 +52,7 @@ public class ArrowManager : MonoBehaviour
     // 잠금 해제된 화살 목록
     private List<ProjectileData.ProjectileType> unlockedArrows = new List<ProjectileData.ProjectileType>();
     
-    // 각 화살별 레벨과 잠금 상태 관리를 위한 딕셔너리
-    private Dictionary<ProjectileData.ProjectileType, int> arrowLevels = new Dictionary<ProjectileData.ProjectileType, int>();
+    // 각 화살별 잠금 상태 관리를 위한 딕셔너리
     private Dictionary<ProjectileData.ProjectileType, bool> arrowUnlocked = new Dictionary<ProjectileData.ProjectileType, bool>();
 
     #endregion
@@ -77,15 +76,12 @@ public class ArrowManager : MonoBehaviour
     {
         // 기본 화살 초기화 (기본적으로 잠금 해제된 상태)
         unlockedArrows.Add(ProjectileData.ProjectileType.Normal);
-        arrowLevels[ProjectileData.ProjectileType.Normal] = 1;
         arrowUnlocked[ProjectileData.ProjectileType.Normal] = true;
         
         // 폭발 화살 초기화 (초기에는 잠금 상태)
-        arrowLevels[ProjectileData.ProjectileType.Explosive] = 0;
         arrowUnlocked[ProjectileData.ProjectileType.Explosive] = false;
         
         // 독 화살 초기화 (초기에는 잠금 상태)
-        arrowLevels[ProjectileData.ProjectileType.Poison] = 0;
         arrowUnlocked[ProjectileData.ProjectileType.Poison] = false;
         
         // 시작 시 기본 화살 장착
@@ -180,7 +176,6 @@ public class ArrowManager : MonoBehaviour
         
         // 화살 잠금 해제 처리
         arrowUnlocked[arrowType] = true;
-        arrowLevels[arrowType] = 1;        // 초기 레벨 1
         unlockedArrows.Add(arrowType);     // 사용 가능한 화살 목록에 추가
         
         return true;

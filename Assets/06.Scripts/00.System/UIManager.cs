@@ -210,9 +210,9 @@ public class UIManager : MonoBehaviour
         // ArrowManager에서 현재 화살 데이터 가져오기
         ProjectileData normalArrow = ArrowManager.Instance.GetNormalArrowData();
 
-        // 업그레이드 전후 데이터 계산
-        float beforeDamage = normalArrow.baseDamage - normalArrow.damageIncreasePerLevel;
-        float afterDamage = normalArrow.baseDamage;
+        / // 업그레이드 전후 데이터 계산 - 배수까지 적용된 damage 속성 사용
+        float beforeDamage = normalArrow.damage / (1 + normalArrow.baseMultiplierIncreasePerLevel); // 이전 배수 계산
+        float afterDamage = normalArrow.damage; // 현재 배수가 적용된 데미지
         float multiplier = normalArrow.baseMultiplier;
 
         // UI 텍스트 업데이트

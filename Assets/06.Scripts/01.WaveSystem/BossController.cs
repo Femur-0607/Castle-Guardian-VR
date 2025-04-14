@@ -30,13 +30,14 @@ public class BossController : LivingEntity
     private const int ANIM_DIE = 5;
 
     [Header("출현 효과")]
+    [SerializeField] private Material bossMaterial; // Inspector에서 할당할 보스 머티리얼
     [SerializeField] private float initialAlpha = 0.0f;  // 초기 알파값
     [SerializeField] private float alphaChangePerWave = 0.1f;  // 웨이브당 알파값 증가량
 
     private NavMeshAgent navAgent;  // 네비게이션 에이전트
     private bool isInBattleMode = false;
     private bool isMovingToBattlePosition = false;
-    private Material[] bossMaterials;  // 보스의 모든 머티리얼
+    
     private float currentAlpha;  // 현재 알파값
 
     #endregion
@@ -59,9 +60,6 @@ public class BossController : LivingEntity
         // 초기에는 비활성화
         navAgent.enabled = false;
 
-        // 모든 렌더러에서 머티리얼 가져오기
-        CollectAllMaterials();
-
         // 초기 알파값 설정
         currentAlpha = initialAlpha;
         SetAlpha(currentAlpha);
@@ -81,6 +79,8 @@ public class BossController : LivingEntity
     {
         startingHealth = maxHealth; // 부모 클래스의 startingHealth 설정
         base.Start(); // LivingEntity의 Start 호출하여 초기화 진행
+
+        Initialize(false);
     }
 
     #endregion
@@ -270,43 +270,28 @@ public class BossController : LivingEntity
     #endregion
 
     #region 보스 시각 효과
-
-    // 모든 머티리얼 수집
-    private void CollectAllMaterials()
-    {
-        // 모든 렌더러 컴포넌트 가져오기
-        Renderer[] renderers = GetComponentsInChildren<Renderer>();
-
-        // 모든 머티리얼 수집
-        System.Collections.Generic.List<Material> materialsList = new System.Collections.Generic.List<Material>();
-        foreach (Renderer renderer in renderers)
-        {
-            materialsList.AddRange(renderer.materials);
-        }
-        bossMaterials = materialsList.ToArray();
-    }
     
     // 알파값 설정 메서드
     public void SetAlpha(float alpha)
     {
         alpha = Mathf.Clamp01(alpha);  // 0-1 사이 값으로 제한
         
-        foreach (Material material in bossMaterials)
+        if (bossMaterial != null)
         {
             // 렌더 모드를 Transparent로 변경
-            material.SetFloat("_Mode", 2);
-            material.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
-            material.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
-            material.SetInt("_ZWrite", 0);
-            material.DisableKeyword("_ALPHATEST_ON");
-            material.EnableKeyword("_ALPHABLEND_ON");
-            material.DisableKeyword("_ALPHAPREMULTIPLY_ON");
-            material.renderQueue = 3000;
-            
+            bossMaterial.SetFloat("_Mode", 2);
+            bossMaterial.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
+            bossMaterial.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+            bossMaterial.SetInt("_ZWrite", 0);
+            bossMaterial.DisableKeyword("_ALPHATEST_ON");
+            bossMaterial.EnableKeyword("_ALPHABLEND_ON");
+            bossMaterial.DisableKeyword("_ALPHAPREMULTIPLY_ON");
+            bossMaterial.renderQueue = 3000;
+        
             // 알파값 설정
-            Color color = material.color;
+            Color color = bossMaterial.color;
             color.a = alpha;
-            material.color = color;
+            bossMaterial.color = color;
         }
     }
     

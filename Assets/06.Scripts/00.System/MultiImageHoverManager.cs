@@ -40,6 +40,7 @@ public class MultiImageHoverManager : MonoBehaviour
     public Ease defaultAnimationEase = Ease.OutBack;
 
     private Dictionary<Image, Sequence> activeSequences = new Dictionary<Image, Sequence>();
+    private Dictionary<Image, HoverableImage> imageToConfigMap = new Dictionary<Image, HoverableImage>();
 
     #endregion
 
@@ -54,43 +55,93 @@ public class MultiImageHoverManager : MonoBehaviour
                 item.originalColor = item.targetImage.color;
                 item.originalRotation = item.targetImage.transform.rotation;
 
-                // 이미지에 이벤트 트리거 추가
-                AddEventTrigger(item);
+                // 이미지와 설정 매핑
+                imageToConfigMap[item.targetImage] = item;
+
+                // 이미지에 OVR 이벤트 핸들러 추가
+                AddOVREventHandlers(item.targetImage.gameObject);
             }
         }
     }
 
-    #region 시각 효과 관련 함수
+    #region OVR 이벤트 지원
 
-    private void AddEventTrigger(HoverableImage item)
+    private void AddOVREventHandlers(GameObject targetObject)
     {
-        // 이미지 게임오브젝트에 EventTrigger 컴포넌트 추가/가져오기
-        EventTrigger trigger = item.targetImage.gameObject.GetComponent<EventTrigger>();
-        if (trigger == null)
-            trigger = item.targetImage.gameObject.AddComponent<EventTrigger>();
-
-        // 목록이 비어있으면 생성
-        if (trigger.triggers == null)
-            trigger.triggers = new List<EventTrigger.Entry>();
-
-        // 기존 트리거 제거 (중복 방지)
-        trigger.triggers.RemoveAll(t => t.eventID == EventTriggerType.PointerEnter || t.eventID == EventTriggerType.PointerExit);
-
-        // PointerEnter 이벤트 추가
-        EventTrigger.Entry enterEntry = new EventTrigger.Entry();
-        enterEntry.eventID = EventTriggerType.PointerEnter;
-        enterEntry.callback.AddListener((eventData) => { OnPointerEnter(item); });
-        trigger.triggers.Add(enterEntry);
-
-        // PointerExit 이벤트 추가
-        EventTrigger.Entry exitEntry = new EventTrigger.Entry();
-        exitEntry.eventID = EventTriggerType.PointerExit;
-        exitEntry.callback.AddListener((eventData) => { OnPointerExit(item); });
-        trigger.triggers.Add(exitEntry);
+        // 기존 이벤트 핸들러가 있는지 확인하고 추가
+        OVRImageEventHandler eventHandler = targetObject.GetComponent<OVRImageEventHandler>();
+        if (eventHandler == null)
+        {
+            eventHandler = targetObject.AddComponent<OVRImageEventHandler>();
+            eventHandler.Initialize(this);
+        }
     }
+
+    // OVR 이벤트를 처리하기 위한 내부 클래스
+    public class OVRImageEventHandler : MonoBehaviour, 
+        IPointerEnterHandler, IPointerExitHandler
+    {
+        private MultiImageHoverManager manager;
+        private Image targetImage;
+
+        public void Initialize(MultiImageHoverManager manager)
+        {
+            this.manager = manager;
+            this.targetImage = GetComponent<Image>();
+        }
+
+        public void OnPointerEnter(PointerEventData eventData)
+        {
+            // 이벤트 타입 확인
+            string eventType = eventData.IsVRPointer() ? "VR 포인터" : "일반 포인터";
+    
+            // OVR 포인터 이벤트 처리
+            if (manager != null && targetImage != null && 
+                manager.imageToConfigMap.ContainsKey(targetImage))
+            {
+                string imageName = targetImage.gameObject.name;
+                VRDebugLogger.Log($"포인터 진입: {imageName} ({eventType})");
+                manager.OnPointerEnter(manager.imageToConfigMap[targetImage]);
+            }
+            
+            // OVR 포인터 이벤트 처리
+            if (manager != null && targetImage != null && 
+                manager.imageToConfigMap.ContainsKey(targetImage))
+            {
+                manager.OnPointerEnter(manager.imageToConfigMap[targetImage]);
+            }
+        }
+
+        public void OnPointerExit(PointerEventData eventData)
+        {
+            // 이벤트 타입 확인
+            string eventType = eventData.IsVRPointer() ? "VR 포인터" : "일반 포인터";
+    
+            // OVR 포인터 이벤트 처리
+            if (manager != null && targetImage != null && 
+                manager.imageToConfigMap.ContainsKey(targetImage))
+            {
+                string imageName = targetImage.gameObject.name;
+                VRDebugLogger.Log($"포인터 이탈: {imageName} ({eventType})");
+                manager.OnPointerExit(manager.imageToConfigMap[targetImage]);
+            }
+            
+            // OVR 포인터 이벤트 처리
+            if (manager != null && targetImage != null && 
+                manager.imageToConfigMap.ContainsKey(targetImage))
+            {
+                manager.OnPointerExit(manager.imageToConfigMap[targetImage]);
+            }
+        }
+    }
+
+    #endregion
+
+    #region 시각 효과 관련 함수
 
     public void OnPointerEnter(HoverableImage item)
     {
+        
         if (item.targetImage == null) return;
 
         // 기존 애니메이션 중단
