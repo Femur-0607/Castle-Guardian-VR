@@ -45,11 +45,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   waveManager: {fileID: 0}
-  cameraController: {fileID: 0}
-  waveUIPanel: {fileID: 0}
-  currentWaveTMP: {fileID: 0}
   startUIPanel: {fileID: 0}
-  gameOverUIPanel: {fileID: 0}
   goldAmountTMP: {fileID: 0}
   startButton: {fileID: 0}
   shopUIPanel: {fileID: 0}
@@ -61,13 +57,16 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
-  castleHealthSlider: {fileID: 0}
-  CameraIndicatorUIPanel: {fileID: 0}
-  leftArrow: {fileID: 0}
-  rightArrow: {fileID: 0}
   dialoguePanel: {fileID: 0}
   dialogueImages:
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
-  cooldownImageObject: {fileID: 0}
+  arrowUpgradePopup: {fileID: 0}
+  beforeDamageText: {fileID: 0}
+  afterDamageText: {fileID: 0}
+  multiplierText: {fileID: 0}
+  bgmSlider: {fileID: 0}
+  sfxSlider: {fileID: 0}
+  bgmValueText: {fileID: 0}
+  sfxValueText: {fileID: 0}

@@ -13,14 +13,11 @@ MonoBehaviour:
   m_Name: PoisonData
   m_EditorClassIdentifier: 
   projectileType: 2
-  projectileName: "\uB3C5 \uD654\uC0B4"
   baseDamage: 50
   lifeTime: 5
   baseImpactRadius: 0
-  baseEffectDuration: 5
+  baseEffectDuration: 3
   baseDotDamage: 10
-  baseMultiplier: 1
   damageIncreasePerLevel: 10
   radiusIncreasePerLevel: 0.5
   durationIncreasePerLevel: 0.5
-  baseMultiplierIncreasePerLevel: 0.1

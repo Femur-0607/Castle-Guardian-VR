@@ -13,14 +13,11 @@ MonoBehaviour:
   m_Name: ExplosiveData
   m_EditorClassIdentifier: 
   projectileType: 1
-  projectileName: "\uD3ED\uD314 \uD654\uC0B4"
   baseDamage: 70
   lifeTime: 5
-  baseImpactRadius: 10
+  baseImpactRadius: 5
   baseEffectDuration: 0
   baseDotDamage: 0
-  baseMultiplier: 1
   damageIncreasePerLevel: 10
   radiusIncreasePerLevel: 0.5
   durationIncreasePerLevel: 0.5
-  baseMultiplierIncreasePerLevel: 0.1

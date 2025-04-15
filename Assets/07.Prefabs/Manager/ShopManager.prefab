@@ -51,7 +51,7 @@ MonoBehaviour:
   arrowUpgradeButton: {fileID: 0}
   explosiveArrowButton: {fileID: 0}
   poisonArrowButton: {fileID: 0}
-  nomalTowerButton: {fileID: 0}
+  normalTowerButton: {fileID: 0}
   explosiveUpgradeButton: {fileID: 0}
   slowUpgradeButton: {fileID: 0}
   towerCost: 50

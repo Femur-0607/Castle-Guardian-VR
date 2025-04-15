@@ -8,8 +8,8 @@ using UnityEngine;
 public class DoTEffect : MonoBehaviour
 {
     // 주요 상태 변수들
-    private float damagePerTick = 10f;    // 매 틱당(한 번의 데미지 적용) 입히는 데미지 양
-    private float totalDuration = 3f;     // 효과의 총 지속 시간(초)
+    private float damagePerTick;    // 매 틱당(한 번의 데미지 적용) 입히는 데미지 양
+    private float totalDuration;     // 효과의 총 지속 시간(초)
     private float tickInterval = 0.5f;    // 데미지가 적용되는 간격(초)
     private float remainingTime = 0f;     // 남은 효과 지속 시간(초)
     

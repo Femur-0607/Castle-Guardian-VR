@@ -9,8 +9,8 @@ public class PoisonArrow : Projectile
     [SerializeField] private GameObject poisonEffect;  // 독 지속 효과 파티클 프리팹 (적 몸에 붙는 효과)
     [SerializeField] private GameObject impactEffect;  // 충돌 즉시 효과 파티클 프리팹
     
-    private float dotDamage = 10f;    // 시간당 지속 데미지(독 효과) 양
-    private float dotDuration = 3f;   // 독 효과 지속 시간(초)
+    private float dotDamage;    // 시간당 지속 데미지(독 효과) 양
+    private float dotDuration;   // 독 효과 지속 시간(초)
     
     /// <summary>
     /// 화살이 충돌했을 때 호출되는 메서드 (부모 클래스의 추상 메서드 구현)
@@ -68,16 +68,8 @@ public class PoisonArrow : Projectile
         // 부모 클래스의 기본 설정 적용 (데미지 등)
         base.SetProjectileData(data);
         
-        // 독 데미지 설정 (데이터에 값이 있는 경우에만)
-        if (data.dotDamage > 0)
-        {
-            dotDamage = data.dotDamage;
-        }
-        
-        // 독 지속시간 설정 (데이터에 값이 있는 경우에만)
-        if (data.effectDuration > 0)
-        {
-            dotDuration = data.effectDuration;
-        }
+        // 독 데미지와 지속시간 설정
+        dotDamage = data.dotDamage;
+        dotDuration = data.effectDuration;
     }
 }

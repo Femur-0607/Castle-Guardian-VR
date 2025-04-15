@@ -98,9 +98,9 @@ public class ArrowManager : MonoBehaviour
     private void HandleLevelUp(int newLevel)
     {
         // 모든 화살의 데미지 증가
-        normalArrowData.baseDamage += normalArrowData.damageIncreasePerLevel;
-        explosiveArrowData.baseDamage += explosiveArrowData.damageIncreasePerLevel;
-        poisonArrowData.baseDamage += poisonArrowData.damageIncreasePerLevel;
+        normalArrowData.IncreaseDamage(normalArrowData.damageIncreasePerLevel);
+        explosiveArrowData.IncreaseDamage(explosiveArrowData.damageIncreasePerLevel);
+        poisonArrowData.IncreaseDamage(poisonArrowData.damageIncreasePerLevel);
     }
     
     // 외부에서 노말 화살 데이터에 접근할 수 있도록
@@ -224,23 +224,23 @@ public class ArrowManager : MonoBehaviour
     }
 
     /// <summary>
-    /// 활 업그레이드 - 모든 화살의 공통 성능 향상 
+    /// 활 업그레이드 - 모든 화살의 데미지 +10 증가 
     /// </summary>
     /// <returns>업그레이드 성공 여부</returns>
     public bool UpgradeAllArrows()
     {
-        // 모든 화살 타입에 공통 배수 적용
-        normalArrowData.baseMultiplier += normalArrowData.baseMultiplierIncreasePerLevel;
+        // 모든 화살의 데미지 +10 증가
+        normalArrowData.IncreaseDamage(10f);
         
         // 해금된 특수 화살에도 동일한 강화 적용
         if (IsArrowUnlocked(ProjectileData.ProjectileType.Explosive))
         {
-            explosiveArrowData.baseMultiplier = normalArrowData.baseMultiplier;
+            explosiveArrowData.IncreaseDamage(10f);
         }
         
         if (IsArrowUnlocked(ProjectileData.ProjectileType.Poison))
         {
-            poisonArrowData.baseMultiplier = normalArrowData.baseMultiplier;
+            poisonArrowData.IncreaseDamage(10f);
         }
         
         return true;

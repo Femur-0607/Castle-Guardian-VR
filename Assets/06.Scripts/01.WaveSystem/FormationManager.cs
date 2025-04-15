@@ -6,10 +6,15 @@ public class FormationManager : MonoBehaviour
 {
     [Header("참조")]
     [SerializeField] private FormationArea[] formationAreas; // 배열로 변경
-    
+
     // 각 FormationArea별로 포지션 관리를 위한 딕셔너리들
+    // FormationArea와 포지션을 키로 사용해 해당 위치에 있는 Enemy를 저장
     private Dictionary<FormationArea, Dictionary<Vector3, Enemy>> areaPositionToEnemy = new Dictionary<FormationArea, Dictionary<Vector3, Enemy>>();
+    // Enemy를 키로 사용해 할당된 (FormationArea, position) 튜플을 저장
     private Dictionary<Enemy, (FormationArea area, Vector3 position)> enemyToAreaPosition = new Dictionary<Enemy, (FormationArea, Vector3)>();
+    // areaPositionToEnemy, enemyToAreaPosition는 적과 타겟간의 양방향 매핑을 관리
+    
+    // FormationArea를 키로 사용해 사용 가능한 위치 목록을 저장
     private Dictionary<FormationArea, List<Vector3>> areaAvailablePositions = new Dictionary<FormationArea, List<Vector3>>();
 
     private void Start()

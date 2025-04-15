@@ -159,11 +159,6 @@ public class GameManager : MonoBehaviour
     /// <summary>
     /// 게임 시작 처리 메서드 (다이얼로그 종료 후 호출)
     /// </summary>
-    private void OnPostRender()
-    {
-        throw new NotImplementedException();
-    }
-
     private void StartGame()
     {
         if (!gameStarted)
@@ -325,18 +320,26 @@ public class GameManager : MonoBehaviour
     
     #endregion
     
-    #region 헬퍼 메서드
+    #region 카메라 관련 메서드
+    
+    /// <summary>
+    /// 카메라를 중앙 위치로 이동
+    /// </summary>
+    private void ResetCameraToCenter()
+    {
+        if (cameraController != null)
+        {
+            cameraController.SwitchCamera(CameraController.CameraPosition.Center);
+        }
+    }
     
     /// <summary>
     /// 플레이어 제어 컴포넌트 활성화
     /// </summary>
     private void EnablePlayerControls()
     {
-        if (cameraController != null)
-        {
-            // CameraPosition을 CameraController를 통해 접근
-            cameraController.SwitchCamera(CameraController.CameraPosition.Center);
-        }
+        // 카메라 중앙 위치로 이동
+        ResetCameraToCenter();
     }
     
     /// <summary>
@@ -344,11 +347,8 @@ public class GameManager : MonoBehaviour
     /// </summary>
     private void DisablePlayerControls()
     {
-        if (cameraController != null)
-        {
-            // VR 환경에서는 카메라를 중앙 위치로 이동
-            cameraController.SwitchCamera(CameraController.CameraPosition.Center);
-        }
+        // 카메라 중앙 위치로 이동
+        ResetCameraToCenter();
     }
     
     #endregion

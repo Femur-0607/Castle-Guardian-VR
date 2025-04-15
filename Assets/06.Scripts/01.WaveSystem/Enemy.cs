@@ -42,7 +42,11 @@ public class Enemy : LivingEntity
     private bool isInPosition = false;  // 포지션에 도달했는지 체크하는 변수 추가
 
     [SerializeField] private float deathDelay = 2.0f;
-    
+
+    private Transform cachedTransform; // 자신의 transform 캐싱
+    private Vector3 cachedEulerAngles; // 오일러 각도 캐싱
+    private float rotationSpeed = 5f;  // 회전 속도를 상수로 분리
+
     #endregion
 
     #region 유니티 이벤트 함수 및 상속 관련
@@ -51,6 +55,7 @@ public class Enemy : LivingEntity
     {
         agent = GetComponent<NavMeshAgent>();
         animator = GetComponentsInChildren<Animator>()[0];
+        cachedTransform = transform; // Transform 캐싱
     }
     protected override void Start()
     {
@@ -89,28 +94,10 @@ public class Enemy : LivingEntity
         // 다이얼로그 중이면 행동 중지
         if (isDialogueActive) return;
         
-        // 타겟을 향해 y축 회전만 적용
-        if (target != null)
+        // 타겟이 있고 살아있을 때만 회전 로직 수행
+        if (target != null && target.gameObject.activeInHierarchy)
         {
-            // 타겟 방향 계산
-            Vector3 direction = target.position - transform.position;
-            direction.y = 0; // y축 성분 제거 (수직 회전 방지)
-            
-            // 현재 오일러 각도 유지
-            Vector3 currentRotation = transform.eulerAngles;
-        
-            // 타겟 방향으로 부드럽게 회전
-            if (direction != Vector3.zero)
-            {
-                // 타겟 방향에 대한 Y축 각도만 계산
-                float targetYRotation = Quaternion.LookRotation(direction).eulerAngles.y;
-            
-                // Y축만 부드럽게 회전
-                float newYRotation = Mathf.LerpAngle(currentRotation.y, targetYRotation, Time.deltaTime * 5f);
-            
-                // 새 회전 적용 (X, Z는 유지)
-                transform.eulerAngles = new Vector3(currentRotation.x, newYRotation, currentRotation.z);
-            }
+            RotateTowardsTarget();
         }
 
         // FSM 구현
@@ -127,6 +114,30 @@ public class Enemy : LivingEntity
             case EnemyState.Dead:
                 // 사망 상태에서는 행동 안함.
                 break;
+        }
+    }
+
+    private void RotateTowardsTarget()
+    {
+        // 타겟 방향 계산 (Y축만 사용)
+        Vector3 targetPosition = target.position;
+        Vector3 direction = targetPosition - cachedTransform.position;
+        direction.y = 0;
+        
+        if (direction != Vector3.zero)
+        {
+            // 현재 오일러 각도 업데이트
+            cachedEulerAngles = cachedTransform.eulerAngles;
+            
+            // 타겟 방향 계산 (매 프레임 Quaternion 생성 대신 Atan2 사용)
+            float targetAngle = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg;
+            
+            // Y축만 부드럽게 회전
+            float newYRotation = Mathf.LerpAngle(cachedEulerAngles.y, targetAngle, Time.deltaTime * rotationSpeed);
+            
+            // 새 회전 적용 (벡터 생성 최소화)
+            cachedEulerAngles.y = newYRotation;
+            cachedTransform.eulerAngles = cachedEulerAngles;
         }
     }
 
@@ -330,18 +341,19 @@ public class Enemy : LivingEntity
         animator.SetBool("isChasing", true);
     }
 
-// NavMeshAgent 복구 코루틴
+    // NavMeshAgent 복구 코루틴
     private IEnumerator RecoverNavMeshAgent()
     {
         // 현재 위치 저장
         Vector3 currentPosition = transform.position;
-    
-        // 에이전트 비활성화
-        agent.enabled = false;
-        yield return new WaitForSeconds(0.1f);
-    
-        // 에이전트 재활성화
-        agent.enabled = true;
+        
+        // 에이전트가 이미 활성화되어 있지 않은 경우에만 활성화
+        if (!agent.enabled)
+        {
+            agent.enabled = true;
+            // 약간의 지연을 주어 NavMesh 초기화 확인
+            yield return new WaitForSeconds(0.05f);
+        }
         
         // NavMesh 위치 찾기
         NavMeshHit hit;
@@ -350,7 +362,7 @@ public class Enemy : LivingEntity
             // NavMesh 위치로 이동
             transform.position = hit.position;
             agent.Warp(hit.position);
-        
+            
             // 상태 업데이트
             if (currentState == EnemyState.Dead)
             {

@@ -366,7 +366,7 @@ public class BossController : LivingEntity
             outlineComponent.OutlineColor = currentOutlineColor;
         
             // 알파값에 따라 아웃라인 두께 조정
-            outlineComponent.OutlineWidth = alpha * 10f; // 최대 10의 두께
+            outlineComponent.OutlineWidth = alpha * 5f; // 최대 5의 두께
         
             // 아웃라인 활성화/비활성화 (낮은 알파값에서는 비활성화)
             outlineComponent.enabled = alpha >= 0.1f;

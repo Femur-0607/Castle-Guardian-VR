@@ -94,7 +94,6 @@ namespace Assets.SimpleSpinner
         [SerializeField] private GameObject damageWarningPanel;
         [SerializeField] private float damageWarningDuration = 1.0f; // 경고 표시 시간
         [SerializeField] private float damageThreshold = 100f; // 데미지 임계값
-        private float lastDamageAmount = 0f; // 마지막으로 받은 데미지
         private Coroutine damageWarningCoroutine;
 
         #endregion
@@ -341,7 +340,13 @@ namespace Assets.SimpleSpinner
         {
             // 레벨업 UI 업데이트
             levelText.text = $"Level {newLevel}";
-            damageText.text = $"Damage: {PlayerExperienceSystem.Instance.CurrentDamage:F1}";
+            
+            // ArrowManager에서 현재 화살 데이터 가져오기 (레벨업 후 증가된 데미지)
+            ProjectileData normalArrow = ArrowManager.Instance.GetNormalArrowData();
+            float nextLevelDamage = normalArrow.damage + normalArrow.damageIncreasePerLevel;  // 다음 레벨의 데미지
+            damageText.text = $"Damage: {nextLevelDamage:F1}";
+            
+            // 공격속도는 PlayerExperienceSystem에서 직접 가져오기
             attackSpeedText.text = $"Attack Speed: {PlayerExperienceSystem.Instance.CurrentAttackSpeed:F1}";
 
             // 통합된 UI 패널 표시 메서드 사용
@@ -465,9 +470,6 @@ namespace Assets.SimpleSpinner
             {
                 StopCoroutine(damageWarningCoroutine);
             }
-    
-            // 데미지 정보 저장
-            lastDamageAmount = damageAmount;
     
             // 통합 UI 패널 표시 메서드 사용 (페이드 효과)
             damageWarningCoroutine = ShowUIPanel(damageWarningPanel, damageWarningDuration, UIFadeType.Fade);

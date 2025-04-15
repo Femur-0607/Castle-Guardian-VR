@@ -203,15 +203,14 @@ public class UIManager : MonoBehaviour
         // ArrowManager에서 현재 화살 데이터 가져오기
         ProjectileData normalArrow = ArrowManager.Instance.GetNormalArrowData();
 
-        // 업그레이드 전후 데이터 계산 - 배수까지 적용된 damage 속성 사용
-        float beforeDamage = normalArrow.damage / (1 + normalArrow.baseMultiplierIncreasePerLevel); // 이전 배수 계산
-        float afterDamage = normalArrow.damage; // 현재 배수가 적용된 데미지
-        float multiplier = normalArrow.baseMultiplier;
+        // 업그레이드 전후 데이터 계산 - currentDamage 사용
+        float beforeDamage = normalArrow.damage;
+        float afterDamage = normalArrow.damage + 10f; // 업그레이드 시 +10 증가
 
         // UI 텍스트 업데이트
         beforeDamageText.text = $"이전 데미지: {beforeDamage:F1}";
         afterDamageText.text = $"현재 데미지: {afterDamage:F1}";
-        multiplierText.text = $"데미지 증폭: {multiplier:F2}x";
+        multiplierText.text = $"데미지 증가: +10";
 
         // 애니메이션과 함께 팝업 표시
         arrowUpgradePopup.transform.localScale = Vector3.zero;

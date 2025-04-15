@@ -9,7 +9,7 @@ public class ExplosiveArrow : Projectile
     [SerializeField] private GameObject explosionEffect;  // 폭발 효과 파티클 프리팹
     [SerializeField] private LayerMask targetLayer;       // 데미지를 줄 대상 레이어 (적만 타격하도록 설정)
     
-    private float explosionRadius = 3f;                   // 폭발 범위 (미터 단위)
+    private float explosionRadius;                   // 폭발 범위 (미터 단위)
     
     /// <summary>
     /// 화살이 충돌했을 때 호출되는 메서드 (부모 클래스의 추상 메서드 구현)
@@ -58,9 +58,6 @@ public class ExplosiveArrow : Projectile
         base.SetProjectileData(data);
         
         // 폭발 반경 설정 (데이터에 값이 있는 경우에만)
-        if (data.impactRadius > 0)
-        {
-            explosionRadius = data.impactRadius;
-        }
+        explosionRadius = data.impactRadius;
     }
 }

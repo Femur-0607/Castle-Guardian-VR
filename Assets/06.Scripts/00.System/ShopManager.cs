@@ -116,14 +116,14 @@ public class ShopManager : MonoBehaviour
             // 돈 차감
             GameManager.Instance.DeductMoney(bowUpgradeCost);
 
-            // 모든 화살 공통 업그레이드
-            bool success = arrowManager.UpgradeAllArrows();
+            // 현재 화살 데이터 가져오기
+            ProjectileData normalArrow = ArrowManager.Instance.GetNormalArrowData();
             
-            if (success)
-            {
-                // 업그레이드 UI 표시
-                uiManager.ShowArrowUpgradePopup();
-            }
+            // 업그레이드 전 데미지로 UI 표시
+            uiManager.ShowArrowUpgradePopup();
+
+            // UI 표시 후 업그레이드 실행
+            bool success = arrowManager.UpgradeAllArrows();
         }
     }
 

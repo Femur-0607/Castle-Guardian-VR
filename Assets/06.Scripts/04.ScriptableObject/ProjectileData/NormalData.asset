@@ -13,14 +13,11 @@ MonoBehaviour:
   m_Name: NormalData
   m_EditorClassIdentifier: 
   projectileType: 0
-  projectileName: "\uAE30\uBCF8 \uD654\uC0B4"
   baseDamage: 100
   lifeTime: 5
   baseImpactRadius: 0
   baseEffectDuration: 0
   baseDotDamage: 0
-  baseMultiplier: 1
   damageIncreasePerLevel: 10
   radiusIncreasePerLevel: 0.5
   durationIncreasePerLevel: 0.5
-  baseMultiplierIncreasePerLevel: 0.1
