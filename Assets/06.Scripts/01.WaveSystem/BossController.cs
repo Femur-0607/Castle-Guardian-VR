@@ -7,8 +7,8 @@ public class BossController : LivingEntity
     #region 필드 변수
 
     [Header("보스 설정")]
-    [SerializeField] private int maxHealth = 1000;
-    [SerializeField] private int attackDamage = 100;  // 공격 데미지
+    [SerializeField] private int maxHealth = 1000;      // 보스 최대 체력
+    [SerializeField] private int attackDamage = 100;    // 공격 데미지
 
     [Header("공격 패턴")]
     // [SerializeField] private GameObject projectilePrefab;
@@ -19,8 +19,9 @@ public class BossController : LivingEntity
     [Header("참조")]
     // [SerializeField] private Transform projectileSpawnPoint;
     [SerializeField] private Animator animator;
-    [SerializeField] private Transform targetBattlePosition;
-    [SerializeField] private Castle targetCastle;  // 공격 대상 성
+    [SerializeField] private Transform targetBattlePosition;    // 공격 위치
+    [SerializeField] private Castle targetCastle;       // 공격 대상 (성)
+    public Transform playerTransform; // 플레이어의 Transform 컴포넌트
 
     [Header("보스 애니메이션 관련")]
     private const int ANIM_IDLE = 1;
@@ -30,12 +31,15 @@ public class BossController : LivingEntity
     private const int ANIM_DIE = 5;
 
     [Header("출현 효과")]
-    [SerializeField] private Material bossMaterial; // Inspector에서 할당할 보스 머티리얼
+    [SerializeField] private Material bossMaterial;
     [SerializeField] private float initialAlpha = 0.0f;  // 초기 알파값
     [SerializeField] private float alphaChangePerWave = 0.1f;  // 웨이브당 알파값 증가량
+    
+    [Header("아웃라인 효과")]
+    [SerializeField] private Outline outlineComponent;
 
     private Rigidbody rb;
-    private NavMeshAgent navAgent;  // 네비게이션 에이전트
+    private NavMeshAgent navAgent;
     private bool isInBattleMode = false;
     private bool isMovingToBattlePosition = false;
     
@@ -50,6 +54,7 @@ public class BossController : LivingEntity
     {
         // NavMeshAgent 컴포넌트 가져오기 (없으면 추가)
         navAgent = GetComponent<NavMeshAgent>();
+        outlineComponent = GetComponent<Outline>();
         if (navAgent == null)
         {
             navAgent = gameObject.AddComponent<NavMeshAgent>();
@@ -96,29 +101,18 @@ public class BossController : LivingEntity
 
         Initialize(false);
     }
-
-    private void OnDrawGizmosSelected()
+    
+    void Update()
     {
-        if (targetBattlePosition != null && navAgent != null)
+        if (playerTransform != null)
         {
-            // 목표 위치 표시
-            Gizmos.color = new Color(1f, 0f, 0f, 0.5f);  // 반투명 빨간색
-            Gizmos.DrawWireSphere(targetBattlePosition.position, navAgent.stoppingDistance);
+            // 플레이어의 위치를 가져옵니다
+            Vector3 playerPosition = playerTransform.position;
             
-            // 현재 위치에서 목표 위치까지의 선 표시
-            Gizmos.color = new Color(1f, 1f, 0f, 0.5f);  // 반투명 노란색
-            Gizmos.DrawLine(transform.position, targetBattlePosition.position);
+            Vector3 targetPosition = new Vector3(transform.position.x, playerPosition.y, transform.position.z);
             
-            // 레이 뷰 표시
-            Gizmos.color = Color.cyan;  // 청록색
-            Vector3 direction = (targetBattlePosition.position - transform.position).normalized;
-            Gizmos.DrawRay(transform.position, direction * Vector3.Distance(transform.position, targetBattlePosition.position));
-            
-            // 현재 위치와 목표 위치에 큐브 표시
-            Gizmos.color = Color.green;
-            Gizmos.DrawWireCube(transform.position, Vector3.one);
-            Gizmos.color = Color.red;
-            Gizmos.DrawWireCube(targetBattlePosition.position, Vector3.one);
+            // 보스가 플레이어를 향해 회전하도록 합니다
+            transform.LookAt(targetPosition);
         }
     }
 
@@ -256,9 +250,6 @@ public class BossController : LivingEntity
         // 체력 변경 이벤트 발생 (UI 업데이트용)
         float healthPercent = currentHealth / startingHealth;
         EventManager.Instance.BossHealthChangedEvent(healthPercent);
-        
-        // 남은 체력 디버그 로그 출력
-        Debug.Log($"보스가 {damage}의 데미지를 받았습니다. 남은 체력: {currentHealth}/{startingHealth} ({healthPercent * 100}%)");
     }
 
     // LivingEntity의 Die 메서드 오버라이드
@@ -364,6 +355,21 @@ public class BossController : LivingEntity
             
             // 현재 알파값 저장
             currentAlpha = alpha;
+        }
+        
+        // 아웃라인 설정 - Outline 컴포넌트 프로퍼티 직접 사용
+        if (outlineComponent != null)
+        {
+            // 알파값에 따라 아웃라인 색상 조정
+            Color currentOutlineColor = outlineComponent.OutlineColor;
+            currentOutlineColor.a = alpha; // 알파값만 변경
+            outlineComponent.OutlineColor = currentOutlineColor;
+        
+            // 알파값에 따라 아웃라인 두께 조정
+            outlineComponent.OutlineWidth = alpha * 10f; // 최대 10의 두께
+        
+            // 아웃라인 활성화/비활성화 (낮은 알파값에서는 비활성화)
+            outlineComponent.enabled = alpha >= 0.1f;
         }
     }
 

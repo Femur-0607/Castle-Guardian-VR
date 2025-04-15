@@ -20,6 +20,7 @@ namespace Assets.SimpleSpinner
 
         [Header("성문 UI")]
         [SerializeField] private Slider castleHealthSlider;
+        private float previousHealth = -1; // 이전 체력값 (-1은 초기화되지 않은 상태)
 
         [Header("카메라 UI")]
         [SerializeField] private GameObject CameraIndicatorUIPanel;
@@ -47,11 +48,13 @@ namespace Assets.SimpleSpinner
         public GameObject spawnHudPanel;     // 스폰 디스플레이용 캔버스
 
         [Header("스폰 포인트 UI 컴포넌트")]
-        public Image spawnBackgroundImage;  // 배경 이미지
+        public Image spawnBackgroundImage;    // 배경 이미지
+        public Image leftSpawnAlarmImage;     // 왼쪽 스폰 알람 이미지
+        public Image rightSpawnAlarmImage;    // 오른쪽 스폰 알람 이미지
         public TextMeshProUGUI spawnInfoText; // TMP 텍스트
         [SerializeField] private float spawnPreviewDuration = 2.0f;  // 표시 지속 시간
         [SerializeField] private float spawnFadeDuration = 1.0f;     // 페이드 아웃 시간
-        private Coroutine spawnFadeCoroutine;  // 현재 실행 중인 페이드 코루틴
+        private Coroutine spawnFadeCoroutine; // 현재 실행 중인 페이드 코루틴
 
         [Header("화살 선택 UI")]
         [SerializeField] private GameObject arrowSelectionDisplayPanel; // 화살 선택 패널
@@ -82,10 +85,17 @@ namespace Assets.SimpleSpinner
         [SerializeField] private GameObject bossWarningPanel;
         [SerializeField] private RectTransform topWarningStrip;
         [SerializeField] private RectTransform bottomWarningStrip;
-        [SerializeField] private float warningStripMoveDuration = 1.5f;  // 경고 띠 이동 시간
+        [SerializeField] private float warningStripMoveDuration = 2f;  // 경고 띠 이동 시간
         [SerializeField] private string warningSound = "BossWarning"; // 경고 사운드
 
         private Coroutine bossWarningCoroutine;
+        
+        [Header("데미지 경고 UI")]
+        [SerializeField] private GameObject damageWarningPanel;
+        [SerializeField] private float damageWarningDuration = 1.0f; // 경고 표시 시간
+        [SerializeField] private float damageThreshold = 100f; // 데미지 임계값
+        private float lastDamageAmount = 0f; // 마지막으로 받은 데미지
+        private Coroutine damageWarningCoroutine;
 
         #endregion
 
@@ -127,6 +137,9 @@ namespace Assets.SimpleSpinner
 
             // 보스 UI 초기화
             bossWarningPanel.SetActive(false);
+            
+            // 데미지 경고 UI 초기화
+            damageWarningPanel.SetActive(false);
         }
 
         private void InitializeSpawnPointPreview()
@@ -187,36 +200,6 @@ namespace Assets.SimpleSpinner
             EventManager.Instance.OnDialogueStarted -= HandleDialogueStarted;
             EventManager.Instance.OnDialogueEnded -= HandleDialogueEnd;
             EventManager.Instance.OnArrowTypeChanged -= HandleArrowTypeChanged;
-
-            // 모든 코루틴 정리
-            CleanupAllCoroutines();
-        }
-
-        /// <summary>
-        /// 모든 활성 코루틴을 정리
-        /// </summary>
-        private void CleanupAllCoroutines()
-        {
-            // 코루틴이 실행 중이라면 중지
-            if (spawnFadeCoroutine != null)
-            {
-                StopCoroutine(spawnFadeCoroutine);
-                spawnFadeCoroutine = null;
-            }
-
-            // 화살 선택 UI 코루틴 중지
-            if (arrowDisplayCoroutine != null)
-            {
-                StopCoroutine(arrowDisplayCoroutine);
-                arrowDisplayCoroutine = null;
-            }
-
-            // 레벨업 코루틴 중지
-            if (levelUpCoroutine != null)
-            {
-                StopCoroutine(levelUpCoroutine);
-                levelUpCoroutine = null;
-            }
         }
 
         #endregion
@@ -361,12 +344,6 @@ namespace Assets.SimpleSpinner
             damageText.text = $"Damage: {PlayerExperienceSystem.Instance.CurrentDamage:F1}";
             attackSpeedText.text = $"Attack Speed: {PlayerExperienceSystem.Instance.CurrentAttackSpeed:F1}";
 
-            // 기존 코루틴이 있다면 중지
-            if (levelUpCoroutine != null)
-            {
-                StopCoroutine(levelUpCoroutine);
-            }
-
             // 통합된 UI 패널 표시 메서드 사용
             levelUpCoroutine = ShowUIPanel(levelUpPanel, levelUpPanelDuration, UIFadeType.Scale);
         }
@@ -450,6 +427,9 @@ namespace Assets.SimpleSpinner
             {
                 castleHealthSlider.maxValue = castle.MaxHealth;
                 castleHealthSlider.value = castle.currentHealth;
+                
+                // 초기 체력값 저장
+                previousHealth = castle.currentHealth;
             }
         }
 
@@ -459,12 +439,51 @@ namespace Assets.SimpleSpinner
             if (castleHealthSlider != null)
             {
                 castleHealthSlider.value = currentHealth;
+                
+                // 이전 체력값이 초기화되었고, 체력이 감소했을 때만 데미지 처리
+                if (previousHealth >= 0 && currentHealth < previousHealth)
+                {
+                    float damageTaken = previousHealth - currentHealth;
+            
+                    // 일정 이상의 데미지를 받았을 때만 경고 표시
+                    if (damageTaken >= damageThreshold)
+                    {
+                        ShowDamageWarning(damageTaken);
+                    }
+                }
+        
+                // 현재 체력값 저장
+                previousHealth = currentHealth;
             }
+        }
+        
+        // 데미지 경고 UI 표시
+        private void ShowDamageWarning(float damageAmount)
+        {
+            // 이미 실행 중인 코루틴이 있으면 중지
+            if (damageWarningCoroutine != null)
+            {
+                StopCoroutine(damageWarningCoroutine);
+            }
+    
+            // 데미지 정보 저장
+            lastDamageAmount = damageAmount;
+    
+            // 통합 UI 패널 표시 메서드 사용 (페이드 효과)
+            damageWarningCoroutine = ShowUIPanel(damageWarningPanel, damageWarningDuration, UIFadeType.Fade);
         }
 
         #endregion
 
         #region 스폰 포인트 UI 함수
+        
+        // 알람 상태를 관리할 enum 추가
+        public enum SpawnAlarmState
+        {
+            None,       // 알람 없음 (둘 다 비활성화)
+            LeftOnly,   // 왼쪽 알람만 활성화
+            RightOnly   // 오른쪽 알람만 활성화
+        }
 
         /// <summary>
         /// 다이얼로그 시작 이벤트 처리
@@ -482,21 +501,24 @@ namespace Assets.SimpleSpinner
         {
             if (type == EventManager.DialogueType.Tutorial)
             {
-                ShowSpawnPreview();
+                // 튜토리얼 종료 후에는 알람 없이 표시
+                ShowSpawnPreview(SpawnAlarmState.None);
                 SetGameplayUIActive(true);
             }
-            if (type == EventManager.DialogueType.SpawnPointAdded)
+            else if (type == EventManager.DialogueType.SpawnPointAdded)
             {
                 if (isSpawnPointChange)
                 {
+                    // 두 번째 스폰 포인트 추가 시 오른쪽 알람만 활성화
                     spawnCamera.transform.SetPositionAndRotation(spawnPoint2.position, spawnPoint2.rotation);
-                    ShowSpawnPreview();
+                    ShowSpawnPreview(SpawnAlarmState.RightOnly);
                     SetGameplayUIActive(true);
                 }
                 else if (!isSpawnPointChange)
                 {
+                    // 첫 번째 스폰 포인트 추가 시 왼쪽 알람만 활성화
                     spawnCamera.transform.SetPositionAndRotation(spawnPoint1.position, spawnPoint1.rotation);
-                    ShowSpawnPreview();
+                    ShowSpawnPreview(SpawnAlarmState.LeftOnly);
                     isSpawnPointChange = true;
                     SetGameplayUIActive(true);
                 }
@@ -506,16 +528,17 @@ namespace Assets.SimpleSpinner
         /// <summary>
         /// 스폰 포인트 프리뷰 표시
         /// </summary>
-        void ShowSpawnPreview()
+        void ShowSpawnPreview(SpawnAlarmState alarmState = SpawnAlarmState.None)
         {
-            // 기존에 실행 중인 페이드 코루틴 중지
-            if (spawnFadeCoroutine != null)
-            {
-                StopCoroutine(spawnFadeCoroutine);
-            }
-
             // 모든 UI 요소의 알파값을 1로 초기화
             SetSpawnUIAlpha(1.0f);
+    
+            // 알람 상태에 따라 이미지 활성화 설정
+            if (leftSpawnAlarmImage != null)
+                leftSpawnAlarmImage.gameObject.SetActive(alarmState == SpawnAlarmState.LeftOnly);
+
+            if (rightSpawnAlarmImage != null)
+                rightSpawnAlarmImage.gameObject.SetActive(alarmState == SpawnAlarmState.RightOnly);
 
             // 카메라와 패널 활성화
             spawnCamera.gameObject.SetActive(true);
@@ -555,6 +578,22 @@ namespace Assets.SimpleSpinner
                 Color color = spawnDisplayImage.color;
                 color.a = alpha;
                 spawnDisplayImage.color = color;
+            }
+            
+            // 왼쪽 알람 이미지 알파값 설정
+            if (leftSpawnAlarmImage != null && leftSpawnAlarmImage.gameObject.activeSelf)
+            {
+                Color color = leftSpawnAlarmImage.color;
+                color.a = alpha;
+                leftSpawnAlarmImage.color = color;
+            }
+
+            // 오른쪽 알람 이미지 알파값 설정
+            if (rightSpawnAlarmImage != null && rightSpawnAlarmImage.gameObject.activeSelf)
+            {
+                Color color = rightSpawnAlarmImage.color;
+                color.a = alpha;
+                rightSpawnAlarmImage.color = color;
             }
 
             // 텍스트 알파값 설정
@@ -636,10 +675,6 @@ namespace Assets.SimpleSpinner
             }
 
             // 화살 선택 UI 표시 (통합 UI 패널 표시 메서드 사용)
-            if (arrowDisplayCoroutine != null)
-            {
-                StopCoroutine(arrowDisplayCoroutine);
-            }
             arrowDisplayCoroutine = ShowUIPanel(arrowSelectionDisplayPanel, arrowDisplayDuration, UIFadeType.Scale);
         }
 
@@ -702,21 +737,21 @@ namespace Assets.SimpleSpinner
         // 보스 경고 UI 표시 메서드
         public void ShowBossWarningUI()
         {
-            // 경고 패널 활성화 (기존 ShowUIPanel 메서드는 재사용하지 않음 - 경고 스트립 애니메이션이 필요하므로)
+            // 카메라 전환 및 페이드 효과가 완료될 때까지 대기하는 코루틴 시작
+            StartCoroutine(DelayedBossWarning());
+            
+        }
+
+        private IEnumerator DelayedBossWarning()
+        {
+            // OVRScreenFade 효과가 완료될 때까지 충분한 지연 시간 부여
+            // fadeTime의 2배 정도로 설정하면 페이드 아웃-인이 모두 끝난 후 경고창이 표시됨
+            yield return new WaitForSeconds(1.0f);
+            
+            // 경고 패널 활성화
             if (bossWarningPanel != null)
             {
                 bossWarningPanel.SetActive(true);
-            }
-
-            // 경고 스트립 초기 위치 설정 (화면 바깥에서 시작)
-            if (topWarningStrip != null)
-            {
-                topWarningStrip.anchoredPosition = new Vector2(-Screen.width, topWarningStrip.anchoredPosition.y);
-            }
-
-            if (bottomWarningStrip != null)
-            {
-                bottomWarningStrip.anchoredPosition = new Vector2(Screen.width, bottomWarningStrip.anchoredPosition.y);
             }
 
             // 경고 애니메이션 코루틴 시작
@@ -755,8 +790,8 @@ namespace Assets.SimpleSpinner
                 yield return null;
             }
 
-            // 2. 경고 표시 지속 (5초 정도)
-            yield return new WaitForSeconds(5f);
+            // 2. 경고 표시 지속 (1초 정도)
+            yield return new WaitForSeconds(1f);
 
             // 3. 페이드 아웃 (기존 ShowUIPanel 메서드를 활용)
             bossWarningPanel.SetActive(false);
