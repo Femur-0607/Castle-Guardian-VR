@@ -18,16 +18,17 @@ public class CameraController : MonoBehaviour
     [SerializeField] private Transform rightPosition;    // 오른쪽 위치
     [SerializeField] private Transform buildPosition;    // 빌드 모드 위치
     [SerializeField] private Transform uiPosition;       // UI 카메라 위치
+    [SerializeField] private Transform victoryPosition; // 승리 카메라 위치
 
     [Header("페이드 설정")]
     [SerializeField] private float fadeTime = 0.3f;      // 페이드 시간
 
     // 빌드 모드 참조
     [SerializeField] private BuildManager buildManager;
-    
-    public enum CameraPosition { Left, Center, Right, UI, Build }
+
+    public enum CameraPosition { Left, Center, Right, UI, Build, Victory }
     private CameraPosition currentPosition = CameraPosition.Center;
-    
+
     private bool isTransitioning = false;
 
     #endregion
@@ -69,19 +70,30 @@ public class CameraController : MonoBehaviour
     #region 이벤트 핸들러
 
     private void HandleDialogueStarted(EventManager.DialogueType type) => SwitchCamera(CameraPosition.UI);
-    
+
     private void HandleDialogueEnded(EventManager.DialogueType type) => SwitchCamera(CameraPosition.Center);
-    
+
     private void HandleGameStart() => SwitchCamera(CameraPosition.Center);
-    
+
     private void HandleWaveEnd(int waveNumber) => SwitchCamera(CameraPosition.UI);
-    
-    private void HandleGameEnd(bool None) => SwitchCamera(CameraPosition.UI);
+
+    private void HandleGameEnd(bool isVictory)
+    {
+        if (!isVictory)
+        {
+            SwitchCamera(CameraPosition.UI);
+        }
+        else
+        {
+            SwitchCamera(CameraPosition.Victory);
+        }
+    }
+
 
     #endregion
 
     #region 카메라 전환 메서드
-    
+
     /// <summary>
     /// 카메라 전환 입력 처리
     /// </summary>
@@ -145,7 +157,7 @@ public class CameraController : MonoBehaviour
             SwitchCamera(targetPosition);
         }
     }
-    
+
     /// <summary>
     /// 지정된 위치로 카메라 전환
     /// </summary>
@@ -153,7 +165,7 @@ public class CameraController : MonoBehaviour
     {
         // 위치가 같으면 무시
         if (position == currentPosition) return;
-        
+
         Transform targetTransform = null;
         switch (position)
         {
@@ -172,45 +184,77 @@ public class CameraController : MonoBehaviour
             case CameraPosition.Build:
                 targetTransform = buildPosition;
                 break;
+            case CameraPosition.Victory:
+                targetTransform = victoryPosition;
+                break;
         }
-        
+
         // 대상 카메라 위치가 없으면 무시
         if (targetTransform == null) return;
-        
+
         // 부드러운 전환 시작
         StartCoroutine(TransitionCamera(targetTransform));
-        
+
         // 현재 위치 업데이트
         currentPosition = position;
     }
-    
+
     /// <summary>
     /// 카메라 전환 코루틴
     /// </summary>
     private IEnumerator TransitionCamera(Transform targetTransform)
     {
+        // 이미 전환 중이면 무시
+        if (isTransitioning) yield break;
+
         isTransitioning = true;
-        
+
         // 페이드 아웃
         if (screenFade != null)
         {
             screenFade.FadeOut();
-            yield return new WaitForSeconds(fadeTime);
+            float elapsedTime = 0f;
+            while (elapsedTime < fadeTime)
+            {
+                elapsedTime += Time.deltaTime;
+                yield return null;
+            }
         }
-        
+
         // 즉시 위치 이동
         ovrCameraRig.transform.position = targetTransform.position;
         ovrCameraRig.transform.rotation = targetTransform.rotation;
-        
+
+        // 약간의 지연 후 페이드 인 시도
+        yield return new WaitForSeconds(0.1f);
+
         // 페이드 인
         if (screenFade != null)
         {
             screenFade.FadeIn();
-            yield return new WaitForSeconds(fadeTime);
+            float elapsedTime = 0f;
+            while (elapsedTime < fadeTime)
+            {
+                elapsedTime += Time.deltaTime;
+                yield return null;
+            }
+
+            // 페이드가 완료되지 않았다면 다시 한번 시도
+            if (screenFade.currentAlpha > 0.9f)
+            {
+                yield return new WaitForSeconds(0.1f);
+                screenFade.FadeIn();
+                elapsedTime = 0f;
+                while (elapsedTime < fadeTime)
+                {
+                    elapsedTime += Time.deltaTime;
+                    yield return null;
+                }
+            }
         }
-        
+
         isTransitioning = false;
-        
+
         // 카메라 변경 이벤트 발생
         if (EventManager.Instance != null)
         {
@@ -219,4 +263,12 @@ public class CameraController : MonoBehaviour
     }
 
     #endregion
+    
+    void Update()
+{
+    if (screenFade != null && screenFade.currentAlpha > 0.9f)
+    {
+        Debug.Log($"High fade alpha: {screenFade.currentAlpha}");
+    }
+}
 } 

@@ -120,8 +120,6 @@ public class ParticlePoolManager : MonoBehaviour
 
     private void MoveSoulToPlayer(GameObject soul, Transform target, float duration, System.Action onSoulCollected = null)
     {
-        Debug.Log("Target Position for Soul: " + target.position);
-        
         // 영혼 파티클을 직접 플레이어 방향으로 이동
         soul.transform.DOMove(target.position, duration)
             .SetEase(Ease.InQuad)

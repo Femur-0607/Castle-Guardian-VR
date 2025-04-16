@@ -17,31 +17,33 @@ public class GameManager : MonoBehaviour
     [SerializeField] private CameraController cameraController;
     // 게임 머니(골드) 프로퍼티로 변경
     private int _gameMoney = 200;
-    public int gameMoney 
-    { 
-        get => _gameMoney; 
-        private set 
-        { 
-            if (_gameMoney != value) 
-            { 
-                _gameMoney = value; 
-                EventManager.Instance.MoneyChangedEvent(_gameMoney); 
-            } 
-        } 
+    public int gameMoney
+    {
+        get => _gameMoney;
+        private set
+        {
+            if (_gameMoney != value)
+            {
+                _gameMoney = value;
+                EventManager.Instance.MoneyChangedEvent(_gameMoney);
+            }
+        }
     }
-    
+
     public bool gameStarted { get; private set; } = false;
-    
+
     [Header("화살 쿨타임 관련")]
     private bool _isArrowCooldown = false; // 화살 쿨타임 상태
     private float _arrowCooldownTime = 1f; // 화살 쿨타임 시간 (초)
     private float _arrowCooldownStartTime; // 쿨타임 시작 시간
     private const float COOLDOWN_DECREASE_PER_LEVEL = 0.1f; // 레벨당 쿨타임 감소량
-    
+
     /// <summary>
     /// 화살 쿨타임 여부 확인
     /// </summary>
     public bool IsArrowCooldown => _isArrowCooldown;
+
+    [SerializeField] private GameObject[] fireworksParticles; // 승리 시 폭죽 파티클
 
     #endregion
 
@@ -64,24 +66,24 @@ public class GameManager : MonoBehaviour
         // 쿨타임 코루틴 시작
         StartCoroutine(ArrowCooldownCoroutine());
     }
-    
+
     /// <summary>
     /// 화살 쿨타임 코루틴
     /// </summary>
     private IEnumerator ArrowCooldownCoroutine()
     {
         float elapsedTime = 0f;
-        
+
         while (elapsedTime < _arrowCooldownTime)
         {
             elapsedTime = Time.time - _arrowCooldownStartTime;
-            
+
             yield return null;
         }
-        
+
         // 쿨타임 종료
         _isArrowCooldown = false;
-        
+
         // 쿨타임 종료 이벤트 발생
         EventManager.Instance.ArrowCooldownEndEvent();
     }
@@ -94,7 +96,7 @@ public class GameManager : MonoBehaviour
         // 레벨업마다 쿨타임 0.1초 감소 (최소 0.1초)
         _arrowCooldownTime = Mathf.Max(0.1f, 1f - (newLevel - 1) * COOLDOWN_DECREASE_PER_LEVEL);
     }
-    
+
     #endregion
 
     #region 유니티 이벤트 함수
@@ -112,6 +114,14 @@ public class GameManager : MonoBehaviour
         DisablePlayerControls();
 
         SoundManager.Instance.PlaySound("TitleBGM");
+
+        foreach (GameObject firework in fireworksParticles)
+        {
+            if (firework != null)
+            {
+                firework.SetActive(false);
+            }
+        }
     }
 
     private void OnEnable()
@@ -119,7 +129,7 @@ public class GameManager : MonoBehaviour
         EventManager.Instance.OnWaveStart += HandleWaveStart;
         EventManager.Instance.OnWaveEnd += HandleWaveEnd;
         EventManager.Instance.OnLevelUp += HandleLevelUp;
-        
+
         // 다이얼로그매니저 이벤트 구독 추가
         // DialogueManager가 아직 초기화되지 않았을 수 있으므로 코루틴으로 시도
         StartCoroutine(TrySubscribeToDialogueManager());
@@ -129,7 +139,7 @@ public class GameManager : MonoBehaviour
     {
         // DialogueManager가 초기화될 때까지 대기
         yield return new WaitForSeconds(2f);
-        
+
         if (DialogueManager.instance != null)
         {
             DialogueManager.instance.conversationEnded += HandleConversationEnded;
@@ -137,7 +147,7 @@ public class GameManager : MonoBehaviour
         else
         {
             yield return new WaitForSeconds(1f);
-            
+
             if (DialogueManager.instance != null)
             {
                 DialogueManager.instance.conversationEnded += HandleConversationEnded;
@@ -174,7 +184,7 @@ public class GameManager : MonoBehaviour
             // 다이얼로그 종료 후 활성화됨
         }
     }
-    
+
     /// <summary>
     /// 게임 종료 메서드
     /// </summary>
@@ -185,7 +195,7 @@ public class GameManager : MonoBehaviour
         // 승리 시 다른 기능 추가
         EventManager.Instance.GameEndEvent(isVictory);
     }
-    
+
     /// <summary>
     /// 게임 재시작 메서드 - 게임오버 UI의 재시작 버튼에 연결
     /// </summary>
@@ -197,16 +207,16 @@ public class GameManager : MonoBehaviour
     #endregion
 
     #region 돈 관련 메서드
-    
+
     // 돈이 충분한지 여부 확인
     public bool HasEnoughMoney(int cost) => gameMoney >= cost;
-    
+
     // 돈 차감
     public void DeductMoney(int cost)
     {
         gameMoney -= cost;
     }
-    
+
     // 돈 추가 메서드 (웨이브 클리어 보상 등에 사용)
     public void AddMoney(int amount)
     {
@@ -214,7 +224,7 @@ public class GameManager : MonoBehaviour
     }
 
     #endregion
-    
+
     #region 웨이브 관련 핸들러
 
     /// <summary>
@@ -241,14 +251,20 @@ public class GameManager : MonoBehaviour
                 // 잠시 지연 후 스폰 포인트 추가 대화 시작
                 StartCoroutine(StartSpawnPointAddedDelayed());
             }
+            // 10번째 웨이브(보스전) 시작 시
+            else if (waveNumber == 10)
+            {
+                // 약간의 지연 후 플레이어 컨트롤 활성화
+                StartCoroutine(DelayedEnablePlayerControls());
+            }
             else
             {
-                // 첫 번째 웨이브가 아닌 경우 바로 플레이어 컨트롤 활성화
+                // 그 외의 웨이브는 바로 플레이어 컨트롤 활성화
                 EnablePlayerControls();
             }
         }
     }
-    
+
     /// <summary>
     /// 지연 후 튜토리얼 대화 시작 코루틴
     /// </summary>
@@ -256,21 +272,21 @@ public class GameManager : MonoBehaviour
     {
         // 1초 대기
         yield return new WaitForSeconds(1f);
-        
+
         // 다이얼로그 시작 이벤트 발생 (튜토리얼 타입)
         EventManager.Instance.DialogueStartedEvent(EventManager.DialogueType.Tutorial);
-        
+
         // Tutorial 대화 시작 (ID는 DSU 에디터에서 설정한 값에 맞게 조정)
         DialogueManager.StartConversation("Tutorial");
-        
+
         // 대화 중에는 플레이어 컨트롤 비활성화 상태 유지
         // 대화가 끝나면 HandleConversationEnded에서 플레이어 컨트롤 활성화됨
     }
-    
+
     private IEnumerator StartSpawnPointAddedDelayed()
     {
         yield return new WaitForSeconds(1f);
-        
+
         EventManager.Instance.DialogueStartedEvent(EventManager.DialogueType.SpawnPointAdded);
 
         DialogueManager.StartConversation("SpawnPointAdded");
@@ -283,45 +299,29 @@ public class GameManager : MonoBehaviour
     {
         // 웨이브 종료 시 플레이어 컨트롤 비활성화
         DisablePlayerControls();
-        
+
         // 첫 번째 웨이브가 끝났을 때만 상점 튜토리얼 표시
         if (waveNumber == 1)
         {
             // 약간의 지연 후 상점 튜토리얼 표시
             StartCoroutine(StartShopTutorialDelayed());
         }
-        
-        // 10 웨이브 종료 시 게임 종료
-        if (waveNumber == 10)
-        {
-            // 승리 다이얼로그 표시
-            StartCoroutine(StartVictoryDialogueDelayed());
-        }
     }
-    
+
     // 지연 후 상점 튜토리얼 시작 코루틴
     private IEnumerator StartShopTutorialDelayed()
     {
         // 상점 UI가 표시될 때까지 잠시 대기
         yield return new WaitForSeconds(1f);
-    
+
         // 상점 튜토리얼 대화 시작
         DialogueManager.StartConversation("ShopTutorial");
     }
-    
-    private IEnumerator StartVictoryDialogueDelayed()
-    {
-        // 약간의 지연
-        yield return new WaitForSeconds(1f);
 
-        // Victory 대화 시작
-        DialogueManager.StartConversation("Victory");
-    }
-    
     #endregion
-    
+
     #region 카메라 관련 메서드
-    
+
     /// <summary>
     /// 카메라를 중앙 위치로 이동
     /// </summary>
@@ -332,7 +332,7 @@ public class GameManager : MonoBehaviour
             cameraController.SwitchCamera(CameraController.CameraPosition.Center);
         }
     }
-    
+
     /// <summary>
     /// 플레이어 제어 컴포넌트 활성화
     /// </summary>
@@ -341,7 +341,7 @@ public class GameManager : MonoBehaviour
         // 카메라 중앙 위치로 이동
         ResetCameraToCenter();
     }
-    
+
     /// <summary>
     /// 플레이어 제어 컴포넌트 비활성화
     /// </summary>
@@ -350,11 +350,11 @@ public class GameManager : MonoBehaviour
         // 카메라 중앙 위치로 이동
         ResetCameraToCenter();
     }
-    
+
     #endregion
 
     #region 대화 시스템 이벤트 핸들러
-    
+
     /// <summary>
     /// 인트로 대화 시작 메서드 - 시작 버튼에 할당
     /// </summary>
@@ -362,10 +362,10 @@ public class GameManager : MonoBehaviour
     {
         // 다이얼로그 시작 이벤트 발생 (인트로 타입)
         EventManager.Instance.DialogueStartedEvent(EventManager.DialogueType.Intro);
-        
+
         // Intro 대화 시작 (ID는 DSU 에디터에서 설정한 값에 맞게 조정)
         DialogueManager.StartConversation("Intro");
-        
+
         // 참고: 게임 시작 처리는 대화 종료 후 HandleConversationEnded에서 처리됨
     }
 
@@ -394,6 +394,16 @@ public class GameManager : MonoBehaviour
         else if (DialogueManager.lastConversationID == 4) // 승리 대화 ID
         {
             // 게임 클리어 처리
+            // 카메라를 승리 위치로 이동
+            if (cameraController != null)
+            {
+                cameraController.SwitchCamera(CameraController.CameraPosition.Victory);
+            }
+
+            // 폭죽 파티클 시스템 활성화
+            PlayVictoryFireworks();
+
+            // 게임 종료 처리 (승리)
             EndGame(true);
         }
         // 스폰 포인트 대화가 끝났을 때
@@ -402,16 +412,16 @@ public class GameManager : MonoBehaviour
             EventManager.Instance.DialogueEndedEvent(EventManager.DialogueType.SpawnPointAdded); // 패널, 카메라 끄기
         }
     }
-    
+
     // 대화 종료 후 지연 처리를 위한 코루틴
     private IEnumerator HandleConversationEndedDelayed()
     {
         // 1초 대기
         yield return new WaitForSeconds(1f);
-        
+
         // 게임오버 변수 확인
         bool isGameOver = DialogueLua.GetVariable("IsGameOver").asBool;
-        
+
         if (isGameOver)
         {
             // 게임오버 처리
@@ -423,7 +433,7 @@ public class GameManager : MonoBehaviour
             StartGame();
         }
     }
-    
+
     /// <summary>
     /// 지연 후 플레이어 컨트롤 활성화 코루틴
     /// </summary>
@@ -431,10 +441,22 @@ public class GameManager : MonoBehaviour
     {
         // 1초 대기
         yield return new WaitForSeconds(1f);
-        
+
         // 대화가 끝나면 플레이어 컨트롤 활성화
         EnablePlayerControls();
     }
-    
+
+    // 폭죽 파티클을 재생하는 메서드
+    private void PlayVictoryFireworks()
+    {
+        foreach (GameObject firework in fireworksParticles)
+        {
+            if (firework != null)
+            {
+                firework.SetActive(true);
+            }
+        }
+    }
+
     #endregion
 }

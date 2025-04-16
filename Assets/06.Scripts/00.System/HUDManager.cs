@@ -303,12 +303,24 @@ namespace Assets.SimpleSpinner
 
             if (!isVictory)
             {
-                gameOverUIPanel.SetActive(true);
+                // 게임오버 패널을 페이드 인 효과로 표시 (지속시간을 매우 크게 설정해 자동 종료되지 않도록)
+                ShowUIPanel(gameOverUIPanel, float.MaxValue, UIFadeType.Scale);
             }
             else
             {
-                gameVictoryUIPanel.SetActive(true);
+                // 승리는 3초 후에 표시 (코루틴 사용)
+                StartCoroutine(ShowVictoryPanelDelayed(3.0f));
             }
+        }
+
+        // 지연 후 승리 패널 표시 코루틴
+        private IEnumerator ShowVictoryPanelDelayed(float delay)
+        {
+            // 지정된 시간 대기
+            yield return new WaitForSeconds(delay);
+            
+            // 승리 패널 표시 (무한 지속)
+            ShowUIPanel(gameVictoryUIPanel, float.MaxValue, UIFadeType.Scale);
         }
 
         // 현재 웨이브 시작 시 작동되는 메서드
@@ -322,7 +334,7 @@ namespace Assets.SimpleSpinner
 
             if (waveNumber == 10)
             {
-                ShowBossWarningUI();
+                StartCoroutine(DelayedBossWarning());
             }
         }
 
@@ -758,19 +770,12 @@ namespace Assets.SimpleSpinner
         #region 보스 UI 함수
 
         // 보스 경고 UI 표시 메서드
-        public void ShowBossWarningUI()
-        {
-            // 카메라 전환 및 페이드 효과가 완료될 때까지 대기하는 코루틴 시작
-            StartCoroutine(DelayedBossWarning());
-            
-        }
-
-        private IEnumerator DelayedBossWarning()
+        public IEnumerator DelayedBossWarning()
         {
             // OVRScreenFade 효과가 완료될 때까지 충분한 지연 시간 부여
-            // fadeTime의 2배 정도로 설정하면 페이드 아웃-인이 모두 끝난 후 경고창이 표시됨
-            yield return new WaitForSeconds(1.0f);
-            
+            // fadeTime의 3배 정도로 설정하면 카메라 전환이 완료된 후 경고창이 표시됨
+            yield return new WaitForSeconds(1f);
+
             // 경고 패널 활성화
             if (bossWarningPanel != null)
             {
@@ -779,6 +784,7 @@ namespace Assets.SimpleSpinner
 
             // 경고 애니메이션 코루틴 시작
             bossWarningCoroutine = StartCoroutine(PlayBossWarningAnimation());
+            
         }
 
         // 보스 경고 애니메이션 코루틴
@@ -815,8 +821,7 @@ namespace Assets.SimpleSpinner
 
             // 2. 경고 표시 지속 (1초 정도)
             yield return new WaitForSeconds(1f);
-
-            // 3. 페이드 아웃 (기존 ShowUIPanel 메서드를 활용)
+            // 3. 경고 패널 닫음
             bossWarningPanel.SetActive(false);
 
             // 코루틴 레퍼런스 초기화

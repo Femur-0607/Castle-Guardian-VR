@@ -1,4 +1,5 @@
 using UnityEngine;
+using PixelCrushers.DialogueSystem;
 using System.Collections;
 using DG.Tweening;
 using UnityEngine.AI;
@@ -257,24 +258,25 @@ public class BossController : LivingEntity
         // 부모 클래스의 Die 호출
         base.Die();
 
+        if (rb != null)
+        {
+            rb.isKinematic = true;
+        }
+
         // 사망 애니메이션
         if (animator != null)
         {
             animator.SetInteger("animation", ANIM_DIE);
         }
 
-        // 보스전 종료 이벤트 발송 (승리)
-        EventManager.Instance.WaveEndEvent(10);  // 10웨이브 종료 이벤트
+        // 다이얼로그 시작 이벤트 발생 (튜토리얼 타입)
+        EventManager.Instance.DialogueStartedEvent(EventManager.DialogueType.Victory);
 
-        // 각종 컴포넌트 비활성화
-        Collider[] colliders = GetComponentsInChildren<Collider>();
-        foreach (var col in colliders)
-        {
-            col.enabled = false;
-        }
+        // 보스전 종료 시 다이얼로그 발생
+        DialogueManager.StartConversation("Victory");
 
-        // 3초 후 오브젝트 제거
-        Destroy(gameObject, 3f);
+        // 1초 후 오브젝트 제거
+        Destroy(gameObject, 1f);
     }
 
     // 공격 애니메이션 이벤트에서 호출되는 메서드

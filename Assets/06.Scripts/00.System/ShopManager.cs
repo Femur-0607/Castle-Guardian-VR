@@ -68,17 +68,35 @@ public class ShopManager : MonoBehaviour
             poisonArrowButton.interactable = !isUnlocked; // 해금되면 버튼 비활성화
         }
     }
-    
+
+    #endregion
+
+    #region 돈 확인
+
+    private bool TryPurchase(int cost)
+    {
+        // 돈이 충분한지 확인
+        if (GameManager.Instance.HasEnoughMoney(cost))
+        {
+            // 돈 차감
+            GameManager.Instance.DeductMoney(cost);
+            return true;
+        }
+        else
+        {
+            // 돈 부족 알림 표시
+            uiManager.ShowNotEnoughMoneyPopup();
+            return false;
+        }
+    }
+
     #endregion
 
     #region 타워 관련 메소드
     public void OnTowerSelected()
     {
-        // 구매 비용 확인
-        if (GameManager.Instance.HasEnoughMoney(towerCost))
+        if (TryPurchase(towerCost))
         {
-            // 돈 차감 후 빌드 모드로 전환
-            GameManager.Instance.DeductMoney(towerCost);
             buildManager.EnterBuildMode();
         }
     }
@@ -93,13 +111,8 @@ public class ShopManager : MonoBehaviour
             return;
         }
 
-        // 돈 확인
-        if (GameManager.Instance.HasEnoughMoney(cost))
+        if (TryPurchase(cost))
         {
-            // 돈 차감
-            GameManager.Instance.DeductMoney(cost);
-
-            // 업그레이드 모드로 빌드 모드 시작
             buildManager.EnterBuildMode(true, upgradeType);
         }
     }
@@ -111,11 +124,8 @@ public class ShopManager : MonoBehaviour
     private void UpgradeBow()
     {
         // 돈 확인
-        if (GameManager.Instance.HasEnoughMoney(bowUpgradeCost))
+        if (TryPurchase(bowUpgradeCost))
         {
-            // 돈 차감
-            GameManager.Instance.DeductMoney(bowUpgradeCost);
-
             // 현재 화살 데이터 가져오기
             ProjectileData normalArrow = ArrowManager.Instance.GetNormalArrowData();
             
@@ -131,11 +141,8 @@ public class ShopManager : MonoBehaviour
     private void UnlockExplosiveArrow()
     {
         // 해금되지 않은 경우 해금 - 돈 확인
-        if (GameManager.Instance.HasEnoughMoney(explosiveArrowCost))
+        if (TryPurchase(explosiveArrowCost))
         {
-            // 돈 차감
-            GameManager.Instance.DeductMoney(explosiveArrowCost);
-
             // 해금 요청
             bool success = arrowManager.UnlockArrow(ProjectileData.ProjectileType.Explosive);
 
@@ -152,11 +159,8 @@ public class ShopManager : MonoBehaviour
     private void UnlockPoisonArrow()
     {
         // 해금되지 않은 경우 해금 - 돈 확인
-        if (GameManager.Instance.HasEnoughMoney(poisonArrowCost))
+        if (TryPurchase(poisonArrowCost))
         {
-            // 돈 차감
-            GameManager.Instance.DeductMoney(poisonArrowCost);
-
             // 해금 요청
             bool success = arrowManager.UnlockArrow(ProjectileData.ProjectileType.Poison);
 

@@ -23,6 +23,9 @@ public class UIManager : MonoBehaviour
     private TextMeshProUGUI[] tabTexts;
     public GameObject[] shopPanels;
 
+    [Header("돈 부족 알림")]
+    [SerializeField] private GameObject notEnoughMoneyPopup;
+
     [Header("다이얼로그 UI")]
     [SerializeField] private GameObject dialoguePanel;
     [SerializeField] private GameObject[] dialogueImages; // 0, 1: 인트로용, 2: 튜토리얼용
@@ -196,6 +199,24 @@ public class UIManager : MonoBehaviour
 
         // 선택한 탭에 해당하는 상점 패널만 활성화
         shopPanels[tabIndex].SetActive(true);
+    }
+
+    public void ShowNotEnoughMoneyPopup()
+    {
+        // 애니메이션과 함께 팝업 표시
+        notEnoughMoneyPopup.transform.localScale = Vector3.zero;
+        notEnoughMoneyPopup.SetActive(true);
+        notEnoughMoneyPopup.transform.DOScale(Vector3.one, 0.3f).SetEase(Ease.OutBack);
+        
+        StartCoroutine(HideNotEnoughMoneyPopup());
+    }
+
+    private IEnumerator HideNotEnoughMoneyPopup()
+    {
+        yield return new WaitForSeconds(1f);
+
+        notEnoughMoneyPopup.transform.DOScale(Vector3.zero, 0.3f).SetEase(Ease.InBack)
+            .OnComplete(() => notEnoughMoneyPopup.SetActive(false));
     }
 
     public void ShowArrowUpgradePopup()

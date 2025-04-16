@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: NormalData
   m_EditorClassIdentifier: 
   projectileType: 0
-  baseDamage: 100
+  baseDamage: 1000
   lifeTime: 5
   baseImpactRadius: 0
   baseEffectDuration: 0
