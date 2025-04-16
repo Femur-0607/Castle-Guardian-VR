@@ -152,6 +152,14 @@ PrefabInstance:
       propertyPath: m_ConstrainProportionsScale
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 2446141108413618469, guid: e1532d1660c00aa4f8077861c83eaf3b, type: 3}
+      propertyPath: m_Mesh
+      value: 
+      objectReference: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+    - target: {fileID: 2446141108413618469, guid: e1532d1660c00aa4f8077861c83eaf3b, type: 3}
+      propertyPath: m_RenderMode
+      value: 4
+      objectReference: {fileID: 0}
     - target: {fileID: 2446141108413618471, guid: e1532d1660c00aa4f8077861c83eaf3b, type: 3}
       propertyPath: m_LocalScale.x
       value: 1
@@ -210,12 +218,16 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2446141108413618522, guid: e1532d1660c00aa4f8077861c83eaf3b, type: 3}
       propertyPath: m_Name
-      value: LootBeam_Generic_Epic Variant
+      value: LootBeam_Generic_Epic_Variant
       objectReference: {fileID: 0}
     - target: {fileID: 2446141108413618522, guid: e1532d1660c00aa4f8077861c83eaf3b, type: 3}
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 2446141108419319429, guid: e1532d1660c00aa4f8077861c83eaf3b, type: 3}
+      propertyPath: m_Mesh
+      value: 
+      objectReference: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
     - target: {fileID: 2446141108419319482, guid: e1532d1660c00aa4f8077861c83eaf3b, type: 3}
       propertyPath: m_LocalScale.x
       value: 2

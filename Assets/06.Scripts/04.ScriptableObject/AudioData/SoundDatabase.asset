@@ -36,22 +36,22 @@ MonoBehaviour:
   - soundID: TitleBGM
     category: 0
     clip: {fileID: 8300000, guid: cc477da07a0e95340a4e0638d3853865, type: 3}
-    volume: 0.8
+    volume: 0
     loop: 1
   - soundID: MainBGM
     category: 0
     clip: {fileID: 8300000, guid: dbf5ca89f27b6284298fa3cc1e733576, type: 3}
-    volume: 0.8
+    volume: 0
     loop: 1
   - soundID: BattleBGM
     category: 0
     clip: {fileID: 8300000, guid: 6cb789d8e3becef4599adbb2a8389601, type: 3}
-    volume: 0.5
+    volume: 0
     loop: 1
   - soundID: BossBattleBGM
     category: 0
     clip: {fileID: 8300000, guid: 6b08b491834f57344be0e280d63735e9, type: 3}
-    volume: 0.8
+    volume: 0
     loop: 1
   - soundID: BossWarning
     category: 1

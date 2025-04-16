@@ -2152,9 +2152,9 @@ MonoBehaviour:
         type: 0
         typeString: 
       - title: Dialogue Text
-        value: "\uC704\uB300\uD55C \uBC18\uC2E0\uC774\uC5EC, \uB9C8\uCE68\uB0B4 \uD574\uB0C8\uAD6C\uB098!
-          \uBD88\uC758 \uC545\uB9C8\uB97C \uBB3C\uB9AC\uCE58\uACE0 \uC544\uB974\uB374
-          \uC655\uAD6D\uC744 \uAD6C\uC6D0\uD588\uB2E4."
+        value: "\uC704\uB300\uD55C \uBC18\uC2E0\uC774\uC5EC, \uB9C8\uCE68\uB0B4 \uD574\uB0C8\uAD6C\uB098!\n\uBD88\uC758
+          \uC545\uB9C8\uB97C \uBB3C\uB9AC\uCE58\uACE0 \uC544\uB974\uB374 \uC655\uAD6D\uC744
+          \uAD6C\uC6D0\uD588\uB2E4."
         type: 0
         typeString: 
       - title: Sequence
@@ -2324,10 +2324,10 @@ MonoBehaviour:
         typeString: 
       - title: Dialogue Text
         value: "\uD55C\uB54C \uC804\uC7A5\uC5D0\uC11C \uC4F0\uB7EC\uC84C\uB358 \uB108\uB294
-          \uC774\uC81C \uC655\uAD6D\uC758 \uC804\uC124\uC774 \uB418\uC5C8\uB2E4.
-          \uB124 \uC774\uB984\uC740 \uB300\uB300\uB85C \uC804\uD574\uC9C8 \uAC83\uC774\uBA70,
-          \uC544\uB974\uB374 \uC0AC\uB78C\uB4E4\uC740 \uBC18\uC2E0\uC758 \uC218\uD638\uB97C
-          \uC601\uC6D0\uD788 \uAE30\uC5B5\uD560 \uAC83\uC774\uB2E4."
+          \uC774\uC81C \uC655\uAD6D\uC758 \uC804\uC124\uC774 \uB418\uC5C8\uB2E4.\n\uB124
+          \uC774\uB984\uC740 \uB300\uB300\uB85C \uC804\uD574\uC9C8 \uAC83\uC774\uBA70,\n\uC544\uB974\uB374
+          \uC0AC\uB78C\uB4E4\uC740 \uBC18\uC2E0\uC758 \uC218\uD638\uB97C \uC601\uC6D0\uD788
+          \uAE30\uC5B5\uD560 \uAC83\uC774\uB2E4."
         type: 0
         typeString: 
       - title: Sequence
@@ -2383,8 +2383,8 @@ MonoBehaviour:
         typeString: 
       - title: Dialogue Text
         value: "\uD558\uC9C0\uB9CC \uAE30\uC5B5\uD558\uB77C. \uC5B4\uB460\uC740 \uACB0\uCF54
-          \uC644\uC804\uD788 \uC0AC\uB77C\uC9C0\uC9C0 \uC54A\uB294\uB2E4. \uC5B8\uC820\uAC00
-          \uC0C8\uB85C\uC6B4 \uC704\uD611\uC774 \uB2E5\uCCD0\uC62C \uB54C, \uB124
+          \uC644\uC804\uD788 \uC0AC\uB77C\uC9C0\uC9C0 \uC54A\uB294\uB2E4.\n\uC5B8\uC820\uAC00
+          \uC0C8\uB85C\uC6B4 \uC704\uD611\uC774 \uB2E5\uCCD0\uC62C \uB54C,\n\uB124
           \uC601\uD63C\uC740 \uB2E4\uC2DC \uD55C\uBC88 \uC655\uAD6D\uC744 \uC9C0\uD0A4\uAE30
           \uC704\uD574 \uAE68\uC5B4\uB0A0\uC9C0\uB3C4 \uBAA8\uB978\uB2E4."
         type: 0
@@ -2471,7 +2471,7 @@ MonoBehaviour:
         height: 30
     entryGroups: []
     canvasScrollPosition: {x: 0, y: 0}
-    canvasZoom: 1.3299997
+    canvasZoom: 1.2099998
   - id: 5
     fields:
     - title: Title

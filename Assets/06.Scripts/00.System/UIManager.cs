@@ -256,6 +256,10 @@ public class UIManager : MonoBehaviour
             case EventManager.DialogueType.SpawnPointAdded:
                 ShowTutorialDialogueImages();
                 break;
+            
+            case EventManager.DialogueType.Victory:
+                ShowIntroDialogueImages();
+                break;
         }
     }
 
@@ -303,7 +307,7 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    // 인트로 다이얼로그 이미지 표시 (0번, 1번 이미지)
+    // 인트로 및 빅토리 다이얼로그 이미지 표시 (0번, 1번 이미지)
     private void ShowIntroDialogueImages()
     {
         // 모든 이미지 비활성화

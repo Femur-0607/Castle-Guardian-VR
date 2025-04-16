@@ -13,7 +13,8 @@ public class EventManager : MonoBehaviour
     {
         Intro,
         Tutorial,
-        SpawnPointAdded
+        SpawnPointAdded,
+        Victory
     }
 
     public static EventManager Instance { get; private set; }

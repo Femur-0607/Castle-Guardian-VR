@@ -220,17 +220,51 @@ public class Enemy : LivingEntity
     /// <summary>
     /// Pool에서 Get될 때마다 호출될 초기화 로직
     /// </summary>
-    public void ResetState()
+    public virtual void ResetState()
     {
-        // LivingEntity에 체력 초기값이 있다면 여기서 재설정
-        currentHealth = startingHealth;
+        // 1. 기본 상태 초기화
         isAlive = true;
-
         currentState = EnemyState.Idle;
-
+    
+        // 2. enemyData 기반 스탯 초기화 (스크립터블 오브젝트 값 적용)
+        if (enemyData != null)
+        {
+            // 체력 초기화
+            startingHealth = enemyData.startingHealth;
+            currentHealth = startingHealth;
+        
+            // 이동 관련 스탯 초기화
+            if (agent != null)
+            {
+                agent.speed = enemyData.moveSpeed;
+                agent.stoppingDistance = enemyData.attackRange;
+                originalStoppingDistance = enemyData.attackRange;
+            }
+        
+            // 공격 관련 스탯 초기화
+            lastAttackTime = 0f;
+        }
+    
+        // 3. 모델링 타입에 맞게 변경
         ActivateModelByType(enemyData.enemyType);
-
-        // NavMeshAgent를 딜레이 후 활성화하여 추적 시작
+    
+        // 4. 진행 중인 모든 코루틴 중지
+        // 슬로우 효과 코루틴 중지
+        if (slowCoroutine != null)
+        {
+            StopCoroutine(slowCoroutine);
+            slowCoroutine = null;
+        }
+    
+        // 다른 진행 중인 코루틴이 있다면 모두 중지
+        StopAllCoroutines();
+    
+        // 5. 포메이션 관련 변수 초기화 (있다면)
+        hasFormationPosition = false;
+        isInPosition = false;
+        assignedPosition = null;
+    
+        // 6. NavMeshAgent 지연 활성화
         StartCoroutine(DelayedAgentActivation(1f));
     }
 

@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using DG.Tweening;
 using UnityEngine.AI;
 
 public class BossController : LivingEntity
@@ -101,20 +102,6 @@ public class BossController : LivingEntity
 
         Initialize(false);
     }
-    
-    void Update()
-    {
-        if (playerTransform != null)
-        {
-            // 플레이어의 위치를 가져옵니다
-            Vector3 playerPosition = playerTransform.position;
-            
-            Vector3 targetPosition = new Vector3(transform.position.x, playerPosition.y, transform.position.z);
-            
-            // 보스가 플레이어를 향해 회전하도록 합니다
-            transform.LookAt(targetPosition);
-        }
-    }
 
     #endregion
 
@@ -126,7 +113,7 @@ public class BossController : LivingEntity
         // 10웨이브 시작 시 전투 모드 시작
         if (waveNumber == 10)
         {
-            StartBattle();
+            return;
         }
         // 1-9웨이브는 알파값만 조정
         else if (waveNumber >= 1 && waveNumber <= 9)
@@ -229,6 +216,16 @@ public class BossController : LivingEntity
         
         // 네비게이션 비활성화
         navAgent.enabled = false;
+        
+        if (playerTransform != null)
+        {
+            // 원하는 회전 설정 (X축 0, Y축 -45, Z축 0)
+            Quaternion targetRotation = Quaternion.Euler(0, -45, 0);
+        
+            // DOTween으로 부드럽게 회전
+            transform.DORotateQuaternion(targetRotation, 1.0f)
+                .SetEase(Ease.OutQuad);
+        }
         
         if (animator != null)
         {

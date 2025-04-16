@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
@@ -87,13 +88,15 @@ namespace Assets.SimpleSpinner
         [SerializeField] private RectTransform bottomWarningStrip;
         [SerializeField] private float warningStripMoveDuration = 2f;  // 경고 띠 이동 시간
         [SerializeField] private string warningSound = "BossWarning"; // 경고 사운드
-
+        [SerializeField] private BossController bossController;
         private Coroutine bossWarningCoroutine;
         
         [Header("데미지 경고 UI")]
         [SerializeField] private GameObject damageWarningPanel;
         [SerializeField] private float damageWarningDuration = 1.0f; // 경고 표시 시간
         [SerializeField] private float damageThreshold = 100f; // 데미지 임계값
+        private float[] healthThresholds = { 900f, 800f, 700f, 600f, 500f, 400f, 300f, 200f, 100f };
+        private List<float> triggeredThresholds = new List<float>();
         private Coroutine damageWarningCoroutine;
 
         #endregion
@@ -139,6 +142,7 @@ namespace Assets.SimpleSpinner
             
             // 데미지 경고 UI 초기화
             damageWarningPanel.SetActive(false);
+            ResetDamageWarnings();
         }
 
         private void InitializeSpawnPointPreview()
@@ -445,18 +449,30 @@ namespace Assets.SimpleSpinner
             {
                 castleHealthSlider.value = currentHealth;
                 
-                // 이전 체력값이 초기화되었고, 체력이 감소했을 때만 데미지 처리
+                // 체력이 감소했을 때만 체크
                 if (previousHealth >= 0 && currentHealth < previousHealth)
                 {
-                    float damageTaken = previousHealth - currentHealth;
+                    // 임계값 체크
+                    foreach (float threshold in healthThresholds)
+                    {
+                        // 이전 체력은 임계값보다 높고, 현재 체력은 임계값보다 낮으면 (임계값을 지나쳤다면)
+                        // 그리고 아직 이 임계값에 대한 경고가 트리거되지 않았다면
+                        if (previousHealth > threshold && currentHealth <= threshold && !triggeredThresholds.Contains(threshold))
+                        {
+                            ShowDamageWarning(threshold);
+                            triggeredThresholds.Add(threshold); // 이미 트리거된 임계값으로 기록
+                            break; // 한 번에 하나의 임계값만 처리
+                        }
+                    }
             
-                    // 일정 이상의 데미지를 받았을 때만 경고 표시
+                    // 일정 이상의 데미지도 여전히 경고로 표시
+                    float damageTaken = previousHealth - currentHealth;
                     if (damageTaken >= damageThreshold)
                     {
                         ShowDamageWarning(damageTaken);
                     }
                 }
-        
+
                 // 현재 체력값 저장
                 previousHealth = currentHealth;
             }
@@ -473,6 +489,11 @@ namespace Assets.SimpleSpinner
     
             // 통합 UI 패널 표시 메서드 사용 (페이드 효과)
             damageWarningCoroutine = ShowUIPanel(damageWarningPanel, damageWarningDuration, UIFadeType.Fade);
+        }
+        
+        public void ResetDamageWarnings()
+        {
+            triggeredThresholds.Clear();
         }
 
         #endregion
@@ -800,6 +821,8 @@ namespace Assets.SimpleSpinner
 
             // 코루틴 레퍼런스 초기화
             bossWarningCoroutine = null;
+            
+            bossController.StartBattle();
         }
     }
     

@@ -83,20 +83,20 @@ public class InputManager : MonoBehaviour
         }
 
         // X 버튼 - 보스전 바로 시작
-        // if (OVRInput.GetDown(OVRInput.Button.One, OVRInput.Controller.LTouch))
-        // {
-        //     // 먼저 카메라를 중앙으로 전환
-        //     if (cameraController != null)
-        //     {
-        //         cameraController.SwitchCamera(CameraController.CameraPosition.Center);
-        //         // 카메라 전환이 완료될 때까지 약간의 딜레이 후 웨이브 시작
-        //         StartCoroutine(StartBossWaveWithDelay());
-        //     }
-        //     else
-        //     {
-        //         Debug.LogError("CameraController reference is missing in InputManager!");
-        //     }
-        // }
+        if (OVRInput.GetDown(OVRInput.Button.One, OVRInput.Controller.LTouch))
+        {
+            // 먼저 카메라를 중앙으로 전환
+            if (cameraController != null)
+            {
+                cameraController.SwitchCamera(CameraController.CameraPosition.Center);
+                // 카메라 전환이 완료될 때까지 약간의 딜레이 후 웨이브 시작
+                StartCoroutine(StartBossWaveWithDelay());
+            }
+            else
+            {
+                Debug.LogError("CameraController reference is missing in InputManager!");
+            }
+        }
     }
 
     private IEnumerator StartBossWaveWithDelay()

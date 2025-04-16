@@ -171,6 +171,8 @@ public class WaveManager : MonoBehaviour
         {
             return;
         }
+        
+        Debug.Log("Soul Collection Point: " + soulCollectionPoint.position);
 
         // 모든 남아있는 영혼을 플레이어에게 이동
         ParticlePoolManager.Instance.CollectAllSouls(soulCollectionPoint, soulMoveDuration, () =>
@@ -262,12 +264,6 @@ public class WaveManager : MonoBehaviour
 
         // 보스 UI 표시, 사운드 변경 등
         SoundManager.Instance.PlaySound("BossBattleBGM");
-
-        // 보스 전투 활성화
-        if (bossController != null)
-        {
-            bossController.StartBattle();
-        }
 
         // 웨이브 시작 이벤트 발생 (10웨이브)
         EventManager.Instance.WaveStartEvent(CurrentWave);
