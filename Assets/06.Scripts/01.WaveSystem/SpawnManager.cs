@@ -51,6 +51,9 @@ public class SpawnManager : MonoBehaviour
         e.spawnManager = this;
         e.enemyData = data; // 적 데이터 설정
         e.formationManager = formationManager;
+        
+        // 스탯 초기화 (중요!)
+        e.ResetState();
 
         // 적 타입에 따라 모델 활성화
         e.ActivateModelByType(type);

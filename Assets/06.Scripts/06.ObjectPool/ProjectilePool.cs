@@ -10,6 +10,8 @@ using ProjectileCurveVisualizerSystem;
 /// </summary>
 public class ProjectilePool : MonoBehaviour
 {
+    public static ProjectilePool Instance { get; private set; }
+    
     [System.Serializable]
     public class ProjectilePoolSetting
     {
@@ -32,6 +34,13 @@ public class ProjectilePool : MonoBehaviour
 
     private void Awake()
     {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+        Instance = this;
+        
         // 각 화살 타입별 프리팹 딕셔너리 초기화
         foreach (var setting in projectilePrefabs)
         {
@@ -160,5 +169,22 @@ public class ProjectilePool : MonoBehaviour
         Projectile proj = GetProjectile(arrowType);
         proj.transform.position = position;
         return proj;
+    }
+    
+    public void ReturnProjectile(GameObject projectile)
+    {
+        if (projectile == null) return;
+    
+        Projectile projectileComponent = projectile.GetComponent<Projectile>();
+        if (projectileComponent != null)
+        {
+            // 이미 풀에 설정된 Release 호출
+            projectileComponent.ReturnToPool();
+        }
+        else
+        {
+            // 컴포넌트가 없는 경우 그냥 비활성화
+            projectile.SetActive(false);
+        }
     }
 }

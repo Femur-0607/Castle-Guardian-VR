@@ -110,8 +110,8 @@ public class GameManager : MonoBehaviour
         }
         Instance = this;
 
-        // 시작 시 컴포넌트 비활성화
-        DisablePlayerControls();
+        // 시작 시 카메라 위치 UI로
+        cameraController.SwitchCamera(CameraController.CameraPosition.UI);
 
         SoundManager.Instance.PlaySound("TitleBGM");
 
@@ -259,8 +259,8 @@ public class GameManager : MonoBehaviour
             }
             else
             {
-                // 그 외의 웨이브는 바로 플레이어 컨트롤 활성화
-                EnablePlayerControls();
+                // 그 외의 웨이브는 바로 카메라 센터 위치로
+                cameraController.SwitchCamera(CameraController.CameraPosition.Center);
             }
         }
     }
@@ -297,8 +297,8 @@ public class GameManager : MonoBehaviour
     /// </summary>
     private void HandleWaveEnd(int waveNumber)
     {
-        // 웨이브 종료 시 플레이어 컨트롤 비활성화
-        DisablePlayerControls();
+        // 웨이브 종료 시 카메라 위치 UI로
+        cameraController.SwitchCamera(CameraController.CameraPosition.UI);
 
         // 첫 번째 웨이브가 끝났을 때만 상점 튜토리얼 표시
         if (waveNumber == 1)
@@ -316,39 +316,6 @@ public class GameManager : MonoBehaviour
 
         // 상점 튜토리얼 대화 시작
         DialogueManager.StartConversation("ShopTutorial");
-    }
-
-    #endregion
-
-    #region 카메라 관련 메서드
-
-    /// <summary>
-    /// 카메라를 중앙 위치로 이동
-    /// </summary>
-    private void ResetCameraToCenter()
-    {
-        if (cameraController != null)
-        {
-            cameraController.SwitchCamera(CameraController.CameraPosition.Center);
-        }
-    }
-
-    /// <summary>
-    /// 플레이어 제어 컴포넌트 활성화
-    /// </summary>
-    private void EnablePlayerControls()
-    {
-        // 카메라 중앙 위치로 이동
-        ResetCameraToCenter();
-    }
-
-    /// <summary>
-    /// 플레이어 제어 컴포넌트 비활성화
-    /// </summary>
-    private void DisablePlayerControls()
-    {
-        // 카메라 중앙 위치로 이동
-        ResetCameraToCenter();
     }
 
     #endregion
@@ -443,7 +410,7 @@ public class GameManager : MonoBehaviour
         yield return new WaitForSeconds(1f);
 
         // 대화가 끝나면 플레이어 컨트롤 활성화
-        EnablePlayerControls();
+        cameraController.SwitchCamera(CameraController.CameraPosition.Center);
     }
 
     // 폭죽 파티클을 재생하는 메서드

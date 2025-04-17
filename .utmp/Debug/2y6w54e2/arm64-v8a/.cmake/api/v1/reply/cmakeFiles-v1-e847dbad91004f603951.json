@@ -49,7 +49,7 @@
 		},
 		{
 			"isGenerated" : true,
-			"path" : "C:/Users/user/Documents/GitHub/Castle-Guardian-VR/.utmp/RelWithDebInfo/3k2u1l2p/arm64-v8a/CMakeFiles/3.22.1-g37088a8-dirty/CMakeSystem.cmake"
+			"path" : "C:/Users/user/Documents/GitHub/Castle-Guardian-VR/.utmp/Debug/2y6w54e2/arm64-v8a/CMakeFiles/3.22.1-g37088a8-dirty/CMakeSystem.cmake"
 		},
 		{
 			"isExternal" : true,
@@ -324,7 +324,7 @@
 		},
 		{
 			"isGenerated" : true,
-			"path" : "C:/Users/user/Documents/GitHub/Castle-Guardian-VR/.utmp/RelWithDebInfo/3k2u1l2p/arm64-v8a/CMakeFiles/3.22.1-g37088a8-dirty/CMakeCCompiler.cmake"
+			"path" : "C:/Users/user/Documents/GitHub/Castle-Guardian-VR/.utmp/Debug/2y6w54e2/arm64-v8a/CMakeFiles/3.22.1-g37088a8-dirty/CMakeCCompiler.cmake"
 		},
 		{
 			"isCMake" : true,
@@ -558,7 +558,7 @@
 		},
 		{
 			"isGenerated" : true,
-			"path" : "C:/Users/user/Documents/GitHub/Castle-Guardian-VR/.utmp/RelWithDebInfo/3k2u1l2p/arm64-v8a/CMakeFiles/3.22.1-g37088a8-dirty/CMakeCXXCompiler.cmake"
+			"path" : "C:/Users/user/Documents/GitHub/Castle-Guardian-VR/.utmp/Debug/2y6w54e2/arm64-v8a/CMakeFiles/3.22.1-g37088a8-dirty/CMakeCXXCompiler.cmake"
 		},
 		{
 			"isCMake" : true,
@@ -722,7 +722,7 @@
 		},
 		{
 			"isGenerated" : true,
-			"path" : "C:/Users/user/Documents/GitHub/Castle-Guardian-VR/.utmp/RelWithDebInfo/3k2u1l2p/arm64-v8a/CMakeFiles/3.22.1-g37088a8-dirty/CMakeCCompiler.cmake"
+			"path" : "C:/Users/user/Documents/GitHub/Castle-Guardian-VR/.utmp/Debug/2y6w54e2/arm64-v8a/CMakeFiles/3.22.1-g37088a8-dirty/CMakeCCompiler.cmake"
 		},
 		{
 			"isCMake" : true,
@@ -816,20 +816,20 @@
 		},
 		{
 			"isGenerated" : true,
-			"path" : "C:/Users/user/Documents/GitHub/Castle-Guardian-VR/.utmp/RelWithDebInfo/3k2u1l2p/arm64-v8a/CMakeFiles/3.22.1-g37088a8-dirty/CMakeCXXCompiler.cmake"
+			"path" : "C:/Users/user/Documents/GitHub/Castle-Guardian-VR/.utmp/Debug/2y6w54e2/arm64-v8a/CMakeFiles/3.22.1-g37088a8-dirty/CMakeCXXCompiler.cmake"
 		},
 		{
 			"path" : "GameActivity/CMakeLists.txt"
 		},
 		{
 			"isExternal" : true,
-			"path" : "C:/Users/user/Documents/GitHub/Castle-Guardian-VR/.utmp/RelWithDebInfo/3k2u1l2p/prefab/arm64-v8a/prefab/lib/aarch64-linux-android/cmake/game-activity/game-activityConfig.cmake"
+			"path" : "C:/Users/user/Documents/GitHub/Castle-Guardian-VR/.utmp/Debug/2y6w54e2/prefab/arm64-v8a/prefab/lib/aarch64-linux-android/cmake/game-activity/game-activityConfig.cmake"
 		}
 	],
 	"kind" : "cmakeFiles",
 	"paths" : 
 	{
-		"build" : "C:/Users/user/Documents/GitHub/Castle-Guardian-VR/.utmp/RelWithDebInfo/3k2u1l2p/arm64-v8a",
+		"build" : "C:/Users/user/Documents/GitHub/Castle-Guardian-VR/.utmp/Debug/2y6w54e2/arm64-v8a",
 		"source" : "C:/Users/user/Documents/GitHub/Castle-Guardian-VR/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/src/main/cpp"
 	},
 	"version" : 

@@ -26,6 +26,10 @@ public class UIManager : MonoBehaviour
     [Header("돈 부족 알림")]
     [SerializeField] private GameObject notEnoughMoneyPopup;
 
+    [Header("타워 관련 경고 문구")] 
+    [SerializeField] private GameObject showNoAvailableNodesPopup;
+    [SerializeField] private GameObject showNoUpgradeableNodesPopup;
+
     [Header("다이얼로그 UI")]
     [SerializeField] private GameObject dialoguePanel;
     [SerializeField] private GameObject[] dialogueImages; // 0, 1: 인트로용, 2: 튜토리얼용
@@ -200,25 +204,46 @@ public class UIManager : MonoBehaviour
         // 선택한 탭에 해당하는 상점 패널만 활성화
         shopPanels[tabIndex].SetActive(true);
     }
+    
+    #endregion
 
-    public void ShowNotEnoughMoneyPopup()
+    #region 팝업 UI 관련
+    
+    // 공통 팝업 표시 메서드
+    private void ShowPopup(GameObject popupObject)
     {
         // 애니메이션과 함께 팝업 표시
-        notEnoughMoneyPopup.transform.localScale = Vector3.zero;
-        notEnoughMoneyPopup.SetActive(true);
-        notEnoughMoneyPopup.transform.DOScale(Vector3.one, 0.3f).SetEase(Ease.OutBack);
-        
-        StartCoroutine(HideNotEnoughMoneyPopup());
+        popupObject.transform.localScale = Vector3.zero;
+        popupObject.SetActive(true);
+        popupObject.transform.DOScale(Vector3.one, 0.3f).SetEase(Ease.OutBack);
+    
+        StartCoroutine(HidePopupAfterDelay(popupObject));
     }
 
-    private IEnumerator HideNotEnoughMoneyPopup()
+    // 공통 팝업 숨김 코루틴
+    private IEnumerator HidePopupAfterDelay(GameObject popupObject)
     {
         yield return new WaitForSeconds(1f);
 
-        notEnoughMoneyPopup.transform.DOScale(Vector3.zero, 0.3f).SetEase(Ease.InBack)
-            .OnComplete(() => notEnoughMoneyPopup.SetActive(false));
+        popupObject.transform.DOScale(Vector3.zero, 0.3f).SetEase(Ease.InBack)
+            .OnComplete(() => popupObject.SetActive(false));
+    }
+    
+    public void ShowNotEnoughMoneyPopup()
+    {
+        ShowPopup(notEnoughMoneyPopup);
     }
 
+    public void ShowNoAvailableNodesPopup()
+    {
+        ShowPopup(showNoAvailableNodesPopup);
+    }
+
+    public void ShowNoUpgradeableNodesPopup()
+    {
+        ShowPopup(showNoUpgradeableNodesPopup);
+    }
+    
     public void ShowArrowUpgradePopup()
     {
         // ArrowManager에서 현재 화살 데이터 가져오기
@@ -233,21 +258,8 @@ public class UIManager : MonoBehaviour
         afterDamageText.text = $"현재 데미지: {afterDamage:F1}";
         multiplierText.text = $"데미지 증가: +10";
 
-        // 애니메이션과 함께 팝업 표시
-        arrowUpgradePopup.transform.localScale = Vector3.zero;
-        arrowUpgradePopup.SetActive(true);
-        arrowUpgradePopup.transform.DOScale(Vector3.one, 0.3f).SetEase(Ease.OutBack);
-
-        // 일정 시간 후 자동 숨김
-        StartCoroutine(HideArrowUpgradePopup());
-    }
-
-    private IEnumerator HideArrowUpgradePopup()
-    {
-        yield return new WaitForSeconds(1f);
-
-        arrowUpgradePopup.transform.DOScale(Vector3.zero, 0.3f).SetEase(Ease.InBack)
-            .OnComplete(() => arrowUpgradePopup.SetActive(false));
+        // 공통 팝업 표시 메서드 사용
+        ShowPopup(arrowUpgradePopup);
     }
 
     #endregion

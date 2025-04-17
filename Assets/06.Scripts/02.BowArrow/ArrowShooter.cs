@@ -20,16 +20,11 @@ public class ArrowShooter : MonoBehaviour
 
     [Header("화살 프리팹-ArrowManager에서 설정")]
     [SerializeField] private GameObject muzzleEffectPrefab; // 발사 전 효과 프리팹 (ArrowManager에서 설정)
-    [SerializeField] private GameObject projectilePrefab;  // 현재 사용 중인 화살 프리팹 (ArrowManager에서 설정)
     [SerializeField] private ProjectileData projectileData; // 현재 화살 데이터 (ArrowManager에서 설정)
 
     [Header("궤적 관련")]
     [SerializeField] private Transform arrowSpawnPoint; // 화살 생성 위치
     [SerializeField] private ProjectileCurveVisualizer curveVisualizer; // 궤적 시각화 도구
-
-    [Header("참조")]
-    [SerializeField] private ProjectilePool arrowPoolManager; // ProjectilePool 참조
-
     #endregion
 
     #region 유니티 이벤트 함수
@@ -113,8 +108,16 @@ public class ArrowShooter : MonoBehaviour
         // 쿨타임 중이거나 조준 중이 아니면 발사 무시
         if (GameManager.Instance.IsArrowCooldown || !isAiming) return;
 
-        // ParticleEffectPool을 사용하여 발사 이펙트 생성
-        ParticleEffectPool.Instance.PlayEffect(muzzleEffectPrefab, arrowSpawnPoint.position, arrowSpawnPoint.rotation);
+        try
+        {
+            // ParticleEffectPool을 사용하여 발사 이펙트 생성
+            ParticleEffectPool.Instance.PlayEffect(muzzleEffectPrefab, arrowSpawnPoint.position,
+                arrowSpawnPoint.rotation);
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError("화살 발사 중 오류 발생: " + e.Message);
+        }
 
         // 발사 사운드 재생
         SoundManager.Instance.PlaySound("ArrowShoot");
@@ -123,16 +126,26 @@ public class ArrowShooter : MonoBehaviour
         isAiming = false;
         curveVisualizer.HideProjectileCurve(); // 화살 궤적 숨김
 
-        // ProjectilePool에서 현재 화살 타입에 맞는 화살 가져오기
-        Projectile projectile = arrowPoolManager.GetProjectile();
+        try 
+        {
+            // ProjectilePool에서 현재 화살 타입에 맞는 화살 가져오기
+            Projectile projectile = ProjectilePool.Instance.GetProjectile();
         
-        // 화살 위치/회전 설정
-        projectile.transform.position = arrowSpawnPoint.position;
-        projectile.transform.rotation = arrowSpawnPoint.rotation;
+            // 화살 위치/회전 설정
+            projectile.transform.position = arrowSpawnPoint.position;
+            projectile.transform.rotation = arrowSpawnPoint.rotation;
         
-        // 데이터 설정 및 발사
-        projectile.SetProjectileData(projectileData);
-        projectile.Launch(arrowSpawnPoint.forward * currentArrowSpeed);
+            // 데이터 설정 및 발사
+            projectile.SetProjectileData(projectileData);
+            projectile.Launch(arrowSpawnPoint.forward * currentArrowSpeed);
+        
+            // 쿨타임 시작 - GameManager에 요청
+            GameManager.Instance.StartArrowCooldown();
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError("화살 발사 중 오류 발생: " + e.Message);
+        }
         
         // 쿨타임 시작 - GameManager에 요청
         GameManager.Instance.StartArrowCooldown();
@@ -148,9 +161,6 @@ public class ArrowShooter : MonoBehaviour
     /// <param name="newMuzzleEffect">새 발사 이펙트 프리팹</param>
     public void SetProjectilePrefab(GameObject newPrefab, ProjectileData data, GameObject newMuzzleEffect)
     {
-        // 새 프리팹 설정
-        projectilePrefab = newPrefab;
-        
         // 새 데이터 설정
         projectileData = data;
 
@@ -158,6 +168,6 @@ public class ArrowShooter : MonoBehaviour
         muzzleEffectPrefab = newMuzzleEffect;
         
         // 화살 풀에 현재 화살 타입 설정 
-        arrowPoolManager.SetCurrentArrowType(data.projectileType);
+        ProjectilePool.Instance.SetCurrentArrowType(data.projectileType);
     }
 }

@@ -14,8 +14,10 @@ public class BuildableNode : MonoBehaviour
 
     [Header("노드 시각 셋팅")]
     public Color baseColor = Color.red;       // 기본 색상 (건설 전)
-    private Color towerColor = Color.white;     // 기본 색상 (건설 후)
     public Color hoverColor = Color.green;     // 마우스 올렸을 때 건설 가능한 색상
+    private Color towerColor = Color.white;     // 기본 아처 타워 색상
+    private Color explosiveTowerColor = Color.red;    // 폭발 타워 색상 
+    private Color slowTowerColor = new Color(0.5f, 0.2f, 0.8f);  // 슬로우 타워 색상 (보라색+초록색)
     
     [Header("머터리얼 설정")]
     [SerializeField] private Material initialMaterial;
@@ -161,7 +163,7 @@ public class BuildableNode : MonoBehaviour
         towerLevel = 2;
 
         nodeRenderer.material = towerMaterial;
-        nodeRenderer.material.color = towerColor;
+        nodeRenderer.material.color = explosiveTowerColor;  // 폭발 타워용 색상
         
         // 2단계 타워로 등록
         buildManager.UpgradeToTier2(this);
@@ -180,7 +182,7 @@ public class BuildableNode : MonoBehaviour
         towerLevel = 2;
 
         nodeRenderer.material = towerMaterial;
-        nodeRenderer.material.color = towerColor;
+        nodeRenderer.material.color = slowTowerColor;  // 슬로우 타워용 색상
         
         // 2단계 타워로 등록
         buildManager.UpgradeToTier2(this);
@@ -218,7 +220,12 @@ public class BuildableNode : MonoBehaviour
             nodeRenderer.material = initialMaterial;
             nodeRenderer.material.color = baseColor;
         }
-        // 2단계 타워는 머티리얼 변경 없음 (현재 상태 유지)
+        else if (towerLevel == 2)
+        {
+            // 2단계 타워도 초기 머터리얼로 변경
+            nodeRenderer.material = initialMaterial;
+            nodeRenderer.material.color = baseColor;
+        }
     }
     
     /// <summary>
@@ -237,68 +244,21 @@ public class BuildableNode : MonoBehaviour
             nodeRenderer.material = towerMaterial;
             nodeRenderer.material.color = towerColor;
         }
-        // 2단계 타워는 변경 없음 (현재 상태 유지)
+        else if (towerLevel == 2)
+        {
+            // 2단계 타워도 해당 타워의 원래 색상으로 복원
+            if (explosiveTower.enabled)
+            {
+                nodeRenderer.material = towerMaterial;
+                nodeRenderer.material.color = explosiveTowerColor;
+            }
+            else if (slowTower.enabled)
+            {
+                nodeRenderer.material = towerMaterial;
+                nodeRenderer.material.color = slowTowerColor;
+            }
+        }
     }
     
     #endregion
-
-    // VR 레이캐스트 히트 시 호출될 메서드 추가
-    public void OnRaycastHit()
-    {
-        // 빌드 모드가 아니면 아무것도 하지 않음
-        if (!buildManager.isBuildMode) return;
-        
-        // 새 타워 건설 모드
-        if (buildManager.currentBuildMode == BuildManager.BuildModeType.NewTower)
-        {
-            // 건설 가능한 노드일 경우에만 건설
-            if (towerLevel == 0)
-            {
-                BuildTower();
-            }
-        }
-        // 업그레이드 모드
-        else if (buildManager.currentBuildMode == BuildManager.BuildModeType.UpgradeTower)
-        {
-            // 1단계 타워만 업그레이드 가능
-            if (towerLevel == 1)
-            {
-                if (buildManager.GetUpgradeTargetType() == TowerType.Explosive)
-                {
-                    UpgradeToExplosiveTower();
-                }
-                else if (buildManager.GetUpgradeTargetType() == TowerType.Slow)
-                {
-                    UpgradeToSlowTower();
-                }
-                buildManager.ExitBuildMode();
-            }
-        }
-    }
-
-    // VR 레이캐스트가 노드를 가리킬 때
-    public void OnRaycastEnter()
-    {
-        if (!buildManager.isBuildMode) return;
-
-        if (buildManager.currentBuildMode == BuildManager.BuildModeType.NewTower)
-        {
-            if (towerLevel == 0) SetColor(hoverColor);
-        }
-        else if (buildManager.currentBuildMode == BuildManager.BuildModeType.UpgradeTower)
-        {
-            if (towerLevel == 1) SetColor(hoverColor);
-        }
-    }
-
-    // VR 레이캐스트가 노드에서 벗어날 때
-    public void OnRaycastExit()
-    {
-        if (!buildManager.isBuildMode) return;
-        
-        if (towerLevel == 0 || towerLevel == 1)
-        {
-            SetColor(baseColor);
-        }
-    }
 }

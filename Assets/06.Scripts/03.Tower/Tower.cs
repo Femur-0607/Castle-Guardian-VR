@@ -174,70 +174,80 @@ public abstract class Tower : MonoBehaviour, IUpgradeable
         // Transform 캐싱으로 성능 최적화
         Transform projectileTransform = projectile.transform;
         
+        // 코루틴 종료시 투사체 반환 로직 추가
+        bool projectileReturned = false;
+        
         // 시간 관련 변수 초기화
         float startTime = Time.time;      // 시작 시간
         float elapsedTime = 0;            // 경과 시간
         Vector3 startPos = projectileTransform.position;  // 시작 위치
         Vector3 initialTargetPos = target.position;       // 초기 타겟 위치
         
-        // 투사체 이동 루프 (예상 시간의 1.5배까지)
-        while (projectile != null && target != null && elapsedTime < estimatedTime * 1.5f)
+        try
         {
-            // 경과 시간 계산
-            elapsedTime = Time.time - startTime;
-            float normalizedTime = elapsedTime / estimatedTime;  // 0~1 사이의 정규화된 시간
-            
-            // 타겟 도착 체크 (99% 이상 도달)
-            if (normalizedTime >= 0.99f)
+            // 투사체 이동 루프 (예상 시간의 1.5배까지)
+            while (projectile != null && target != null && elapsedTime < estimatedTime * 1.5f)
             {
-                if (projectile != null)
+                // 경과 시간 계산
+                elapsedTime = Time.time - startTime;
+                float normalizedTime = elapsedTime / estimatedTime;  // 0~1 사이의 정규화된 시간
+                
+                // 타겟 도착 체크 (99% 이상 도달)
+                if (normalizedTime >= 0.99f)
                 {
-                    // 타겟에 데미지 적용
-                    if (target.TryGetComponent<Enemy>(out var enemy))
+                    if (projectile != null)
                     {
-                        enemy.TakeDamage(towerData.attackDamage);
+                        // 타겟에 데미지 적용
+                        if (target.TryGetComponent<Enemy>(out var enemy))
+                        {
+                            enemy.TakeDamage(towerData.attackDamage);
+                        }
+                        
+                        // 타격 이펙트 생성
+                        if (hitEffect != null)
+                        {
+                            ParticleEffectPool.Instance.PlayEffect(hitEffect, target.position, Quaternion.identity);
+                        }
+                        
+                        // 투사체 제거 대신 풀에 반환
+                        projectileReturned = true;
+                        ProjectilePool.Instance.ReturnProjectile(projectile);
                     }
-                    
-                    // 타격 이펙트 생성
-                    if (hitEffect != null)
-                    {
-                        Instantiate(hitEffect, target.position, Quaternion.identity);
-                    }
-                    
-                    // 투사체 제거
-                    Destroy(projectile);
+                    yield break;  // 코루틴 종료
                 }
-                yield break;  // 코루틴 종료
+                
+                // 투사체 위치 계산 (최적화)
+                float directWeight = 1.0f - normalizedTime;  // 직선 경로 가중치
+                float followWeight = normalizedTime;         // 추적 경로 가중치
+                
+                // 직선 경로 계산 (시작점에서 초기 타겟 위치로)
+                Vector3 directPath = Vector3.Lerp(startPos, initialTargetPos, normalizedTime);
+                
+                // 추적 경로 계산 (현재 위치에서 타겟 방향으로)
+                Vector3 followDirection = (target.position - projectileTransform.position).normalized;
+                Vector3 followPath = projectileTransform.position + 
+                    followDirection * (speed * Time.deltaTime * followWeight);
+                
+                // 포물선 높이 계산 (사인 함수 사용)
+                float height = Mathf.Sin(normalizedTime * Mathf.PI) * heightMultiplier;
+                
+                // 최종 위치 계산 (직선과 추적 경로의 가중 평균 + 높이)
+                Vector3 newPosition = (directPath * directWeight + followPath * followWeight);
+                newPosition.y += height;
+                
+                // 새로운 위치 적용
+                projectileTransform.position = newPosition;
+                
+                yield return null;  // 다음 프레임까지 대기
             }
-            
-            // 투사체 위치 계산 (최적화)
-            float directWeight = 1.0f - normalizedTime;  // 직선 경로 가중치
-            float followWeight = normalizedTime;         // 추적 경로 가중치
-            
-            // 직선 경로 계산 (시작점에서 초기 타겟 위치로)
-            Vector3 directPath = Vector3.Lerp(startPos, initialTargetPos, normalizedTime);
-            
-            // 추적 경로 계산 (현재 위치에서 타겟 방향으로)
-            Vector3 followDirection = (target.position - projectileTransform.position).normalized;
-            Vector3 followPath = projectileTransform.position + 
-                followDirection * (speed * Time.deltaTime * followWeight);
-            
-            // 포물선 높이 계산 (사인 함수 사용)
-            float height = Mathf.Sin(normalizedTime * Mathf.PI) * heightMultiplier;
-            
-            // 최종 위치 계산 (직선과 추적 경로의 가중 평균 + 높이)
-            Vector3 newPosition = (directPath * directWeight + followPath * followWeight);
-            newPosition.y += height;
-            
-            // 새로운 위치 적용
-            projectileTransform.position = newPosition;
-            
-            yield return null;  // 다음 프레임까지 대기
-        }
         
-        // 시간 초과 시 투사체 제거
-        if (projectile != null)
-            Destroy(projectile);
+        }
+        finally 
+        {
+            // 코루틴이 어떤 이유로든 종료될 때 투사체가 반환되지 않았다면 반환
+            if (!projectileReturned && projectile != null)
+                ProjectilePool.Instance.ReturnProjectile(projectile);
+        }
     }
 
     #endregion

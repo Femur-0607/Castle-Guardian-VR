@@ -34,7 +34,6 @@ public class EnemyPool : MonoBehaviour
     private void OnTakeEnemy(Enemy enemy)
     {
         enemy.gameObject.SetActive(true);
-        enemy.ResetState();
     }
 
     private void OnReleaseEnemy(Enemy enemy)

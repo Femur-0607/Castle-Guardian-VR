@@ -57,7 +57,7 @@ public abstract class Projectile : MonoBehaviour, IProjectile
     }
 
     // 풀 사용 및 반환 시 투사체 상태 초기화
-    public virtual void ResetState()
+    public void ResetState()
     {
         // 자식 오브젝트 위치 초기화
         if (projectileChildPoint != null)
@@ -90,7 +90,7 @@ public abstract class Projectile : MonoBehaviour, IProjectile
     }
 
     // 풀로 반환
-    protected virtual void ReturnToPool()
+    public void ReturnToPool()
     {
         if (pool != null)
         {

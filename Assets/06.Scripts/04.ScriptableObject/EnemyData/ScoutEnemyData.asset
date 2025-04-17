@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: ScoutEnemyData
   m_EditorClassIdentifier: 
   startingHealth: 50
-  moveSpeed: 15
+  moveSpeed: 12
   attackRange: 10
   attackDamage: 5
   attackCooldown: 2

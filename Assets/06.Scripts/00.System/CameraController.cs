@@ -263,12 +263,4 @@ public class CameraController : MonoBehaviour
     }
 
     #endregion
-    
-    void Update()
-{
-    if (screenFade != null && screenFade.currentAlpha > 0.9f)
-    {
-        Debug.Log($"High fade alpha: {screenFade.currentAlpha}");
-    }
 }
-} 

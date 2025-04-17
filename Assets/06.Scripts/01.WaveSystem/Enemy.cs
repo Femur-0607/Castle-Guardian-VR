@@ -24,6 +24,9 @@ public class Enemy : LivingEntity
     public Transform target;        // 성문
     public EnemyData enemyData;     // 'Enemy'의 스테이터스를 담당
     public SpawnManager spawnManager;
+    private Collider collider;
+    private Rigidbody rigidbody;
+    private int currentWave = 1;
 
     [Header("모델 프리팹")]
     [SerializeField] private GameObject normalModel;
@@ -55,6 +58,8 @@ public class Enemy : LivingEntity
     {
         agent = GetComponent<NavMeshAgent>();
         animator = GetComponentsInChildren<Animator>()[0];
+        collider = GetComponent<Collider>();
+        rigidbody = GetComponent<Rigidbody>();
         cachedTransform = transform; // Transform 캐싱
     }
     protected override void Start()
@@ -200,7 +205,11 @@ public class Enemy : LivingEntity
     // 웨이브 시작 시 체력 갱신 메서드
     private void UpdateEnemyHealthForWave(int waveNumber)
     {
-        if (enemyData != null)
+        // 현재 웨이브 업데이트
+        currentWave = waveNumber;
+    
+        // 활성화된 상태에서만 체력 갱신
+        if (isAlive && enemyData != null)
         {
             // 현재 웨이브에 맞는 체력으로 갱신
             startingHealth = enemyData.CalculateHealthForWave(waveNumber);
@@ -230,7 +239,7 @@ public class Enemy : LivingEntity
         if (enemyData != null)
         {
             // 체력 초기화
-            startingHealth = enemyData.startingHealth;
+            startingHealth = enemyData.CalculateHealthForWave(currentWave);
             currentHealth = startingHealth;
         
             // 이동 관련 스탯 초기화
@@ -247,6 +256,18 @@ public class Enemy : LivingEntity
     
         // 3. 모델링 타입에 맞게 변경
         ActivateModelByType(enemyData.enemyType);
+        
+        if (rigidbody != null)
+        {
+            rigidbody.isKinematic = false; // 물리 효과 다시 활성화
+            rigidbody.linearVelocity = Vector3.zero;
+            rigidbody.angularVelocity = Vector3.zero;
+        }
+
+        if (collider != null)
+        {
+            collider.enabled = true;
+        }
     
         // 4. 진행 중인 모든 코루틴 중지
         // 슬로우 효과 코루틴 중지
@@ -444,34 +465,44 @@ public class Enemy : LivingEntity
     /// </summary>
     public override void Die()
     {
+        if (!isAlive) return;
+        
+        base.Die();
+        
         if (hasFormationPosition)
         {
             formationManager.ReleasePosition(this);
             hasFormationPosition = false;
             isInPosition = false;
         }
-
-        base.Die();
-
-        currentState = EnemyState.Dead;
-
-        // 에이전트가 활성화되고 NavMesh 위에 있는지 확인
-        if (agent != null && agent.isActiveAndEnabled && agent.isOnNavMesh)
+        
+        // 슬로우 효과 코루틴 중지
+        if (slowCoroutine != null)
+        {
+            StopCoroutine(slowCoroutine);
+            slowCoroutine = null;
+        }
+        
+        // 네비게이션 에이전트를 먼저 비활성화
+        if (agent != null && agent.isActiveAndEnabled)
         {
             agent.isStopped = true;
+            agent.velocity = Vector3.zero;  // 속도 0으로 설정
             agent.enabled = false;
         }
-        else
+        
+        // 리지드바디 처리 - isKinematic을 true로 설정해 물리 영향 비활성화
+        if (rigidbody != null)
         {
-            // 이미 비활성화되어 있거나 NavMesh에 없는 경우 바로 비활성화
-            if (agent != null && agent.isActiveAndEnabled)
-            {
-                agent.enabled = false;
-            }
+            rigidbody.linearVelocity = Vector3.zero;     // 속도 초기화
+            rigidbody.angularVelocity = Vector3.zero;  // 회전 속도 초기화
+            rigidbody.isKinematic = true;          // 물리 효과 비활성화
         }
+        
+        // 충돌 비활성화
+        collider.enabled = false;
 
-        Rigidbody rb = GetComponent<Rigidbody>();
-        rb.isKinematic = true;
+        currentState = EnemyState.Dead;
 
         // 사망 시 게임매니저에게 골드 전달 (프로퍼티 사용을 위해 AddMoney 메서드 호출)
         GameManager.Instance.AddMoney((int)enemyData.goldDropAmount);

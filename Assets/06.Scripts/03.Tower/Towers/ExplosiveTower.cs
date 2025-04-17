@@ -18,17 +18,17 @@ public class ExplosiveTower : Tower
         // 발사 사운드 재생
         SoundManager.Instance.PlaySound3D("ExplosiveTowerShoot", firePoint.position);
 
-        // 발사 효과 생성
-        GameObject muzzleEffect = Instantiate(muzzleEffectPrefab, firePoint.position, firePoint.rotation);
-        Destroy(muzzleEffect, 2f);
+        // 발사 효과 생성 (ParticleEffectPool 사용)
+        ParticleEffectPool.Instance.PlayEffect(muzzleEffectPrefab, firePoint.position, firePoint.rotation);
 
-        // 투사체 생성 및 이동 시작
-        GameObject projectile = Instantiate(explosionPrefab, firePoint.position, Quaternion.identity);
+        // 투사체 생성 (ProjectilePool 사용)
+        Projectile projectileComponent = ProjectilePool.Instance.GetProjectileAt(firePoint.position);
+        GameObject projectileObj = projectileComponent.gameObject;
         float travelTime = Vector3.Distance(firePoint.position, target.transform.position) / towerData.projectileSpeed;
 
         // 공통 코루틴 호출
         StartCoroutine(MoveProjectileWithPrediction(
-            projectile,
+            projectileObj,
             target.transform,
             towerData.projectileSpeed,
             travelTime,

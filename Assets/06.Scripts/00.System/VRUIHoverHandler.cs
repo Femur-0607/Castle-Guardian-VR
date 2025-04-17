@@ -30,8 +30,6 @@ public class VRUIHoverHandler : MonoBehaviour, IPointerEnterHandler, IPointerExi
         transform.localScale = originalScale * hoverScale;
         // 색상 변경
         targetImage.color = hoverColor;
-
-        Debug.Log($"Hover Enter: {gameObject.name}");
     }
 
     public void OnPointerExit(PointerEventData eventData)
@@ -42,8 +40,6 @@ public class VRUIHoverHandler : MonoBehaviour, IPointerEnterHandler, IPointerExi
         transform.localScale = originalScale;
         // 원래 색상으로
         targetImage.color = originalColor;
-
-        Debug.Log($"Hover Exit: {gameObject.name}");
     }
 
     private void OnDisable()

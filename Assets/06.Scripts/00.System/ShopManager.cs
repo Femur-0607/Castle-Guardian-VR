@@ -95,6 +95,14 @@ public class ShopManager : MonoBehaviour
     #region 타워 관련 메소드
     public void OnTowerSelected()
     {
+        // 건설 가능한 노드가 있는지 먼저 확인
+        if (!buildManager.HasBuildableNodes())
+        {
+            // 건설 가능한 노드가 없다면 알림 표시
+            uiManager.ShowNoAvailableNodesPopup(); // 이런 메서드를 UIManager에 추가해야 함
+            return;
+        }
+        
         if (TryPurchase(towerCost))
         {
             buildManager.EnterBuildMode();
@@ -108,6 +116,7 @@ public class ShopManager : MonoBehaviour
         // 업그레이드 가능한 1단계 타워가 없으면 리턴
         if (!buildManager.HasUpgradeableTowers())
         {
+            uiManager.ShowNoUpgradeableNodesPopup(); // 이런 메서드를 UIManager에 추가해야 함
             return;
         }
 

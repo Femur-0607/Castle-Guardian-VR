@@ -19,6 +19,7 @@ public class ParticleEffectPool : MonoBehaviour
         }
         Instance = this;
     }
+
     #endregion
     
     // 풀을 관리할 딕셔너리
@@ -34,36 +35,50 @@ public class ParticleEffectPool : MonoBehaviour
     // 효과 재생
     public void PlayEffect(GameObject prefab, Vector3 position, Quaternion rotation)
     {
-        string key = prefab.name;
-        
-        // 풀 확인 및 초기화
-        if (!particlePools.ContainsKey(key))
+        // 널 체크 추가
+        if (prefab == null)
         {
-            particlePools[key] = new Queue<GameObject>();
-            // 초기 풀 크기만큼 생성
-            PreparePool(prefab, key, defaultPoolSize);
+            Debug.LogWarning("Attempted to play null particle effect");
+            return;
         }
-        
-        // 풀에서 파티클 가져오기
-        GameObject effect = GetFromPool(prefab, key);
-        
-        // 위치 설정
-        effect.transform.position = position;
-        effect.transform.rotation = rotation;
-        effect.SetActive(true);
-        
-        // 파티클 시스템 재생
-        ParticleSystem[] particleSystems = effect.GetComponentsInChildren<ParticleSystem>();
-        foreach (var ps in particleSystems)
+
+        try
         {
-            ps.Clear();
-            ps.Play();
+            // 기존 로직 유지
+            string key = prefab.name;
+
+            // 풀 확인 및 초기화
+            if (!particlePools.ContainsKey(key))
+            {
+                particlePools[key] = new Queue<GameObject>();
+                PreparePool(prefab, key, defaultPoolSize);
+            }
+
+            // 풀에서 파티클 가져오기
+            GameObject effect = GetFromPool(prefab, key);
+
+            // 위치 설정
+            effect.transform.position = position;
+            effect.transform.rotation = rotation;
+            effect.SetActive(true);
+
+            // 파티클 시스템 재생
+            ParticleSystem[] particleSystems = effect.GetComponentsInChildren<ParticleSystem>();
+            foreach (var ps in particleSystems)
+            {
+                ps.Clear();
+                ps.Play();
+            }
+
+            // 자동 반환 처리
+            StartCoroutine(ReturnToPoolAfterPlay(effect, key, GetLongestDuration(particleSystems)));
         }
-        
-        // 자동 반환 처리
-        StartCoroutine(ReturnToPoolAfterPlay(effect, key, GetLongestDuration(particleSystems)));
+        catch (System.Exception e)
+        {
+            Debug.LogError($"Error playing particle effect: {e.Message}");
+        }
     }
-    
+
     // 풀 초기화
     private void PreparePool(GameObject prefab, string key, int count)
     {
