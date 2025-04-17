@@ -217,7 +217,7 @@ public class BuildManager : MonoBehaviour
             cameraController.SwitchCamera(CameraController.CameraPosition.UI);
         }
 
-                // 빌드 모드 상태 초기화
+        // 빌드 모드 상태 초기화
         currentBuildMode = BuildModeType.None;
 
         // 모든 노드에 빌드 모드 종료 알림
@@ -231,6 +231,12 @@ public class BuildManager : MonoBehaviour
         {
             node.OnBuildModeExit();
             node.SetNodeVisibility(false);  // 노드 비활성화 추가
+        }
+
+        foreach (BuildableNode node in tier2Nodes)
+        {
+            node.OnBuildModeExit();
+            node.SetNodeVisibility(true);  // 2단계 타워는 계속 보이도록
         }
         
         // 상점 UI 다시 표시

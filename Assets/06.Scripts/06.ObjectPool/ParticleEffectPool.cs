@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -35,16 +36,13 @@ public class ParticleEffectPool : MonoBehaviour
     // 효과 재생
     public void PlayEffect(GameObject prefab, Vector3 position, Quaternion rotation)
     {
-        // 널 체크 추가
         if (prefab == null)
         {
-            Debug.LogWarning("Attempted to play null particle effect");
             return;
         }
 
         try
         {
-            // 기존 로직 유지
             string key = prefab.name;
 
             // 풀 확인 및 초기화
@@ -62,13 +60,8 @@ public class ParticleEffectPool : MonoBehaviour
             effect.transform.rotation = rotation;
             effect.SetActive(true);
 
-            // 파티클 시스템 재생
+            // 파티클 시스템 지속시간 계산을 위한 참조
             ParticleSystem[] particleSystems = effect.GetComponentsInChildren<ParticleSystem>();
-            foreach (var ps in particleSystems)
-            {
-                ps.Clear();
-                ps.Play();
-            }
 
             // 자동 반환 처리
             StartCoroutine(ReturnToPoolAfterPlay(effect, key, GetLongestDuration(particleSystems)));

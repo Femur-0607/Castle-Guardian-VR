@@ -24,8 +24,8 @@ public class Enemy : LivingEntity
     public Transform target;        // 성문
     public EnemyData enemyData;     // 'Enemy'의 스테이터스를 담당
     public SpawnManager spawnManager;
-    private Collider collider;
-    private Rigidbody rigidbody;
+    private new Collider collider;
+    private new Rigidbody rigidbody;
     private int currentWave = 1;
 
     [Header("모델 프리팹")]
@@ -158,7 +158,29 @@ public class Enemy : LivingEntity
         }
         else
         {
+             SetLastStateParameter(); // 히트 모션 전에 이전 상태 기록
+
             animator.SetTrigger("hit");
+        }
+    }
+    
+    private void SetLastStateParameter()
+    {
+        if (animator == null) return;
+
+        if (currentState == EnemyState.Chasing)
+        {
+            animator.SetInteger("LastState", 1); // WalkFWD
+        }
+        else if (currentState == EnemyState.Attacking)
+        {
+            // Attack01과 Attack02를 구분
+            int attackType = animator.GetInteger("attackType");
+            animator.SetInteger("LastState", attackType == 0 ? 2 : 3);
+        }
+        else
+        {
+            animator.SetInteger("LastState", 0); // 기본값
         }
     }
 
@@ -169,16 +191,16 @@ public class Enemy : LivingEntity
     // 다이얼로그 시작 시 호출
     private void HandleDialogueStarted(EventManager.DialogueType type)
     {
-        if (type == EventManager.DialogueType.Tutorial  || type == EventManager.DialogueType.SpawnPointAdded)
+        if (type == EventManager.DialogueType.Tutorial || type == EventManager.DialogueType.SpawnPointAdded)
         {
             isDialogueActive = true;
-            
+
             // 네비게이션 일시 중지
             if (agent != null && agent.enabled)
             {
                 agent.isStopped = true;
             }
-            
+
             // 애니메이션 중지 (Idle 상태로)
             if (animator != null)
             {

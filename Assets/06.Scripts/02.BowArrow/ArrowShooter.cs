@@ -1,5 +1,6 @@
 using UnityEngine;
 using ProjectileCurveVisualizerSystem;
+using System;
 
 /// <summary>
 /// 화살 발사 시스템: 화살을 발사하는 역할을 담당
@@ -108,47 +109,67 @@ public class ArrowShooter : MonoBehaviour
         // 쿨타임 중이거나 조준 중이 아니면 발사 무시
         if (GameManager.Instance.IsArrowCooldown || !isAiming) return;
 
-        try
-        {
-            // ParticleEffectPool을 사용하여 발사 이펙트 생성
-            ParticleEffectPool.Instance.PlayEffect(muzzleEffectPrefab, arrowSpawnPoint.position,
-                arrowSpawnPoint.rotation);
-        }
-        catch (System.Exception e)
-        {
-            Debug.LogError("화살 발사 중 오류 발생: " + e.Message);
-        }
-
-        // 발사 사운드 재생
-        SoundManager.Instance.PlaySound("ArrowShoot");
-
-        // 조준 종료 및 궤적 숨김
+        bool fireSuccessful = false;
         isAiming = false;
         curveVisualizer.HideProjectileCurve(); // 화살 궤적 숨김
 
-        try 
+        try
         {
-            // ProjectilePool에서 현재 화살 타입에 맞는 화살 가져오기
+            // 필요한 컴포넌트 검증
+            if (muzzleEffectPrefab == null)
+            {
+                return;
+            }
+            else if (ParticleEffectPool.Instance != null)
+            {
+                // 이펙트 생성
+                ParticleEffectPool.Instance.PlayEffect(muzzleEffectPrefab, arrowSpawnPoint.position, arrowSpawnPoint.rotation);
+            }
+
+            // 발사 사운드 재생
+            SoundManager.Instance.PlaySound("ArrowShoot");
+
+            // 화살 발사 검증
+            if (projectileData == null)
+            {
+                return;
+            }
+
+            if (ProjectilePool.Instance == null)
+            {
+                return;
+            }
+
+            // 화살 생성
             Projectile projectile = ProjectilePool.Instance.GetProjectile();
-        
+            if (projectile == null)
+            {
+                return;
+            }
+
             // 화살 위치/회전 설정
             projectile.transform.position = arrowSpawnPoint.position;
             projectile.transform.rotation = arrowSpawnPoint.rotation;
-        
+
             // 데이터 설정 및 발사
             projectile.SetProjectileData(projectileData);
             projectile.Launch(arrowSpawnPoint.forward * currentArrowSpeed);
-        
-            // 쿨타임 시작 - GameManager에 요청
-            GameManager.Instance.StartArrowCooldown();
+
+            fireSuccessful = true;
         }
         catch (System.Exception e)
         {
-            Debug.LogError("화살 발사 중 오류 발생: " + e.Message);
+            // 예외 처리 로직
+            Debug.Log(e);
         }
-        
-        // 쿨타임 시작 - GameManager에 요청
-        GameManager.Instance.StartArrowCooldown();
+        finally
+        {
+            // 성공 여부와 상관없이 쿨타임은 시작
+            if (fireSuccessful || !isAiming) // 발사 시도했으면 쿨타임
+            {
+                GameManager.Instance.StartArrowCooldown();
+            }
+        }
     }
 
     #endregion
@@ -161,13 +182,47 @@ public class ArrowShooter : MonoBehaviour
     /// <param name="newMuzzleEffect">새 발사 이펙트 프리팹</param>
     public void SetProjectilePrefab(GameObject newPrefab, ProjectileData data, GameObject newMuzzleEffect)
     {
-        // 새 데이터 설정
-        projectileData = data;
+        // 인자 검증 추가
+        if (data == null)
+        {
+            return;
+        }
 
-        // 머즐 이펙트 업데이트
+        // 데이터와 이펙트 설정
+        projectileData = data;
         muzzleEffectPrefab = newMuzzleEffect;
         
-        // 화살 풀에 현재 화살 타입 설정 
-        ProjectilePool.Instance.SetCurrentArrowType(data.projectileType);
+        // ProjectilePool 인스턴스 확인
+        if (ProjectilePool.Instance != null)
+        {
+            // 화살 풀에 현재 화살 타입 설정
+            ProjectilePool.Instance.SetCurrentArrowType(data.projectileType);
+        }
+        else
+        {
+            return;
+        }
+    }
+
+    private void PlayMuzzleEffect()
+    {
+        if (muzzleEffectPrefab == null)
+        {
+            return;
+        }
+        // 머즐 이펙트 재생 로직
+    }
+
+    public void ShootArrow()
+    {
+        if (projectileData == null)
+        {
+            return;
+        }
+
+        if (ProjectilePool.Instance == null)
+        {
+            return;
+        }
     }
 }

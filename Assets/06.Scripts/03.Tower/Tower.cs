@@ -160,93 +160,79 @@ public abstract class Tower : MonoBehaviour, IUpgradeable
         return towerData.upgradeCost;
     }
 
-    protected IEnumerator<object> MoveProjectileWithPrediction(
-        GameObject projectile,      // 이동시킬 투사체
-        Transform target,          // 목표물
-        float speed,              // 투사체 속도
-        float estimatedTime,      // 예상 도착 시간
-        GameObject hitEffect = null,  // 타격 이펙트
-        float heightMultiplier = 1.5f)  // 포물선 높이 배수
+    // 파티클 이펙트 이동 및 타격 처리용 코루틴
+    protected IEnumerator<object> MoveProjectileEffect(
+        GameObject projectile,
+        Transform target,
+        float speed,
+        float estimatedTime,
+        GameObject hitEffect = null)
     {
         // 투사체나 타겟이 없으면 코루틴 종료
         if (projectile == null || target == null) yield break;
-        
-        // Transform 캐싱으로 성능 최적화
-        Transform projectileTransform = projectile.transform;
-        
-        // 코루틴 종료시 투사체 반환 로직 추가
-        bool projectileReturned = false;
-        
-        // 시간 관련 변수 초기화
-        float startTime = Time.time;      // 시작 시간
-        float elapsedTime = 0;            // 경과 시간
-        Vector3 startPos = projectileTransform.position;  // 시작 위치
-        Vector3 initialTargetPos = target.position;       // 초기 타겟 위치
-        
+
+        bool effectReturned = false;
+
         try
         {
-            // 투사체 이동 루프 (예상 시간의 1.5배까지)
+            // 시간 관련 변수 초기화
+            float startTime = Time.time;
+            float elapsedTime = 0;
+            Vector3 startPos = projectile.transform.position;
+            Vector3 initialTargetPos = target.position;
+
+            // 투사체 이동 루프
             while (projectile != null && target != null && elapsedTime < estimatedTime * 1.5f)
             {
-                // 경과 시간 계산
                 elapsedTime = Time.time - startTime;
-                float normalizedTime = elapsedTime / estimatedTime;  // 0~1 사이의 정규화된 시간
-                
-                // 타겟 도착 체크 (99% 이상 도달)
+                float normalizedTime = elapsedTime / estimatedTime;
+
+                // 타겟 도착 체크
                 if (normalizedTime >= 0.99f)
                 {
-                    if (projectile != null)
+                    // 타겟에 데미지 적용
+                    if (target.TryGetComponent<Enemy>(out var enemy))
                     {
-                        // 타겟에 데미지 적용
-                        if (target.TryGetComponent<Enemy>(out var enemy))
-                        {
-                            enemy.TakeDamage(towerData.attackDamage);
-                        }
-                        
-                        // 타격 이펙트 생성
-                        if (hitEffect != null)
-                        {
-                            ParticleEffectPool.Instance.PlayEffect(hitEffect, target.position, Quaternion.identity);
-                        }
-                        
-                        // 투사체 제거 대신 풀에 반환
-                        projectileReturned = true;
-                        ProjectilePool.Instance.ReturnProjectile(projectile);
+                        enemy.TakeDamage(towerData.attackDamage);
                     }
-                    yield break;  // 코루틴 종료
+
+                    // 타격 이펙트 생성
+                    if (hitEffect != null)
+                    {
+                        ParticleEffectPool.Instance.PlayEffect(hitEffect, target.position, Quaternion.identity);
+                    }
+
+                    // 파티클 풀로 반환
+                    effectReturned = true;
+                    ParticleEffectPool.Instance.ReturnEffect(projectile);
+                    yield break;
                 }
-                
-                // 투사체 위치 계산 (최적화)
-                float directWeight = 1.0f - normalizedTime;  // 직선 경로 가중치
-                float followWeight = normalizedTime;         // 추적 경로 가중치
-                
-                // 직선 경로 계산 (시작점에서 초기 타겟 위치로)
+
+                // 포물선 이동 처리
+                float directWeight = 1.0f - normalizedTime;
+                float followWeight = normalizedTime;
+
                 Vector3 directPath = Vector3.Lerp(startPos, initialTargetPos, normalizedTime);
-                
-                // 추적 경로 계산 (현재 위치에서 타겟 방향으로)
-                Vector3 followDirection = (target.position - projectileTransform.position).normalized;
-                Vector3 followPath = projectileTransform.position + 
-                    followDirection * (speed * Time.deltaTime * followWeight);
-                
-                // 포물선 높이 계산 (사인 함수 사용)
-                float height = Mathf.Sin(normalizedTime * Mathf.PI) * heightMultiplier;
-                
-                // 최종 위치 계산 (직선과 추적 경로의 가중 평균 + 높이)
+                Vector3 followDirection = (target.position - projectile.transform.position).normalized;
+                Vector3 followPath = projectile.transform.position + followDirection * (speed * Time.deltaTime * followWeight);
+
+                float height = Mathf.Sin(normalizedTime * Mathf.PI) * 1.5f;
+
                 Vector3 newPosition = (directPath * directWeight + followPath * followWeight);
                 newPosition.y += height;
-                
-                // 새로운 위치 적용
-                projectileTransform.position = newPosition;
-                
-                yield return null;  // 다음 프레임까지 대기
+
+                projectile.transform.position = newPosition;
+
+                yield return null;
             }
-        
         }
-        finally 
+        finally
         {
-            // 코루틴이 어떤 이유로든 종료될 때 투사체가 반환되지 않았다면 반환
-            if (!projectileReturned && projectile != null)
-                ProjectilePool.Instance.ReturnProjectile(projectile);
+            // 효과가 반환되지 않았다면 반환
+            if (!effectReturned && projectile != null)
+            {
+                ParticleEffectPool.Instance.ReturnEffect(projectile);
+            }
         }
     }
 

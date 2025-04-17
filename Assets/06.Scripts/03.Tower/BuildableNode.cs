@@ -14,10 +14,10 @@ public class BuildableNode : MonoBehaviour
 
     [Header("노드 시각 셋팅")]
     public Color baseColor = Color.red;       // 기본 색상 (건설 전)
-    public Color hoverColor = Color.green;     // 마우스 올렸을 때 건설 가능한 색상
+    public Color hoverColor = Color.green;     // 건설 가능한 타워 색상
     private Color towerColor = Color.white;     // 기본 아처 타워 색상
     private Color explosiveTowerColor = Color.red;    // 폭발 타워 색상 
-    private Color slowTowerColor = new Color(0.5f, 0.2f, 0.8f);  // 슬로우 타워 색상 (보라색+초록색)
+    private Color slowTowerColor = Color.green;  // 슬로우 타워 색상 (초록색)
     
     [Header("머터리얼 설정")]
     [SerializeField] private Material initialMaterial;
@@ -35,11 +35,13 @@ public class BuildableNode : MonoBehaviour
     [SerializeField] private ArcherTower archerTower;
     [SerializeField] private ExplosiveTower explosiveTower;
     [SerializeField] private SlowTower slowTower;
+    
+    private TowerType currentTowerType = TowerType.Normal;
 
     #endregion
 
     #region 유니티 이벤트 함수
-    
+
     private void Awake()
     {
         nodeRenderer = GetComponent<Renderer>();
@@ -47,7 +49,7 @@ public class BuildableNode : MonoBehaviour
         archerTower = GetComponent<ArcherTower>();
         explosiveTower = GetComponent<ExplosiveTower>();
         slowTower = GetComponent<SlowTower>();
-        
+
         SetColor(baseColor);
         nodeRenderer.material = initialMaterial;
         nodeRenderer.material.color = baseColor;
@@ -147,7 +149,7 @@ public class BuildableNode : MonoBehaviour
     }
 
     #endregion
-        
+
     #region 타워 업그레이드
 
     public void UpgradeToExplosiveTower()
@@ -158,34 +160,38 @@ public class BuildableNode : MonoBehaviour
         // 폭발 타워 활성화
         explosiveTower.enabled = true;
         if (explosiveTower.gameObject != gameObject) explosiveTower.gameObject.SetActive(true);
-        
+
         // 타워 레벨과 타입 업데이트
         towerLevel = 2;
 
         nodeRenderer.material = towerMaterial;
         nodeRenderer.material.color = explosiveTowerColor;  // 폭발 타워용 색상
-        
+
         // 2단계 타워로 등록
         buildManager.UpgradeToTier2(this);
+
+        currentTowerType = TowerType.Explosive;
     }
 
     public void UpgradeToSlowTower()
     {
         // 이전 타워 비활성화
         DeactivateAllTowers();
-        
+
         // 둔화 타워 활성화
         slowTower.enabled = true;
         if (slowTower.gameObject != gameObject) slowTower.gameObject.SetActive(true);
-        
+
         // 타워 레벨과 타입 업데이트
         towerLevel = 2;
 
         nodeRenderer.material = towerMaterial;
         nodeRenderer.material.color = slowTowerColor;  // 슬로우 타워용 색상
-        
+
         // 2단계 타워로 등록
         buildManager.UpgradeToTier2(this);
+
+        currentTowerType = TowerType.Slow;
     }
 
     /// <summary>
@@ -227,7 +233,7 @@ public class BuildableNode : MonoBehaviour
             nodeRenderer.material.color = baseColor;
         }
     }
-    
+
     /// <summary>
     /// 빌드 모드 종료 시 호출되는 메서드
     /// </summary>
@@ -244,17 +250,17 @@ public class BuildableNode : MonoBehaviour
             nodeRenderer.material = towerMaterial;
             nodeRenderer.material.color = towerColor;
         }
-        else if (towerLevel == 2)
+         else if (towerLevel == 2)
         {
-            // 2단계 타워도 해당 타워의 원래 색상으로 복원
-            if (explosiveTower.enabled)
+            nodeRenderer.material = towerMaterial;
+            
+            // 타워 타입으로 분기
+            if (currentTowerType == TowerType.Explosive)
             {
-                nodeRenderer.material = towerMaterial;
                 nodeRenderer.material.color = explosiveTowerColor;
             }
-            else if (slowTower.enabled)
+            else if (currentTowerType == TowerType.Slow)
             {
-                nodeRenderer.material = towerMaterial;
                 nodeRenderer.material.color = slowTowerColor;
             }
         }

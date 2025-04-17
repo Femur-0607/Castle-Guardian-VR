@@ -15,16 +15,14 @@ public class ArcherTower : Tower
         // 화살 발사 사운드를 3D로 재생 (타워의 위치에서)
         SoundManager.Instance.PlaySound3D("ArrowTowerShoot", firePoint.position);
 
-        // 발사 효과 생성 (ParticleEffectPool 사용)
+         // 발사 효과 생성 (머즐 이펙트)
         ParticleEffectPool.Instance.PlayEffect(muzzleEffectPrefab, firePoint.position, firePoint.rotation);
 
-        // 투사체 생성 (ProjectilePool 사용)
-        Projectile projectileComponent = ProjectilePool.Instance.GetProjectileAt(firePoint.position);
-        GameObject projectileObj = projectileComponent.gameObject;
+        // 투사체 효과 생성 (화살 이펙트)
+        GameObject projectileObj = ParticleEffectPool.Instance.GetEffectInstance(projectilePrefab, firePoint.position, firePoint.rotation);
         float travelTime = Vector3.Distance(firePoint.position, target.transform.position) / towerData.projectileSpeed;
 
-        // 공통 코루틴 호출
-        StartCoroutine(MoveProjectileWithPrediction(
+        StartCoroutine(MoveProjectileEffect(
             projectileObj, 
             target.transform, 
             towerData.projectileSpeed, 
